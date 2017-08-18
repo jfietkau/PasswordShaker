@@ -1,7 +1,6 @@
 
 function activateOnField(info) {
-    console.log("test");
-    console.log(info);
+    console.log("PasswordShaker activated on: " + info);
 }
 
 browser.browserAction.onClicked.addListener(activateOnField);
@@ -9,11 +8,11 @@ browser.browserAction.onClicked.addListener(activateOnField);
 browser.contextMenus.create({
     id: "password-shaker",
     title: "PasswordShaker",
-    contexts: ["password"],
+    contexts: ["all"],
 });
 browser.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "password-shaker") {
-        activateOnField(info);
+        activateOnField(info['pageUrl']);
     }
 });
 
