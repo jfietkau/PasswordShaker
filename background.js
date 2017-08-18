@@ -1,16 +1,21 @@
 
-function activateOnField(info) {
-    console.log("PasswordShaker activated on: " + info);
+var masterPassword = null;
+
+function activateOnPage(url) {
+    console.log("PasswordShaker activated on: " + url);
+    browser.runtime.sendMessage({
+        "generated-password": "foobar"
+    });
 }
 
 browser.contextMenus.create({
     id: "password-shaker",
     title: "PasswordShaker",
-    contexts: ["all"],
+    contexts: ["password"],
 });
 browser.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "password-shaker") {
-        activateOnField(info['pageUrl']);
+        activateOnPage(info["pageUrl"]);
     }
 });
 
