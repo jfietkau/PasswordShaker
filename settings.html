@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style type="text/css">
+      body {
+        min-height: 50em;
+      }
+      label, input {
+        vertical-align: middle;
+      }
+      input[type="checkbox"] {
+        margin-right: .5em;
+      }
+
+      #profiles {
+        margin-top: 1.2em;
+      }
+      #profiles input[type="radio"] {
+        display: none;
+      }
+      #profiles label {
+        display: inline-block;
+        margin: 0 0 -1px;
+        padding: .3em .6em;
+        text-align: center;
+        color: #bbb;
+        border: 1px solid transparent;
+      }
+      #profiles label:hover {
+        cursor: pointer;
+      }
+      #profiles input:checked + label {
+        color: #555;
+        border: 1px solid #ddd;
+        border-bottom: 1px solid #fff;
+        background: #fff;
+      }
+      #profileContent {
+        border: 1px solid #ddd;
+        padding: 1em;
+        background: #fff;
+      }
+
+      .smallspace {
+        height: .5em;
+      }
+      table, td {
+        margin: 0;
+        padding: 0;
+      }
+      #profileEngineDefaultConfig,
+      #profileEnginePasswordMakerConfig {
+        display: none;
+      }
+      #profileEngineDefault:checked ~ #profileEngineDefaultConfig,
+      #profileEnginePasswordMaker:checked ~ #profileEnginePasswordMakerConfig {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <script src="settings.js"></script>
+    <script src="settings-ui.js"></script>
+
+    <form>
+      <input type="checkbox" id="verifyMasterPassword"><label for="verifyMasterPassword">Require verification of master password (enter it twice)</label><br>
+      <input type="checkbox" id="showMasterPassword"><label for="showMasterPassword">Show master password in plain text</label><br>
+      <input type="checkbox" id="storeMasterPasswordHash"><label for="storeMasterPasswordHash">Store master password hash for automatic verification</label><br>
+      <label for="storeMasterPassword">Once entered, save master password</label>
+      <select id="storeMasterPassword">
+        <option value="permanent">in permanent storage</option>
+        <option value="volatile">in RAM only</option>
+        <option value="never">not at all</option>
+      </select>
+
+      <div id="profiles">
+        <input id="tab0" type="radio" name="tabs" checked>
+        <label for="tab0">(default profile)</label>
+        <input id="tab1" type="radio" name="tabs">
+        <label for="tab1">Profile 2</label>
+        <input id="tabX" type="radio" name="tabs">
+        <label for="tabX">+</label>
+      </div>
+      <div id="profileContent">
+        <label for="profileName">Profile name:</label> <input type="text" id="profileName" value=""><br>
+        <div class="smallspace"></div>
+        Profile engine:
+        <input type="radio" name="profileEngine" id="profileEngineDefault" checked> <label for="profileEngineDefault">PasswordShaker (default)</label>
+        <input type="radio" name="profileEngine" id="profileEnginePasswordMaker"> <label for="profileEnginePasswordMaker">PasswordMaker compatible</label><br>
+        <div class="smallspace"></div>
+        <div id="profileEngineDefaultConfig">
+          <table>
+            <tr>
+              <td>Length of generated password:</td>
+              <td><input type="number" id="psPasswordLength" value="8"></td>
+            </tr>
+            <tr>
+              <td>Password characters:</td>
+              <td>
+                <input type="checkbox" id="psCharactersAlphaCap"> <label for="psCharactersAlphaCap">capital letters (ABCDE...)</label><br>
+                <input type="checkbox" id="psCharactersAlphaLower"> <label for="psCharactersAlphaLower">lower case letters (abcde...)</label><br>
+                <input type="checkbox" id="psCharactersNumbers"> <label for="psCharactersNumbers">numbers (0123456789)</label><br>
+                <input type="checkbox" id="psCharactersSpecial"> <label for="psCharactersSpecial">special characters (!?#+-_...)</label><br>
+                <input type="checkbox" id="psCharactersQuotation"> <label for="psCharactersQuotation">quotation marks (" ')</label><br>
+                <input type="checkbox" id="psCharactersCustom"> <label for="psCharactersCustom">custom character list:</label>
+                <input type="text" id="psCharactersCustomList" value=""><br>
+              </td>
+            </tr>
+            <tr>
+              <td>Hash algorithm:</td>
+              <td>
+                <select id="psHashAlgorithm">
+                  <option value="sha256">SHA-256</option>
+                </select>
+                <div class="smallspace"></div>
+              </td>
+            </tr>
+          </table>
+          <div class="smallspace"></div>
+          <input type="checkbox" id="psUseSiteSpecificRequirements">
+          <label for="psUseSiteSpecificRequirements">Use database of site-specific password requirements to make adjustments when necessary</label><br>
+        </div>
+        <div id="profileEnginePasswordMakerConfig">
+          <table>
+            <tr>
+              <td>Use l33t:</td>
+              <td>
+                <select id="pmUseLeet">
+                  <option value="off">not at all</option>
+                  <option value="before-hashing">before generating password</option>
+                  <option value="after-hashing">after generating password</option>
+                  <option value="both">before and after generating password</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>l33t level:</td>
+              <td>
+                <select id="pmLeetLevel">
+                  <option value="0">1</option>
+                  <option value="1">2</option>
+                  <option value="2">3</option>
+                  <option value="3">4</option>
+                  <option value="4">5</option>
+                  <option value="5">6</option>
+                  <option value="6">7</option>
+                  <option value="7">8</option>
+                  <option value="8">9</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Hash algorithm:</td>
+              <td>
+                <select id="pmHashAlgorithm">
+                  <option value="md4">MD4</option>
+                  <option value="hmac-md4">HMAC-MD4</option>
+                  <option value="md5">MD5</option>
+                  <option value="md5_v6">MD5 Version 0.6</option>
+                  <option value="hmac-md5">HMAC-MD5</option>
+                  <option value="hmac-md5_v6">HMAC-MD5 Version 0.6</option>
+                  <option value="sha1">SHA-1</option>
+                  <option value="hmac-sha1">HMAC-SHA-1</option>
+                  <option value="sha256">SHA-256</option>
+                  <option value="hmac-sha256_fix">HMAC-SHA-256</option>
+                  <option value="hmac-sha256">HMAC-SHA-256 Version 1.5.1</option>
+                  <option value="rmd160">RIPEMD-160</option>
+                  <option value="hmac-rmd160">HMAC-RIPEMD-160</option>
+                </select>
+                <div class="smallspace"></div>
+              </td>
+            </tr>
+            <tr>
+              <td>Use URL components:</td>
+              <td>
+                <input type="checkbox" id="pmUseProtocol"> <label for="pmUseProtocol">protocol</label><br>
+                <input type="checkbox" id="pmUseSubdomains"> <label for="pmUseSubdomains">subdomain(s)</label><br>
+                <input type="checkbox" id="pmUseDomain"> <label for="pmUseDomain">domain</label><br>
+                <input type="checkbox" id="pmUseOther"> <label for="pmUseOther">port, path, anchor, query parameters</label>
+              </td>
+            </tr>
+            <tr>
+              <td>Length of generated password:</td>
+              <td><input type="number" id="pmPasswordLength" value="0"></td>
+            </tr>
+            <tr>
+              <td>Username:</td>
+              <td><input type="text" id="pmUsername" value=""></td>
+            </tr>
+            <tr>
+              <td>Modifier:</td>
+              <td><input type="text" id="pmModifier" value=""></td>
+            </tr>
+            <tr>
+              <td>Characters:</td>
+              <td>
+                <select id="pmCharacterSet">
+                  <option selected>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={}|[]\:&quot;;'<>?,./</option>
+                  <option>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</option>
+                  <option>0123456789abcdef</option>
+                  <option>0123456789</option>
+                  <option>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</option>
+                  <option>`~!@#$%^&*()_-+={}|[]\:&quot;;'<>?,./</option>
+                  <option value="custom">(custom)</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Password prefix:</td>
+              <td><input type="text" id="pmPasswordPrefix" value=""></td>
+            </tr>
+            <tr>
+              <td>Password suffix:</td>
+              <td><input type="text" id="pmPasswordSuffix" value=""></td>
+            </tr>
+          </table>
+        </div>
+        <div class="smallspace"></div>
+        <input type="checkbox" id="showInContextMenu"> <label for="showInContextMenu">Show this profile in context menu</label><br>
+      </div>
+      
+    </form>
+
+  </body>
+
+</html>
