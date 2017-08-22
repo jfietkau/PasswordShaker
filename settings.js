@@ -12,35 +12,43 @@ function debug_showSettings() {
 }
 
 function debug_tostr(obj) {
-  var result = [];
-  for(var property in obj) {
-    if(obj.hasOwnProperty(property)) {
-      if(obj[property] === null) {
-        result.push(property + ": null");
-      } else if(typeof obj[property] === 'object') {
+  if(obj === null) {
+    return "null";
+  } else if(Array.isArray(obj)) {
+    var result = [];
+    for(var i = 0; i < obj.length; i++) {
+      result.push(debug_tostr(obj[i]));
+    }
+    return "[" + result.join(", ") + "]";
+  } else if(typeof obj === "string") {
+    return "\"" + obj + "\"";
+  } else if(typeof obj === "object") {
+    var result = [];
+    for(var property in obj) {
+      if(obj.hasOwnProperty(property)) {
         result.push(property + ": " + debug_tostr(obj[property]));
-      } else {
-        result.push(property + ": " + obj[property]);
       }
     }
+    return "{" + result.join(", ") + "}";
+  } else {
+    return "" + obj;
   }
-  return "{" + result.join(", ") + "}";
 }
 
 function loadSettings() {
   browser.storage.local.get("settings").then((loadedSettings) => {
-    console.log("Loaded: " + debug_tostr(loadedSettings));
     if(loadedSettings != null
        && loadedSettings.hasOwnProperty("settings")
        && loadedSettings["settings"] !== null) {
       currentSettings = loadedSettings["settings"];
     }
+    console.log("Loaded: " + debug_tostr(currentSettings));
     extendObjectWith(currentSettings, getDefaultSettings());
-    if(currentSettings.profiles.length == 0) {
-      currentSettings.profiles = {};
+    if(currentSettings.profiles.length === 0) {
+      currentSettings.profiles.push({});
     }
-    for(var profile in currentSettings.profiles) {
-      extendObjectWith(profile, getDefaultProfileSettings());
+    for(i = 0; i < currentSettings.profiles.length; i++) {
+      extendObjectWith(currentSettings.profiles[i], getDefaultProfileSettings());
     }
   });
 }
