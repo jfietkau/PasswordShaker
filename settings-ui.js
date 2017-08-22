@@ -1,4 +1,7 @@
+var ignoreFormEvents = 0;
+
 function populateSettingsForm(settings) {
+  ignoreFormEvents += 1;
   for(var property in settings) {
     if(property == "profiles") {
       for(var i = 0; i < settings.profiles.length; i++) {
@@ -16,7 +19,7 @@ function populateSettingsForm(settings) {
             if(i == 0) {
               tabTitle = "(default profile)";
             } else {
-              tabTitle = "(profile " + i + ")";
+              tabTitle = "(profile " + (i + 1) + ")";
             }
           }
           var labelContent = document.createTextNode(tabTitle);
@@ -34,14 +37,24 @@ function populateSettingsForm(settings) {
       populateSettingsElement(property, settings[property]);
     }
   }
+  ignoreFormEvents -= 1;
+}
+
+function addNewProfile(settings) {
+  var newIndex = settings.profiles.length;
+  settings.profiles[newIndex] = {};
+  extendObjectWith(settings.profiles[newIndex], getDefaultProfileSettings());
+  populateSettingsForm(settings);
 }
 
 function populateProfileArea(profileSettings) {
+  ignoreFormEvents += 1;
   for(var property in profileSettings) {
     if(profileSettings.hasOwnProperty(property)) {
       populateSettingsElement(property, profileSettings[property]);
     }
   }
+  ignoreFormEvents -= 1;
 }
 
 function populateSettingsElement(elem, value) {
@@ -64,6 +77,10 @@ function populateSettingsElement(elem, value) {
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
+    document.getElementById("profileTabX").addEventListener("click", () => {
+      addNewProfile(currentSettings);
+      document.getElementById("profileTab" + (currentSettings.profiles.length - 1)).checked = true;
+    });
   });
   document.getElementById("loadButton").addEventListener("click", loadSettings);
   document.getElementById("saveButton").addEventListener("click", saveSettings);
