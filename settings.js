@@ -36,7 +36,7 @@ function debug_tostr(obj) {
 }
 
 function loadSettings() {
-  browser.storage.local.get("settings").then((loadedSettings) => {
+  return browser.storage.local.get("settings").then((loadedSettings) => {
     if(loadedSettings != null
        && loadedSettings.hasOwnProperty("settings")
        && loadedSettings["settings"] !== null) {
@@ -54,7 +54,7 @@ function loadSettings() {
 }
 
 function saveSettings() {
-  browser.storage.local.set({settings: currentSettings}).then(() => {
+  return browser.storage.local.set({settings: currentSettings}).then(() => {
     console.log("Saved: " + debug_tostr(currentSettings));
   });
 }
