@@ -1,10 +1,39 @@
 var currentSettings = {};
 
+function clearSettings() {
+  currentSettings = {};
+  browser.storage.local.set({settings: null}).then(() => {
+    console.log("Cleared all settings!");
+  });
+}
+
+function debug_showSettings() {
+  console.log("Current settings: " + debug_tostr(currentSettings));
+}
+
+function debug_tostr(obj) {
+  var result = [];
+  for(var property in obj) {
+    if(obj.hasOwnProperty(property)) {
+      if(obj[property] === null) {
+        result.push(property + ": null");
+      } else if(typeof obj[property] === 'object') {
+        result.push(property + ": " + debug_tostr(obj[property]));
+      } else {
+        result.push(property + ": " + obj[property]);
+      }
+    }
+  }
+  return "{" + result.join(", ") + "}";
+}
+
 function loadSettings() {
-  console.log("Loading...");
   browser.storage.local.get("settings").then((loadedSettings) => {
-    if(loadedSettings != null) {
-      currentSettings = loadedSettings;
+    console.log("Loaded: " + debug_tostr(loadedSettings));
+    if(loadedSettings != null
+       && loadedSettings.hasOwnProperty("settings")
+       && loadedSettings["settings"] !== null) {
+      currentSettings = loadedSettings["settings"];
     }
     extendObjectWith(currentSettings, getDefaultSettings());
     if(currentSettings.profiles.length == 0) {
@@ -13,14 +42,12 @@ function loadSettings() {
     for(var profile in currentSettings.profiles) {
       extendObjectWith(profile, getDefaultProfileSettings());
     }
-    console.log("Loaded: " + Object.keys(currentSettings));
   });
 }
 
 function saveSettings() {
-  console.log("Saving...");
   browser.storage.local.set({settings: currentSettings}).then(() => {
-    console.log("Saved: " + Object.keys(currentSettings));
+    console.log("Saved: " + debug_tostr(currentSettings));
   });
 }
 
