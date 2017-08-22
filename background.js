@@ -3,9 +3,9 @@ var masterPassword = null;
 
 function activateOnPage(url) {
   console.log("PasswordShaker activated on: " + url);
-  browser.tabs.executeScript({file: "/injector.js"}).then(
+  browser.tabs.executeScript({file: "/injector.js"}).then(() => {
     browser.tabs.executeScript({code: "passwordshaker_fill('" + "abcdef" + "');"})
-  );
+  });
 }
 
 browser.contextMenus.create({
