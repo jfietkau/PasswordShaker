@@ -149,6 +149,20 @@ function parseSettingsElement(elem, settings) {
   }
 }
 
+function updateForm() {
+  var currentProfileTabTitle = document.getElementById("profileName").value.trim();
+  var currentProfileIndex = getProfileIndex(currentSettings);
+  if(currentProfileTabTitle.length == 0) {
+    if(currentProfileIndex == 0) {
+      currentProfileTabTitle = "(default profile)";
+    } else {
+      currentProfileTabTitle = "(profile " + (currentProfileIndex + 1) + ")";
+    }
+  }
+  var tabTarget = document.getElementById("profileTab" + currentProfileIndex).nextSibling;
+  tabTarget.innerHTML = currentProfileTabTitle;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
@@ -164,7 +178,15 @@ document.addEventListener("DOMContentLoaded", () => {
   for(var i = 0; i < elems.length; i++) {
     elems[i].addEventListener("change", () => {
       if(ignoreFormEvents == 0) {
+        updateForm();
         parseForm(currentSettings);
+      }
+    });
+  }
+  for(var i = 0; i < inputs.length; i++) {
+    inputs[i].addEventListener("keyup", () => {
+      if(ignoreFormEvents == 0) {
+        updateForm();
       }
     });
   }
