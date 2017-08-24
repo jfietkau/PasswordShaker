@@ -133,12 +133,14 @@ function parseSettingsElement(elem, settings) {
       } else if(domElem.type == "text") {
         value = domElem.value;
       } else if(domElem.type == "number") {
-        value = parseInt(domElem.value);
+        value = (domElem.value.length == 0) ? null : parseInt(domElem.value);
       }
     } else if(domElem.tagName.toLowerCase() == "select") {
       value = domElem.value;
     }
-    settings[elem] = value;
+    if(value !== null) {
+      settings[elem] = value;
+    }
   } else if(document.getElementsByName(elem).length > 0) {
     var radios = document.getElementsByName(elem);
     for(var i = 0; i < radios.length; i++) {
@@ -172,6 +174,8 @@ function updateForm() {
     !document.getElementById("psCharactersCustom").checked;
   document.getElementById("pmCustomCharacterListContainer").style.display =
     (document.getElementById("pmCharacterSet").value == "custom") ? "block" : "none";
+  document.getElementById("pmLeetLevel").disabled =
+    (document.getElementById("pmUseLeet").value == "off");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
