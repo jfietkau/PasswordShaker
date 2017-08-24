@@ -28,9 +28,7 @@ function hex2arr(hex) {
 
 function clearSettings() {
   currentSettings = {};
-  browser.storage.local.remove("settings").then(() => {
-    console.log("Cleared all settings!");
-  });
+  return browser.storage.local.remove("settings");
 }
 
 function debug_showSettings() {
@@ -107,8 +105,11 @@ function saveStoredHash(hash, salt, algorithm) {
   storedHash.hash = hash;
   storedHash.salt = salt;
   storedHash.algorithm = algorithm;
-  console.log(debug_tostr(storedHash));
   return browser.storage.local.set({masterPasswordHash: storedHash});
+}
+
+function clearStoredHash() {
+  return browser.storage.local.remove("masterPasswordHash");
 }
 
 function extendObjectWith(base, extension) {

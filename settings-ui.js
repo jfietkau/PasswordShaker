@@ -109,6 +109,9 @@ function parseForm(settings) {
       parseSettingsElement(property, settings);
     }
   }
+  if(!document.getElementById("storeMasterPasswordHash").checked) {
+    clearStoredHash();
+  }
   var profileIndex = getProfileIndex(settings);
   for(var i = 0; i < settings.profiles.length; i++) {
     if(document.getElementById("profileTab" + i).checked) {
