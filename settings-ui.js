@@ -196,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(ignoreFormEvents == 0) {
         updateForm();
         parseForm(currentSettings);
+        saveSettings();
       }
     });
   }
