@@ -15,6 +15,7 @@ browser.contextMenus.create({
 });
 browser.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "password-shaker") {
+    browser.pageAction.show(tab.id);
     activateOnPage(info["pageUrl"]);
   }
 });
