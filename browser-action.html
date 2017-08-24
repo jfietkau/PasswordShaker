@@ -15,9 +15,18 @@
         margin-bottom: .33em;
         font-size: 1.5em;
       }
+      #confirmationIcons {
+        float: left;
+        line-height: 0;
+      }
+      #confirmationIcons img {
+        height: 30px;
+        padding-right: .33em;
+      }
       #okButton {
         width: 100px;
-        margin-left: 150px;
+        height: 30px;
+        float: right;
         font-size: 1.5em;
       }
     </style>
@@ -31,6 +40,12 @@
 
       <input type="password" id="masterPassword" class="passwordEntry" value="" placeholder="Master password">
       <input type="password" id="masterPasswordConfirmation" class="passwordEntry" value="" placeholder="Master password (confirm)">
+
+      <div id="confirmationIcons">
+        <img src="/icons/equals-gray.svg" id="equalsIcon">
+        <img src="/icons/stored-gray.svg" id="matchStoredIcon">
+      </div>
+
       <input type="submit" id="okButton" value="OK">
       
     </form>
