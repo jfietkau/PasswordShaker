@@ -2,13 +2,13 @@ var currentSettings = {};
 
 function clearSettings() {
   currentSettings = {};
-  browser.storage.local.set({settings: null}).then(() => {
+  browser.storage.local.remove("settings").then(() => {
     console.log("Cleared all settings!");
   });
 }
 
 function debug_showSettings() {
-  console.log("Current settings: " + debug_tostr(currentSettings));
+  alert("Current settings: " + debug_tostr(currentSettings));
 }
 
 function debug_tostr(obj) {
@@ -76,6 +76,7 @@ function getDefaultSettings() {
   return {
     verifyMasterPassword: true,
     showMasterPassword: false,
+    showVisualHash: false,
     storeMasterPasswordHash: false,
     storeMasterPassword: "volatile",
     profiles: []
