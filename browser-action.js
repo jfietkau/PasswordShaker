@@ -5,6 +5,12 @@ function setupPopupForm(settings) {
     confirmationElem.value = "abc";
     confirmationElem.parentNode.removeChild(confirmationElem);
   }
+  if(settings.showMasterPassword) {
+    var passwordFields = document.getElementsByClassName("passwordEntry");
+    for(var i = 0; i < passwordFields.length; i++) {
+      passwordFields[i].type = "text";
+    }
+  }
 }
 
 function updatePopupForm(settings) {
