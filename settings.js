@@ -42,7 +42,6 @@ function loadSettings() {
        && loadedSettings["settings"] !== null) {
       currentSettings = loadedSettings["settings"];
     }
-    console.log("Loaded: " + debug_tostr(currentSettings));
     extendObjectWith(currentSettings, getDefaultSettings());
     if(currentSettings.profiles.length === 0) {
       currentSettings.profiles.push({});
@@ -54,9 +53,7 @@ function loadSettings() {
 }
 
 function saveSettings() {
-  return browser.storage.local.set({settings: currentSettings}).then(() => {
-    console.log("Saved: " + debug_tostr(currentSettings));
-  });
+  return browser.storage.local.set({settings: currentSettings});
 }
 
 function extendObjectWith(base, extension) {
