@@ -6,6 +6,12 @@
 
   "description": "Generates site-specific passwords for you automatically, based on one master password.",
 
+  "applications": {
+    "gecko": {
+      "id": "passwordshaker@julian-fietkau.de"
+    }
+  },
+
   "icons": {
     "48": "icons/shaker.svg"
   },
