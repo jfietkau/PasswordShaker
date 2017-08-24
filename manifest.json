@@ -17,11 +17,16 @@
   },
 
   "permissions": [
-    "activeTab", "contextMenus", "storage"
+    "activeTab",
+    "contextMenus",
+    "storage"
   ],
 
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js",
+      "settings.js"
+    ]
   },
 
   "page_action": {

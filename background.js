@@ -21,7 +21,13 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 function reactToTabChange(tabId) {
-  browser.pageAction.show(tabId);
+  loadSettings().then(() => {
+    if(currentSettings.showPageAction == "always") {
+      browser.pageAction.show(tabId);
+    } else {
+      browser.pageAction.hide(tabId);
+    }
+  });
 }
 browser.tabs.onActivated.addListener((activeInfo) => {
   reactToTabChange(activeInfo.tabId);
