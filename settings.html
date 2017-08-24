@@ -202,14 +202,17 @@
               <td>Characters:</td>
               <td>
                 <select id="pmCharacterSet">
-                  <option selected>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={}|[]\:&quot;;'<>?,./</option>
-                  <option>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</option>
+                  <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={}|[]\:&quot;;'<>?,./">ABC...XYZabc...xyz0123456789`~!@#$%^&*()_-+={}|[]\:&quot;;'<>?,./</option>
+                  <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789">ABC...XYZabc...xyz0123456789</option>
                   <option>0123456789abcdef</option>
                   <option>0123456789</option>
-                  <option>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</option>
+                  <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz">ABC...XYZabc...xyz</option>
                   <option>`~!@#$%^&*()_-+={}|[]\:&quot;;'<>?,./</option>
                   <option value="custom">(custom)</option>
                 </select>
+                <div id="pmCustomCharacterListContainer">
+                  <input type="text" id="pmCustomCharacterList" value="" placeholder="custom character list" style="width: 20em;">
+                </div>
               </td>
             </tr>
             <tr>

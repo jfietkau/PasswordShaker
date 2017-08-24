@@ -107,6 +107,7 @@ function getDefaultProfileSettings() {
     pmUsername: "",
     pmModifier: "",
     pmCharacterSet: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={}|[]\\:\";'<>?,./",
+    pmCustomCharacterList: "",
     pmPasswordPrefix: "",
     pmPasswordSuffix: "",
     showInContextMenu: true

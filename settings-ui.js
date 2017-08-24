@@ -15,6 +15,7 @@ function populateSettingsForm(settings) {
           newRadio.addEventListener("click", () => {
             ignoreFormEvents += 1;
             populateProfileArea(currentSettings, newRadio.value);
+            updateForm();
             ignoreFormEvents -= 1;
           });
           document.getElementById("profiles").insertBefore(newRadio, plusTab);
@@ -149,7 +150,7 @@ function parseSettingsElement(elem, settings) {
   }
 }
 
-function updateForm() {
+function getCurrentProfileTabTitle() {
   var currentProfileTabTitle = document.getElementById("profileName").value.trim();
   var currentProfileIndex = getProfileIndex(currentSettings);
   if(currentProfileTabTitle.length == 0) {
@@ -159,13 +160,24 @@ function updateForm() {
       currentProfileTabTitle = "(profile " + (currentProfileIndex + 1) + ")";
     }
   }
+  return currentProfileTabTitle;
+}
+
+function updateForm() {
+  var currentProfileIndex = getProfileIndex(currentSettings);
   var tabTarget = document.getElementById("profileTab" + currentProfileIndex).nextSibling;
-  tabTarget.innerHTML = currentProfileTabTitle;
+  tabTarget.innerHTML = getCurrentProfileTabTitle();
+  document.getElementById("profileName").placeholder = getCurrentProfileTabTitle();
+  document.getElementById("psCharactersCustomList").disabled =
+    !document.getElementById("psCharactersCustom").checked;
+  document.getElementById("pmCustomCharacterListContainer").style.display =
+    (document.getElementById("pmCharacterSet").value == "custom") ? "block" : "none";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
+    updateForm();
     document.getElementById("profileTabX").addEventListener("click", () => {
       addNewProfile(currentSettings);
       document.getElementById("profileTab" + (currentSettings.profiles.length - 1)).checked = true;
