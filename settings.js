@@ -1,5 +1,31 @@
 var currentSettings = {};
 
+function getRandomBytes(numberOfBytes) {
+  var buffer = new ArrayBuffer(numberOfBytes);
+  var uint8View = new Uint8Array(buffer);
+  for(var i = 0; i < uint8View.length; i++) {
+    uint8View[i] = Math.floor(Math.random() * 256);
+  }
+  return uint8View;
+}
+
+function arr2hex(byteArray) {
+  result = "";
+  for(var i = 0; i < byteArray.length; i++) {
+    result += ('0' + byteArray[i].toString(16)).slice(-2);
+  }
+  return result;
+}
+
+function hex2arr(hex) {
+  var buffer = new ArrayBuffer(Math.floor(hex.length / 2));
+  var uint8View = new Uint8Array(buffer);
+  for(var i = 0; i < uint8View.length; i++) {
+    uint8View[i] = parseInt(hex.slice(i * 2, (i + 1) * 2), 16);
+  }
+  return uint8View;
+}
+
 function clearSettings() {
   currentSettings = {};
   browser.storage.local.remove("settings").then(() => {
@@ -54,6 +80,35 @@ function loadSettings() {
 
 function saveSettings() {
   return browser.storage.local.set({settings: currentSettings});
+}
+
+function loadStoredHash(callback) {
+  return browser.storage.local.get("masterPasswordHash").then((loadedHash) => {
+    var result;
+    if(loadedHash != null
+       && loadedHash.hasOwnProperty("masterPasswordHash")
+       && loadedHash["masterPasswordHash"] !== null) {
+      loadedHash = loadedHash["masterPasswordHash"];
+    }
+    if(loadedHash == null
+       || !loadedHash.hasOwnProperty("algorithm")
+       || !loadedHash.hasOwnProperty("hash")
+       || !loadedHash.hasOwnProperty("salt")) {
+      result = null;
+    } else {
+      result = loadedHash;
+    }
+    callback(result);
+  });
+}
+
+function saveStoredHash(hash, salt, algorithm) {
+  var storedHash = {};
+  storedHash.hash = hash;
+  storedHash.salt = salt;
+  storedHash.algorithm = algorithm;
+  console.log(debug_tostr(storedHash));
+  return browser.storage.local.set({masterPasswordHash: storedHash});
 }
 
 function extendObjectWith(base, extension) {

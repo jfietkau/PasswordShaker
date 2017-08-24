@@ -1,5 +1,6 @@
 
-var masterPassword = null;
+var session = {};
+session.masterPassword = null;
 
 function activateOnPage(url) {
   console.log("PasswordShaker activated on: " + url);

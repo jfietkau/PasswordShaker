@@ -1,3 +1,5 @@
+var storedHash = null;
+
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
   elem.parentNode.removeChild(elem);
@@ -39,6 +41,32 @@ function updatePopupForm(settings) {
     }
     equalsIcon.title = equalsIcon.alt;
   }
+  if(settings.storeMasterPasswordHash) {
+    var entered = document.getElementById("masterPassword").value;
+    var matchStoredIcon = document.getElementById("matchStoredIcon");
+    if(entered.length == 0) {
+      matchStoredIcon.src = "/icons/stored-gray.svg";
+      matchStoredIcon.alt = "Master password not entered yet";
+      noProblems = false;
+    } else if(storedHash === null) {
+      matchStoredIcon.src = "/icons/stored-yellow.svg";
+      matchStoredIcon.alt = "A hash for the current master password will be saved when you click OK";
+    } else {
+      hashFunc = (masterPassword, salt) => { return null; }
+      if(storedHash.algorithm == "sha3-512") {
+        hashFunc = sha3_512;
+      }
+      console.log("a: " + storedHash.hash);
+      if(hashFunc.update(entered).update(hex2arr(storedHash.salt)).hex() == storedHash.hash) {
+        matchStoredIcon.src = "/icons/stored-green.svg";
+        matchStoredIcon.alt = "Master password matches the stored hash";
+      } else {
+        matchStoredIcon.src = "/icons/stored-red.svg";
+        matchStoredIcon.alt = "Master password does not match the stored hash!";
+      }
+    }
+    matchStoredIcon.title = matchStoredIcon.alt;
+  }
   document.getElementById("okButton").disabled = !noProblems;
 }
 
@@ -46,6 +74,15 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);
+    loadStoredHash((newStoredHash) => {
+      storedHash = newStoredHash;
+    });
+  });
+  document.getElementById("mainForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    var newSalt = getRandomBytes(64);
+    var newHash = sha3_512.update(document.getElementById("masterPassword").value).update(newSalt).hex();
+    saveStoredHash(newHash, arr2hex(newSalt), "sha3-512");
   });
   var passwordEntries = document.getElementsByClassName("passwordEntry");
   for(var i = 0; i < passwordEntries.length; i++) {

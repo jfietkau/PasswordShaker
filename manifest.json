@@ -24,6 +24,7 @@
 
   "background": {
     "scripts": [
+      "engine-default/sha3.js",
       "background.js",
       "settings.js"
     ]
