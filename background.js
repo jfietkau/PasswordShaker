@@ -20,3 +20,10 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
+function reactToTabChange(tabId) {
+  browser.pageAction.show(tabId);
+}
+browser.tabs.onActivated.addListener((activeInfo) => {
+  reactToTabChange(activeInfo.tabId);
+});
+browser.tabs.onUpdated.addListener(reactToTabChange);
