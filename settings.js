@@ -79,6 +79,7 @@ function getDefaultSettings() {
     showVisualHash: false,
     storeMasterPasswordHash: false,
     storeMasterPassword: "volatile",
+    showPageAction: "always",
     profiles: []
   };
 }

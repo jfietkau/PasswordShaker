@@ -81,7 +81,13 @@
         <option value="permanent">in permanent storage</option>
         <option value="volatile">in RAM only</option>
         <option value="never">not at all</option>
-      </select>
+      </select><br>
+      <label for="showPageAction">Show the page action (address bar button)</label>
+      <select id="showPageAction">
+        <option value="always">on every page</option>
+        <option value="when-applicable">only on pages with password fields</option>
+        <option value="when-needed">only when the master password is required</option>
+      </select><br>
 
       <div id="profiles">
         <input id="profileTabX" type="radio" name="profileTabs">
