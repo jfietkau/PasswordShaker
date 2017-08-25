@@ -56,13 +56,13 @@ function updatePopupForm(settings) {
       if(storedHash.algorithm == "sha3-512") {
         hashFunc = sha3_512;
       }
-      console.log("a: " + storedHash.hash);
       if(hashFunc.update(entered).update(hex2arr(storedHash.salt)).hex() == storedHash.hash) {
         matchStoredIcon.src = "/icons/stored-green.svg";
         matchStoredIcon.alt = "Master password matches the stored hash";
       } else {
         matchStoredIcon.src = "/icons/stored-red.svg";
         matchStoredIcon.alt = "Master password does not match the stored hash!";
+        noProblems = false;
       }
     }
     matchStoredIcon.title = matchStoredIcon.alt;
@@ -80,9 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("mainForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    var newSalt = getRandomBytes(64);
-    var newHash = sha3_512.update(document.getElementById("masterPassword").value).update(newSalt).hex();
-    saveStoredHash(newHash, arr2hex(newSalt), "sha3-512");
+    if(storedHash === null) {
+      var newSalt = getRandomBytes(32);
+      var newHash = sha3_512.update(document.getElementById("masterPassword").value).update(newSalt).hex();
+      saveStoredHash(newHash, arr2hex(newSalt), "sha3-512");
+    }
+    window.close();
   });
   var passwordEntries = document.getElementsByClassName("passwordEntry");
   for(var i = 0; i < passwordEntries.length; i++) {
