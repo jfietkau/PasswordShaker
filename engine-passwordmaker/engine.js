@@ -1044,7 +1044,7 @@ function preGeneratePassword(masterPassword, url, settings) {
    if (settings.passwordPrefix)
      password = settings.passwordPrefix + password;
    if (settings.passwordSuffix)
-     password = password.substring(0, settings.passwdLength-settings.passwordSuffix.length) + settings.passwordSuffix;
+     password = password.substring(0, settings.passwordLength-settings.passwordSuffix.length) + settings.passwordSuffix;
    return password.substring(0, settings.passwordLength);
 }
   
