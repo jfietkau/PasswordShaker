@@ -1008,74 +1008,6 @@ var passwdMaster, passwdUrl, passwdGenerated,
 var base93="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={}|[]\\:\";\'<>?,./";
 var base16="0123456789abcdef";
 
-function init() {
-  if (typeof otherOnLoadHandler == "function")
-    otherOnLoadHandler();
-  passwdMaster = document.getElementById("passwdMaster");
-  saveMasterBtn = document.getElementById("saveMasterBtn");
-  passwdUrl = document.getElementById("passwdUrl");
-  passwdGenerated = document.getElementById("passwdGenerated");
-  passwdLength = document.getElementById("passwdLength");
-  domainCB = document.getElementById("domainCB");
-  protocolCB = document.getElementById("protocolCB");
-  subdomainCB = document.getElementById("subdomainCB");
-  pathCB = document.getElementById("pathCB");
-  leetLevelLB = document.getElementById("leetLevelLB");
-  hashAlgorithmLB = document.getElementById("hashAlgorithmLB");
-  whereLeetLB = document.getElementById("whereLeetLB");
-  usernameTB = document.getElementById("usernameTB");
-  counter = document.getElementById("counter");
-  passwordPrefix= document.getElementById("passwordPrefix");
-  passwordSuffix = document.getElementById("passwordSuffix");
-  charMinWarning = document.getElementById("charMinWarning");
-  ifHidePasswd = document.getElementById("ifHidePasswd");
-  ifSavePreferences = document.getElementById("ifSavePreferences");
-  preUrl = document.getElementById("preURL");
-
-  populateURL(); // in case passwdUrl.value is using document.location instead of cookie value, this calculates the correct URL
-	passwdMaster.focus();
-}
-
-// Loads a certain profile.
-function loadProfile() {
-  var profileIndex = document.getElementById("profileLB").selectedIndex;
-  var selectedProfile = document.getElementById("profileLB").options[profileIndex].text;
-
-  var a = unescape(getCookie(escape(selectedProfile)));
-  var settingsArray = a.split("|");
-  
-  preUrl.value = (settingsArray[0] == undefined || settingsArray[6] == undefined) ? "" : unescape(settingsArray[0]);
-  passwdLength.value = (settingsArray[1] == undefined || settingsArray[1] == undefined) ? "8" : settingsArray[1];
-  protocolCB.checked = (settingsArray[2] == undefined || settingsArray[2] == undefined) ? false : settingsArray[2] == "true";
-  domainCB.checked = (settingsArray[3] == undefined || settingsArray[3] == undefined) ? true : settingsArray[3] == "true";
-  subdomainCB.checked = (settingsArray[4] == undefined || settingsArray[4] == undefined) ? false : settingsArray[4] == "true";
-  pathCB.checked = (settingsArray[5] == undefined || settingsArray[5] == undefined) ? false : settingsArray[5] == "true";
-  passwdUrl.value = (settingsArray[6] == undefined || settingsArray[6] == undefined) ? "" : unescape(settingsArray[6]);
-  leetLevelLB.value = (settingsArray[7] == undefined || settingsArray[7] == undefined) ? "0" : settingsArray[7];
-  hashAlgorithmLB.value = (settingsArray[8] == undefined || settingsArray[8] == undefined) ? "md5" : settingsArray[8];  
-  whereLeetLB.value = (settingsArray[9] == undefined || settingsArray[9] == undefined) ? "off" : settingsArray[9];
-  usernameTB.value = (settingsArray[10] == undefined || settingsArray[10] == undefined) ? "" : unescape(settingsArray[10]);
-  counter.value = (settingsArray[11] == undefined || settingsArray[11] == undefined) ? "" : unescape(settingsArray[11]);
-  EditableSelect.setValue(document.getElementById("charset"), (settingsArray[12] == undefined || settingsArray[12] == undefined) ? base93 : unescape(settingsArray[12]));
-  passwordPrefix.value = (settingsArray[13] == undefined || settingsArray[13] == undefined) ? "" : unescape(settingsArray[13]);
-  passwordSuffix.value = (settingsArray[14] == undefined || settingsArray[14] == undefined) ? "" : unescape(settingsArray[14]);
-
-  preGeneratePassword();
-}
-
-// Load the list of profiles into the dropdown box.
-function loadProfileList() {
-}
-
-function getIndexOfValue(lb, value) {
-  // Find the index of the option to select
-  for (var i=0; i<lb.options.length; i++) {
-    if (lb[i].value == value)
-      return i;
-  }
-  return 0; // can't find it!
-}
-
 function preGeneratePassword(masterPassword, url, settings) {
    var selectedChar = settings.charSet;
 
@@ -1219,50 +1151,6 @@ function truncateUrl(fullUrl, settings) {
 // Make a pseudo-random encryption key... emphasis on *pseudo*
 var hex = ['0','1','2','3','4','5','6','7','8','9','0','a','b','c','d','e','f'];
 var keySz = keySizeInBits/4; //keySizeInBits defined in aes.js
-function makeKey() {
-  var ret = "";
-  while (ret.length < keySz) 
-    ret += hex[Math.floor(Math.random()*15)];
-  return ret;
-}
-
-function addEvent(obj, evType, fn){
-	if (obj.addEventListener){
-		obj.addEventListener(evType, fn, true);
-		return true;
-	} else if (obj.attachEvent){
-		var r = obj.attachEvent("on"+evType, fn);
-		return r;
-	} else {
-		return false;
-	}
-} 
-
-// simple array search function.
-// If returnIndex==true, returns the index of the found item or false if the item is not found
-// else, returns true/false.
-function in_array(needle, haystack, returnIndex) {
-	var n = haystack.length;
-	for (var i=0; i<n; i++) {
-		if (haystack[i]==needle) {
-			if(returnIndex==true)
-				return i;
-			else
-				return true;
-		}
-	}
-	return false;
-}
-
-if (addEventListener){
-	addEventListener('load', init, false);
-} else if (attachEvent){
-	attachEvent('onload', init);
-} else {
-	var otherOnLoadHandler=window.onload;
-	onload=init;
-}
-
 
 // scripts/md4.js
 
