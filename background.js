@@ -9,7 +9,20 @@ var session = {
 function generatePasswordForProfile(url, masterPassword, profileSettings) {
   var generatedPassword = null;
   if(profileSettings.profileEngine == "profileEngineDefault") {
-    generatedPassword = "123";
+    var engineSpecificSettings = {
+      passwordLength: profileSettings.psPasswordLength,
+      charactersAlphaCap: profileSettings.psCharactersAlphaCap,
+      charactersAlphaLower: profileSettings.psCharactersAlphaLower,
+      charactersNumbers: profileSettings.psCharactersNumbers,
+      charactersSpecial: profileSettings.psCharactersSpecial,
+      charactersSpaceQuotation: profileSettings.psCharactersSpaceQuotation,
+      charactersCustom: profileSettings.psCharactersCustom,
+      charactersCustomList: profileSettings.psCharactersCustomList,
+      hashAlgorithm: profileSettings.psHashAlgorithm,
+      mainSalt: profileSettings.psMainSalt,
+      useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements
+    };
+    generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings);
   } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
     var engineSpecificSettings = {
       charSet: (profileSettings.pmCharacterSet == "custom") ? profileSettings.pmCustomCharacterList : profileSettings.pmCharacterSet,
@@ -56,11 +69,10 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     activateOnPage(currentUrl, request.masterPassword);
   }
   if(request != null && request.wantExamplePasswordForProfile !== null) {
-    var passedSendResponse = sendResponse;
     loadSettings().then(() => {
       var profileSettings = currentSettings.profiles[request.wantExamplePasswordForProfile];
       var newExamplePassword = generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings);
-      passedSendResponse({examplePassword: newExamplePassword});
+      sendResponse({examplePassword: newExamplePassword});
     });
     return true;
   }

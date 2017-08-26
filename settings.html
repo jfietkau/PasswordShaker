@@ -58,7 +58,14 @@
       #profileEnginePasswordMaker:checked ~ #profileEnginePasswordMakerConfig {
         display: block;
       }
+      #examplePasswordContainer {
+        float: right;
+        padding: 0 1em 1em;
+        text-align: right;
+      }
       #examplePassword {
+        display: block;
+        margin-top: .4em;
         font-weight: bold;
         color: #48f;
       }
@@ -99,7 +106,9 @@
         <label for="profileTabX" style="font-weight: bold;">+</label>
       </div>
       <div id="profileContent">
-        <div>Example password for the current settings: <span id="examplePassword"></span></div>
+        <div id="examplePasswordContainer">
+          Example password for the current settings: <span id="examplePassword"></span>
+        </div>
         <div class="smallspace"></div>
         <label for="profileName">Profile name:</label> <input type="text" id="profileName" value=""><br>
         <div class="smallspace"></div>
@@ -120,7 +129,7 @@
                 <input type="checkbox" id="psCharactersAlphaLower"> <label for="psCharactersAlphaLower">lower case letters (abcde...)</label><br>
                 <input type="checkbox" id="psCharactersNumbers"> <label for="psCharactersNumbers">numbers (0123456789)</label><br>
                 <input type="checkbox" id="psCharactersSpecial"> <label for="psCharactersSpecial">special characters (!?#+-_...)</label><br>
-                <input type="checkbox" id="psCharactersQuotation"> <label for="psCharactersQuotation">quotation marks (" ')</label><br>
+                <input type="checkbox" id="psCharactersSpaceQuotation"> <label for="psCharactersSpaceQuotation">space and quotation marks (" ')</label><br>
                 <input type="checkbox" id="psCharactersCustom"> <label for="psCharactersCustom">custom character list:</label>
                 <input type="text" id="psCharactersCustomList" value=""><br>
               </td>

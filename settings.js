@@ -146,7 +146,7 @@ function getDefaultProfileSettings() {
     psCharactersAlphaLower: true,
     psCharactersNumbers: true,
     psCharactersSpecial: true,
-    psCharactersQuotation: false,
+    psCharactersSpaceQuotation: false,
     psCharactersCustom: false,
     psCharactersCustomList: "",
     psHashAlgorithm: "sha256",

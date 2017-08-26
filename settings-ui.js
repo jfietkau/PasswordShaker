@@ -181,10 +181,19 @@ function updateForm() {
     (document.getElementById("pmUseLeet").value == "off");
 }
 
+function updateExamplePassword() {
+  saveSettings().then(() => {
+    browser.runtime.sendMessage({wantExamplePasswordForProfile: getProfileIndex(currentSettings)}).then((message) => {
+      document.getElementById("examplePassword").innerHTML = message.examplePassword;
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
     updateForm();
+    updateExamplePassword();
     document.getElementById("profileTabX").addEventListener("click", () => {
       addNewProfile(currentSettings);
       document.getElementById("profileTab" + (currentSettings.profiles.length - 1)).checked = true;
@@ -199,14 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(ignoreFormEvents == 0) {
         updateForm();
         parseForm(currentSettings);
-        saveSettings().then(() => {
-          browser.runtime.sendMessage({wantExamplePasswordForProfile: getProfileIndex(currentSettings)}).then((message) => {
-            console.log(message);
-            document.getElementById("examplePassword").innerHTML = message.examplePassword;
-          }, (error) => {
-            console.log("error: " + error);
-          });
-        });
+        updateExamplePassword();
       }
     });
   }

@@ -26,6 +26,7 @@
   "background": {
     "scripts": [
       "engine-default/sha3.js",
+      "engine-default/engine.js",
       "engine-passwordmaker/engine.js",
       "background.js",
       "settings.js"
