@@ -45,7 +45,7 @@ function reactToTabChange(tabId, newUrl) {
   loadSettings().then(() => {
     session.currentUrl = newUrl;
     session.currentProfile = null;
-    if(currentSettings.showPageAction == "always") {
+    if(currentSettings.showPageAction == "always" && !newUrl.startsWith("about:")) {
       browser.pageAction.show(tabId);
     } else {
       browser.pageAction.hide(tabId);
