@@ -76,16 +76,28 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePopupForm(currentSettings);
     loadStoredHash((newStoredHash) => {
       storedHash = newStoredHash;
+      if(storedHash != null && storedHash.salt.length < 64) {
+        storedHash = null;
+      }
     });
+    document.getElementById("masterPassword").focus();
   });
   document.getElementById("mainForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    if(storedHash === null) {
-      var newSalt = getRandomBytes(32);
-      var newHash = sha3_512.update(document.getElementById("masterPassword").value).update(newSalt).hex();
-      saveStoredHash(newHash, arr2hex(newSalt), "sha3-512");
-    }
-    window.close();
+    var enteredMasterPassword = document.getElementById("masterPassword").value;
+    browser.runtime.sendMessage(
+      {masterPassword: enteredMasterPassword}
+    ).then(() => {
+      if(currentSettings.storeMasterPasswordHash && storedHash === null) {
+        var newSalt = getRandomBytes(32);
+        var newHash = sha3_512.update(enteredMasterPassword).update(newSalt).hex();
+        saveStoredHash(newHash, arr2hex(newSalt), "sha3-512").then(() => {
+          window.close();
+        });
+      } else {
+        window.close();
+      }
+    });
   });
   var passwordEntries = document.getElementsByClassName("passwordEntry");
   for(var i = 0; i < passwordEntries.length; i++) {

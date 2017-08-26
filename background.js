@@ -1,13 +1,20 @@
 
 var session = {};
 session.masterPassword = null;
+session.currentUrl = "";
 
-function activateOnPage(url) {
-  console.log("PasswordShaker activated on: " + url);
+function activateOnPage(url, masterPassword) {
   browser.tabs.executeScript({file: "/injector.js"}).then(() => {
-    browser.tabs.executeScript({code: "passwordshaker_fill('" + "abcdef" + "');"})
+    browser.tabs.executeScript({code: "passwordshaker_fill('" + masterPassword + "');"})
   });
 }
+
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if(request != null && request.masterPassword != null) {
+    var currentUrl = "";
+    activateOnPage(currentUrl, request.masterPassword);
+  }
+});
 
 browser.contextMenus.create({
   id: "password-shaker",
