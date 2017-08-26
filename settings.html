@@ -58,6 +58,10 @@
       #profileEnginePasswordMaker:checked ~ #profileEnginePasswordMakerConfig {
         display: block;
       }
+      #examplePassword {
+        font-weight: bold;
+        color: #48f;
+      }
     </style>
   </head>
 
@@ -95,6 +99,8 @@
         <label for="profileTabX" style="font-weight: bold;">+</label>
       </div>
       <div id="profileContent">
+        <div>Example password for the current settings: <span id="examplePassword"></span></div>
+        <div class="smallspace"></div>
         <label for="profileName">Profile name:</label> <input type="text" id="profileName" value=""><br>
         <div class="smallspace"></div>
         Profile engine:

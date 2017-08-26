@@ -199,7 +199,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if(ignoreFormEvents == 0) {
         updateForm();
         parseForm(currentSettings);
-        saveSettings();
+        saveSettings().then(() => {
+          browser.runtime.sendMessage({wantExamplePasswordForProfile: getProfileIndex(currentSettings)}).then((message) => {
+            console.log(message);
+            document.getElementById("examplePassword").innerHTML = message.examplePassword;
+          }, (error) => {
+            console.log("error: " + error);
+          });
+        });
       }
     });
   }
