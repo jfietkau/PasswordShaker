@@ -36,8 +36,36 @@ function createCharSet(settings) {
 }
 
 function extractHostName(url) {
+  var parseHelper = document.createElement("a");
+  parseHelper.href = url;
+  var hostName = parseHelper.hostname;
+  return hostName;
+}
+
+function isCompoundTld(urlPart) {
+  if(urlPart.startsWith(".")) {
+    urlPart = urlPart.slice(1);
+  }
   // TODO
-  return url;
+  return false;
+}
+
+function extractDomain(hostName) {
+  var parts = hostName.split(".");
+  if(!isNaN(parseInt(parts.slice(-1)[0]))) {
+    // this is an IP address
+    return hostName;
+  }
+  if(parts.length == 1) {
+    // has to be a local name (no TLD)
+    return hostName;
+  }
+  var result = parts.pop(); // the TLD
+  result = parts.pop() + "." + result;
+  while(isCompoundTld(result)) {
+    result = parts.pop() + "." + result;
+  }
+  return result;
 }
 
 function generatePassword(masterPassword, url, settings) {
@@ -46,13 +74,14 @@ function generatePassword(masterPassword, url, settings) {
     return null;
   }
   var hostName = extractHostName(url);
+  var domain = extractDomain(hostName);
   var generatedPassword = "";
   var toHash = hostName + masterPassword;
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
   while(generatedPassword.length < settings.passwordLength) {
     var hashResult = sha3_512(toHash);
-    while(hashResult.length > 0 && generatedPassword.length < settings.passwordLength) {
+    while(hashResult.length >= 8 && generatedPassword.length < settings.passwordLength) {
       var hashPart = parseInt(hashResult.slice(0, 8), 16) >>> 0;
       hashResult = hashResult.slice(8);
       for(var i = 0; i < maxCharactersPerUint; i++) {
