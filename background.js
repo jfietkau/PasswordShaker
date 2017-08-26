@@ -10,9 +10,36 @@ function activateOnPage(url, masterPassword) {
   if(currentSettings.storeMasterPassword != "never") {
     session.masterPassword = masterPassword;
   }
-  browser.tabs.executeScript({file: "/injector.js"}).then(() => {
-    browser.tabs.executeScript({code: "passwordshaker_fill('" + masterPassword + "');"})
-  });
+  if(session.currentProfile === null) {
+    return;
+  }
+  profileSettings = currentSettings.profiles[session.currentProfile];
+  var generatedPassword = null;
+  if(profileSettings.profileEngine == "profileEngineDefault") {
+    generatedPassword = "123";
+  } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
+    var engineSpecificSettings = {
+      charSet: (profileSettings.pmCharacterSet == "custom") ? profileSettings.pmCustomCharacterList : profileSettings.pmCharacterSet,
+      hashAlgorithm: profileSettings.pmHashAlgorithm,
+      whereToUseL33t: profileSettings.pmUseLeet,
+      l33tLevel: profileSettings.pmLeetLevel,
+      passwordLength: profileSettings.pmPasswordLength,
+      userName: profileSettings.pmUsername,
+      modifier: profileSettings.pmModifier,
+      passwordPrefix: profileSettings.pmPasswordPrefix,
+      passwordSuffix: profileSettings.pmPasswordSuffix,
+      useProtocol: profileSettings.pmUseProtocol,
+      useSubdomains: profileSettings.pmUseSubdomains,
+      useDomain: profileSettings.pmUseDomain,
+      usePath: profileSettings.pmUseOther
+    };
+    generatedPassword = pmGeneratePassword(masterPassword, url, engineSpecificSettings);
+  }
+  if(generatedPassword !== null) {
+    browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+      browser.tabs.executeScript({code: "passwordshaker_fill('" + generatedPassword + "');"})
+    });
+ }
 }
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -32,6 +59,7 @@ browser.contextMenus.create({
 });
 browser.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "password-shaker") {
+    session.currentProfile = 0;
     if(session.masterPassword === null) {
       browser.pageAction.show(tab.id);
       session.currentTabId = tab.id;
@@ -45,7 +73,9 @@ function reactToTabChange(tabId, newUrl) {
   loadSettings().then(() => {
     session.currentUrl = newUrl;
     session.currentProfile = null;
-    if(currentSettings.showPageAction == "always" && !newUrl.startsWith("about:")) {
+    if(currentSettings.showPageAction == "always"
+       && !newUrl.startsWith("about:")
+       && newUrl.length > 0) {
       browser.pageAction.show(tabId);
     } else {
       browser.pageAction.hide(tabId);

@@ -1032,17 +1032,6 @@ function init() {
   ifSavePreferences = document.getElementById("ifSavePreferences");
   preUrl = document.getElementById("preURL");
 
-  // load the default profile
-  loadProfile();
-
-  // load the global preferences (preferences not unique to any profile)
-  loadGlobalPrefs();
-
-  if (whereLeetLB.options.selectedIndex > -1) {
-    // for IE at load time
-  	onWhereLeetLBChanged();
-    preGeneratePassword();
-  }
   populateURL(); // in case passwdUrl.value is using document.location instead of cookie value, this calculates the correct URL
 	passwdMaster.focus();
 }
@@ -1087,65 +1076,44 @@ function getIndexOfValue(lb, value) {
   return 0; // can't find it!
 }
 
-function preGeneratePassword() {
-  var charIndex = document.getElementById("charset").selectedIndex;
-  if(document.getElementById("charset").options[charIndex].value == "")
-    var selectedChar = document.getElementById("charset").options[charIndex].text;
-  else
-    var selectedChar = document.getElementById("charset").options[charIndex].value;
+function preGeneratePassword(masterPassword, url, settings) {
+   var selectedChar = settings.charSet;
+
+   var truncatedUrl = truncateUrl(url, settings);
 
    // Never *ever, ever* allow the charset's length<2 else
    // the hash algorithms will run indefinitely
    if (selectedChar.length < 2) {
-     passwdGenerated.value = "";
-     charMinWarning.style.display = "block";
-     return;
+     return null;
    }
-   charMinWarning.style.display = "none";
-   try {
-     var hashAlgorithm = hashAlgorithmLB.options[hashAlgorithmLB.options.selectedIndex].value;
-
-     var whereToUseL33t = whereLeetLB.options[whereLeetLB.options.selectedIndex].value;
-     var l33tLevel = leetLevelLB.options[leetLevelLB.options.selectedIndex].value;
-   }
-   catch (e) {return;}
-
-   if (!document.getElementById("charset").disabled)
-      userCharsetValue = selectedChar; // Save the user's character set for when the hash algoritm does not specify one.
-
-   if (hashAlgorithm == "md5_v6" || hashAlgorithm == "hmac-md5_v6") {
-      EditableSelect.setValue(document.getElementById("charset"), base16);
-      document.getElementById("charset").disabled = true;
-   }
-   else {
-      EditableSelect.setValue(document.getElementById("charset"), userCharsetValue);
-      document.getElementById("charset").disabled = false;
-   }
+   var hashAlgorithm = settings.hashAlgorithm;
+   var whereToUseL33t = settings.whereToUseL33t;
+   var l33tLevel = settings.l33tLevel;
    
    // Calls generatepassword() n times in order to support passwords
    // of arbitrary length regardless of character set length.
    var password = "";
    var count = 0;
-   while (password.length < passwdLength.value) {
+   while (password.length < settings.passwordLength) {
      // To maintain backwards compatibility with all previous versions of passwordmaker,
      // the first call to _generatepassword() must use the plain "key".
      // Subsequent calls add a number to the end of the key so each iteration
      // doesn't generate the same hash value.
      password += (count == 0) ?
-       generatepassword(hashAlgorithm, passwdMaster.value,
-         passwdUrl.value + usernameTB.value + counter.value, whereToUseL33t, l33tLevel,
-         passwdLength.value, selectedChar, passwordPrefix.value, passwordSuffix.value) :
-       generatepassword(hashAlgorithm, passwdMaster.value + '\n' + count, 
-         passwdUrl.value + usernameTB.value + counter.value, whereToUseL33t, l33tLevel,
-         passwdLength.value, selectedChar, passwordPrefix.value, passwordSuffix.value);
+       generatepassword(hashAlgorithm, masterPassword,
+         truncatedUrl + settings.userName + settings.modifier, whereToUseL33t, l33tLevel,
+         settings.passwordLength, selectedChar, settings.passwordPrefix, settings.passwordSuffix) :
+       generatepassword(hashAlgorithm, masterPassword + '\n' + count, 
+         truncatedUrl + settings.userName + settings.modifier, whereToUseL33t, l33tLevel,
+         settings.passwordLength, selectedChar, settings.passwordPrefix, settings.passwordSuffix);
      count++;
    }
      
-   if (passwordPrefix.value)
-     password = passwordPrefix.value + password;
-   if (passwordSuffix.value)
-     password = password.substring(0, passwdLength.value-passwordSuffix.value.length) + passwordSuffix.value;
-   passwdGenerated.value = password.substring(0, passwdLength.value);
+   if (settings.passwordPrefix)
+     password = settings.passwordPrefix + password;
+   if (settings.passwordSuffix)
+     password = password.substring(0, settings.passwdLength-settings.passwordSuffix.length) + settings.passwordSuffix;
+   return password.substring(0, settings.passwordLength);
 }
   
 function generatepassword(hashAlgorithm, key, data, whereToUseL33t, l33tLevel, passwordLength, charset, prefix, suffix) {
@@ -1212,9 +1180,8 @@ function generatepassword(hashAlgorithm, key, data, whereToUseL33t, l33tLevel, p
   return password;
 }
 
-function populateURL() {
-  //var temp = location.href.match("([^://]*://)([^/]*)(.*)");
-  temp = preUrl.value.match("([^://]*://)?([^:/]*)([^#]*)");
+function truncateUrl(fullUrl, settings) {
+  var temp = fullUrl.match("([^://]*://)?([^:/]*)([^#]*)");
   if (!temp) {
 	temp = ['','','','']; // Helps prevent an undefine based error
   }
@@ -1223,9 +1190,9 @@ function populateURL() {
 	domainSegments.unshift(''); // Helps prevent the URL from displaying undefined in the URL to use box
   }
   var displayMe = '';
-  var displayMeTemp= protocolCB.checked ? temp[1] : ''; // set the protocol or empty string
+  var displayMeTemp= settings.useProtocol ? temp[1] : ''; // set the protocol or empty string
 
-  if (subdomainCB.checked) {
+  if (settings.useSubdomains) {
 	  // The subdomain is all domainSegments
 	  // except the final two.
 	  for (var i=0; i<domainSegments.length-2;i++) {
@@ -1236,156 +1203,17 @@ function populateURL() {
 	  }			
   }
 
-  if (domainCB.checked) {
+  if (settings.useDomain) {
 	  if (displayMe != "" && displayMe[displayMe.length-1]  != ".")
 	    displayMe += ".";
       displayMe += domainSegments[domainSegments.length-2] + "." + domainSegments[domainSegments.length-1];
   }
   displayMe = displayMeTemp + displayMe;
 
-  if (pathCB.checked)
+  if (settings.usePath)
 	  displayMe += temp[3];
 
-  passwdUrl.value = displayMe;	  
-  preGeneratePassword();
-}
-
-function onWhereLeetLBChanged() {
-  leetLevelLB.disabled = whereLeetLB.options[whereLeetLB.options.selectedIndex].value == "off";
-}
-
-function saveProfile() {
-  var profileIndex = document.getElementById("profileLB").selectedIndex;
-  var selectedProfile = document.getElementById("profileLB").options[profileIndex].text;
-
-  if(selectedProfile=="profileList" || selectedProfile=="globalPrefs")  //user can't name a profile profileList!!
-  {
-	  alert("Sorry, you cannot name your profile 'profileList'. Please pick another name.");
-  } else
-  {
-  // Set cookie expiration date
-  var expires = new Date();
-  // Fix the bug in Navigator 2.0, Macintosh
-  fixDate(expires);
-  // Expire the cookie in 5 years
-  expires.setTime(expires.getTime() + 5 * 365 * 24 * 60 * 60 * 1000);
-
-  setCookie(escape(selectedProfile), exportPreferences(), expires);
-
-  // Is this profile in the "profileList" cookie? If not, add it.
-  if(!in_array(selectedProfile, profileListArray))
-  {
-    profileListArray.push(escape(selectedProfile));
-    setCookie("profileList", escape(profileListArray.join('|')), expires);
-  }
-  }
-}
-
-function deleteProfile() {
-  var profileIndex = document.getElementById("profileLB").selectedIndex;
-  var selectedProfile = document.getElementById("profileLB").options[profileIndex].text;
-
-  // Delte the cookie for the profile
-  deleteCookie(escape(selectedProfile));
-
-  // Remove it from profileListArray and write it to the profileList cookie
-  index = in_array(escape(selectedProfile), profileListArray, true);
-  profileListArray.splice(index, 1);
-
-  var expires = new Date();
-  fixDate(expires);
-  expires.setTime(expires.getTime() + 5 * 365 * 24 * 60 * 60 * 1000);
-
-  setCookie("profileList", escape(profileListArray.join('|')), expires);
-
-  if(profileListArray.length==0)
-    deleteCookie("profileList");
-
-  document.location = document.location;
-}
-
-function exportPreferences() {
-  var charIndex = document.getElementById("charset").selectedIndex;
-  var selectedChar = document.getElementById("charset").options[charIndex].text;
-
-  var prefs = preUrl.value + "|" +
-  passwdLength.value + "|" +
-  protocolCB.checked + "|" +
-  domainCB.checked + "|" +
-  subdomainCB.checked + "|" +
-  pathCB.checked + "|" +
-  escape(passwdUrl.value) + "|" +
-  leetLevelLB.value + "|" + 
-  hashAlgorithmLB.value + "|" +
-  whereLeetLB.value + "|" +
-  escape(usernameTB.value) + "|" +
-  escape(counter.value) + "|" +
-  escape(selectedChar) + "|" +
-  escape(passwordPrefix.value) + "|" + 
-  escape(passwordSuffix.value);
-
-  // Double-escaping allows the pipe character to be part of the data itself
-  return escape(prefs);
-}
-
-function saveGlobalPrefs() {
-	var prefs = ifSaveMasterPassword + "|"
-	+ ifHidePasswd.checked + "|";
-	if (ifSaveMasterPassword) {
-		var key = makeKey();
-		// Encrypt the master pw for browsers like Firefox 1.0,which store
-		// cookies in plain text.
-		prefs += escape(key) + "|" +
-		escape(byteArrayToHex(rijndaelEncrypt(passwdMaster.value, hexToByteArray(key), "CBC")));
-	}
-
-	// Set cookie expiration date
-	var expires = new Date();
-	// Fix the bug in Navigator 2.0, Macintosh
-	fixDate(expires);
-	// Expire the cookie in 5 years
-	expires.setTime(expires.getTime() + 5 * 365 * 24 * 60 * 60 * 1000);
-
-	setCookie("globalPrefs", escape(prefs), expires);
-}
-
-function loadGlobalPrefs() {
-	var a = unescape(getCookie("globalPrefs"));
-	var settingsArray = a.split("|");
-
-	ifSaveMasterPassword = (settingsArray[0] == undefined) ? false : settingsArray[0] == "true";
-	if(ifSaveMasterPassword)
-		saveMasterBtn.value="Clear saved master password";
-
-	ifHidePasswd.checked = (settingsArray[1] == undefined) ? false : settingsArray[1] == "true";
-	if(ifHidePasswd.checked==true)
-		passwdGenerated.style.color='#ffffff';
-	else
-		passwdGenerated.style.color='#0000ff';
-
-	if (settingsArray[2] != undefined && settingsArray[3] != undefined) {
-		// Decrypt the encrypted master pw
-		passwdMaster.value = byteArrayToString(rijndaelDecrypt(hexToByteArray(unescape(settingsArray[3])), 
-		hexToByteArray(unescape(settingsArray[2])), "CBC"));
-	}
-}
-
-function saveMaster() {
-	if(ifSaveMasterPassword)
-	{
-		// If we're currently saving the password, we want to clear it.
-		//Hence, we want to give the user the option to save the password again.
-		saveMasterBtn.value="Save master password";
-		ifSaveMasterPassword = false;
-		passwdMaster.value="";
-	}
-	else
-	{
-		saveMasterBtn.value="Clear saved master password";
-		ifSaveMasterPassword = true;
-	}
-
-	saveGlobalPrefs();
+  return displayMe;
 }
 
 // Make a pseudo-random encryption key... emphasis on *pseudo*
@@ -1396,13 +1224,6 @@ function makeKey() {
   while (ret.length < keySz) 
     ret += hex[Math.floor(Math.random()*15)];
   return ret;
-}
-
-function onClickTips() {
-  if (tipsWnd != null && !tipsWnd.closed)
-    tipsWnd.focus();
-  else
-    tipsWnd = window.open("tips.html", "tipsWnd", "width=600,length=50,menubar=no,location=no,resizable=yes,scrollbars=yes,status=no");
 }
 
 function addEvent(obj, evType, fn){
@@ -2701,7 +2522,7 @@ if (typeof(PasswordMaker_HashUtils) != "object") {
 
 // Provide the main interface for this password generation engine
 base.pmGeneratePassword = function(masterPassword, url, settings) {
-  return "abcde";
+  return preGeneratePassword(masterPassword, url, settings);
 }
 
 })();
