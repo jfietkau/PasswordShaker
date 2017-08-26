@@ -11,7 +11,7 @@ function activateOnPage(url, masterPassword) {
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.masterPassword != null) {
-    var currentUrl = "";
+    var currentUrl = session.currentUrl;
     activateOnPage(currentUrl, request.masterPassword);
   }
 });
@@ -23,13 +23,18 @@ browser.contextMenus.create({
 });
 browser.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "password-shaker") {
-    browser.pageAction.show(tab.id);
-    activateOnPage(info["pageUrl"]);
+    if(session.masterPassword === null) {
+      browser.pageAction.show(tab.id);
+    } else {
+      activateOnPage(info["pageUrl"], session.masterPassword);
+    }
   }
 });
 
-function reactToTabChange(tabId) {
+function reactToTabChange(tabId, newUrl) {
   loadSettings().then(() => {
+    session.currentUrl = newUrl;
+    console.log(session.currentUrl);
     if(currentSettings.showPageAction == "always") {
       browser.pageAction.show(tabId);
     } else {
@@ -38,6 +43,11 @@ function reactToTabChange(tabId) {
   });
 }
 browser.tabs.onActivated.addListener((activeInfo) => {
-  reactToTabChange(activeInfo.tabId);
+  var tabId = activeInfo.tabId;
+  browser.tabs.get(tabId).then((tab) => {
+    reactToTabChange(tabId, tab.url);
+  });
 });
-browser.tabs.onUpdated.addListener(reactToTabChange);
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  reactToTabChange(tabId, changeInfo.url);
+});
