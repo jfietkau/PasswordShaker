@@ -76,13 +76,13 @@ function generatePassword(masterPassword, url, settings) {
   var hostName = extractHostName(url);
   var domain = extractDomain(hostName);
   var generatedPassword = "";
-  var thHostName = str2arr(hostName);
+  var thDomain = str2arr(domain);
   var thMasterPassword = str2arr(masterPassword);
   var thMainSalt = hex2arr(settings.mainSalt);
-  var toHash = new Uint8Array(thHostName.length + thMasterPassword.length + thMainSalt.length);
-  toHash.set(thHostName);
-  toHash.set(thMasterPassword, thHostName.length);
-  toHash.set(thMainSalt, thHostName.length + thMasterPassword.length);
+  var toHash = new Uint8Array(thDomain.length + thMasterPassword.length + thMainSalt.length);
+  toHash.set(thDomain);
+  toHash.set(thMasterPassword, thDomain.length);
+  toHash.set(thMainSalt, thDomain.length + thMasterPassword.length);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
   while(generatedPassword.length < settings.passwordLength) {
@@ -99,7 +99,6 @@ function generatePassword(masterPassword, url, settings) {
     toHashNew.set(toHash);
     toHashNew[toHashNew.length - 1] = 0xff;
     toHash = toHashNew;
-    console.log(toHash);
   }
   if(generatedPassword.length > settings.passwordLength) {
     generatedPassword = generatedPassword.slice(0, settings.passwordLength);
