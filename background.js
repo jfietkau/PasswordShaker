@@ -1,5 +1,8 @@
+
 // Parse the public suffix list for hostnames, this only has to happen once while the scripts are in RAM.
 publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
+
+createOrUpdateContextMenu();
 
 var session = {
   masterPassword: null,
@@ -80,14 +83,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-browser.contextMenus.create({
-  id: "password-shaker",
-  title: "PasswordShaker",
-  contexts: ["password"],
-});
 browser.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "password-shaker") {
-    session.currentProfile = 0;
+  if (info.menuItemId.startsWith("password-shaker-context-menu-")) {
+    session.currentProfile = parseInt(info.menuItemId.slice("password-shaker-context-menu-".length));
     if(session.masterPassword === null) {
       browser.pageAction.show(tab.id);
       session.currentTabId = tab.id;

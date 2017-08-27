@@ -167,3 +167,38 @@ function getDefaultProfileSettings() {
     showInContextMenu: true
   };
 }
+
+function createOrUpdateContextMenu() {
+  loadSettings().then(() => {
+    browser.contextMenus.removeAll().then(() => {
+      var numberOfContextMenuEntries = 0;
+      for(var i = 0; i < currentSettings.profiles.length; i++) {
+        if(currentSettings.profiles[i].showInContextMenu) {
+          numberOfContextMenuEntries++;
+        }
+      }
+      for(var i = 0; i < currentSettings.profiles.length; i++) {
+        if(currentSettings.profiles[i].showInContextMenu) {
+          var itemTitle = currentSettings.profiles[i].profileName;
+          if(itemTitle.length == 0) {
+            if(numberOfContextMenuEntries == 1) {
+              itemTitle = "PasswordShaker";
+            } else {
+              if(i == 0) {
+                itemTitle = "(default profile)";
+              } else {
+                itemTitle = "(profile " + (i + 1) + ")";
+              }
+            }
+          }
+          browser.contextMenus.create({
+            id: "password-shaker-context-menu-" + i,
+            title: itemTitle,
+            contexts: ["password"],
+          });
+        }
+      }
+    });
+  });
+}
+

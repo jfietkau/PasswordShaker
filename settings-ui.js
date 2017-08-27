@@ -12,10 +12,11 @@ function populateSettingsForm(settings) {
           newRadio.name = "profileTabs";
           newRadio.id = "profileTab" + i;
           newRadio.value = i;
-          newRadio.addEventListener("click", () => {
+          newRadio.addEventListener("click", (e) => {
             ignoreFormEvents += 1;
-            populateProfileArea(currentSettings, newRadio.value);
+            populateProfileArea(currentSettings, parseInt(e.target.value));
             updateForm();
+            updateExamplePassword();
             ignoreFormEvents -= 1;
           });
           document.getElementById("profiles").insertBefore(newRadio, plusTab);
@@ -185,8 +186,16 @@ function updateExamplePassword() {
   saveSettings().then(() => {
     browser.runtime.sendMessage({wantExamplePasswordForProfile: getProfileIndex(currentSettings)}).then((message) => {
       var displayPassword = message.examplePassword;
-      displayPassword = displayPassword.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-      document.getElementById("examplePassword").innerHTML = displayPassword;
+      if(typeof displayPassword == "string") {
+        displayPassword = displayPassword.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        document.getElementById("examplePassword").innerHTML = displayPassword;
+        document.getElementById("examplePassword").style.fontWeight = "bold";
+        document.getElementById("examplePassword").style.fontStyle = "normal";
+      } else {
+        document.getElementById("examplePassword").innerHTML = "[ failed to generate ]";
+        document.getElementById("examplePassword").style.fontWeight = "normal";
+        document.getElementById("examplePassword").style.fontStyle = "italic";
+      }
     });
   });
 }
@@ -211,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateForm();
         parseForm(currentSettings);
         updateExamplePassword();
+        createOrUpdateContextMenu();
       }
     });
   }
