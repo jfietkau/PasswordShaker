@@ -57,15 +57,13 @@ function extractDomain(hostName) {
     return hostName;
   }
   if(parts.length == 1) {
-    // has to be a local name (no TLD)
+    // assumed to be a local name (no TLD)
     return hostName;
   }
-  var result = parts.pop(); // the TLD
-  result = parts.pop() + "." + result;
-  while(isCompoundTld(result)) {
-    result = parts.pop() + "." + result;
-  }
-  return result;
+  var publicSuffix = publicSuffixList.getPublicSuffix(hostName);
+  // keep the public suffix plus one more name segment below that
+  var result = parts.slice(-1 - publicSuffix.split(".").length);
+  return result.join(".");
 }
 
 function generatePassword(masterPassword, url, settings) {
@@ -76,7 +74,7 @@ function generatePassword(masterPassword, url, settings) {
   var hostName = extractHostName(url);
   var domain = extractDomain(hostName);
   var generatedPassword = "";
-  var toHash = hostName + masterPassword;
+  var toHash = hostName + masterPassword + settings.mainSalt;
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
   while(generatedPassword.length < settings.passwordLength) {
@@ -89,7 +87,7 @@ function generatePassword(masterPassword, url, settings) {
         hashPart = Math.floor(hashPart / charSet.length);
       }
     }
-    toHash += " ";
+    toHash += String.fromCharCode(0xff);
   }
   if(generatedPassword.length > settings.passwordLength) {
     generatedPassword = generatedPassword.slice(0, settings.passwordLength);

@@ -1,3 +1,5 @@
+// Parse the public suffix list for hostnames, this only has to happen once while the scripts are in RAM.
+publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
 
 var session = {
   masterPassword: null,
@@ -100,6 +102,7 @@ function reactToTabChange(tabId, newUrl) {
     session.currentUrl = newUrl;
     session.currentProfile = null;
     if(currentSettings.showPageAction == "always"
+       && typeof newUrl == "string"
        && !newUrl.startsWith("about:")
        && newUrl.length > 0) {
       browser.pageAction.show(tabId);

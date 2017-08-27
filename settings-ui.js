@@ -184,7 +184,9 @@ function updateForm() {
 function updateExamplePassword() {
   saveSettings().then(() => {
     browser.runtime.sendMessage({wantExamplePasswordForProfile: getProfileIndex(currentSettings)}).then((message) => {
-      document.getElementById("examplePassword").innerHTML = message.examplePassword;
+      var displayPassword = message.examplePassword;
+      displayPassword = displayPassword.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      document.getElementById("examplePassword").innerHTML = displayPassword;
     });
   });
 }
