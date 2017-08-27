@@ -3,9 +3,7 @@ var currentSettings = {};
 function getRandomBytes(numberOfBytes) {
   var buffer = new ArrayBuffer(numberOfBytes);
   var uint8View = new Uint8Array(buffer);
-  for(var i = 0; i < uint8View.length; i++) {
-    uint8View[i] = Math.floor(Math.random() * 256);
-  }
+  window.crypto.getRandomValues(uint8View);
   return uint8View;
 }
 

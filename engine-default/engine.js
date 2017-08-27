@@ -6,9 +6,7 @@ var base = typeof window === 'object' ? window : {};
 function getRandomBytes(numberOfBytes) {
   var buffer = new ArrayBuffer(numberOfBytes);
   var uint8View = new Uint8Array(buffer);
-  for(var i = 0; i < uint8View.length; i++) {
-    uint8View[i] = Math.floor(Math.random() * 256);
-  }
+  window.crypto.getRandomValues(uint8View);
   return uint8View;
 }
 
@@ -74,7 +72,7 @@ function generatePassword(masterPassword, url, settings) {
   var hostName = extractHostName(url);
   var domain = extractDomain(hostName);
   var generatedPassword = "";
-  var toHash = hostName + masterPassword + settings.mainSalt;
+  var toHash = hostName + masterPassword + hex2arr(settings.mainSalt);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
   while(generatedPassword.length < settings.passwordLength) {
