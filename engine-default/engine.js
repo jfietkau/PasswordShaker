@@ -2,6 +2,10 @@
 (function () {
 
 var base = typeof window === 'object' ? window : {};
+var textEncoder = new TextEncoder();
+var str2arr = function(str) {
+  return textEncoder.encode(str);
+}
 
 function getRandomBytes(numberOfBytes) {
   var buffer = new ArrayBuffer(numberOfBytes);
@@ -72,7 +76,13 @@ function generatePassword(masterPassword, url, settings) {
   var hostName = extractHostName(url);
   var domain = extractDomain(hostName);
   var generatedPassword = "";
-  var toHash = hostName + masterPassword + hex2arr(settings.mainSalt);
+  var thHostName = str2arr(hostName);
+  var thMasterPassword = str2arr(masterPassword);
+  var thMainSalt = hex2arr(settings.mainSalt);
+  var toHash = new Uint8Array(thHostName.length + thMasterPassword.length + thMainSalt.length);
+  toHash.set(thHostName);
+  toHash.set(thMasterPassword, thHostName.length);
+  toHash.set(thMainSalt, thHostName.length + thMasterPassword.length);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
   while(generatedPassword.length < settings.passwordLength) {
@@ -85,7 +95,11 @@ function generatePassword(masterPassword, url, settings) {
         hashPart = Math.floor(hashPart / charSet.length);
       }
     }
-    toHash += String.fromCharCode(0xff);
+    var toHashNew = new Uint8Array(toHash.length + 1);
+    toHashNew.set(toHash);
+    toHashNew[toHashNew.length - 1] = 0xff;
+    toHash = toHashNew;
+    console.log(toHash);
   }
   if(generatedPassword.length > settings.passwordLength) {
     generatedPassword = generatedPassword.slice(0, settings.passwordLength);
