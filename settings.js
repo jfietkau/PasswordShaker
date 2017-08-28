@@ -1,5 +1,12 @@
 var currentSettings = {};
 
+var session = {
+  masterPassword: null,
+  currentUrl: "",
+  currentProfile: null,
+  currentTabId: null
+};
+
 function getRandomBytes(numberOfBytes) {
   var buffer = new ArrayBuffer(numberOfBytes);
   var uint8View = new Uint8Array(buffer);

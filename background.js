@@ -4,13 +4,6 @@ publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
 
 createOrUpdateContextMenu();
 
-var session = {
-  masterPassword: null,
-  currentUrl: "",
-  currentProfile: null,
-  currentTabId: null
-};
-
 function generatePasswordForProfile(url, masterPassword, profileSettings) {
   var generatedPassword = null;
   if(profileSettings.profileEngine == "profileEngineDefault") {
@@ -50,9 +43,6 @@ function generatePasswordForProfile(url, masterPassword, profileSettings) {
 }
 
 function activateOnPage(url, masterPassword) {
-  if(currentSettings.storeMasterPassword != "never") {
-    session.masterPassword = masterPassword;
-  }
   if(session.currentProfile === null) {
     return;
   }
@@ -65,15 +55,34 @@ function activateOnPage(url, masterPassword) {
  }
 }
 
+function storeMasterPassword(masterPassword) {
+  var textEncoder = new TextEncoder();
+  var masterPasswordArray = textEncoder.encode(masterPassword);
+  var xorKey = getRandomBytes(masterPasswordArray.length);
+  for(var i = 0; i < masterPasswordArray.length; i++) {
+    masterPasswordArray[i] = xorKey[i] ^ masterPasswordArray[i];
+  }
+  var storedMasterPassword = {};
+  storedMasterPassword.firstHalf = arr2hex(xorKey);
+  storedMasterPassword.secondHalf = arr2hex(masterPasswordArray);
+  return browser.storage.local.set({storedMasterPassword: storedMasterPassword});
+}
+
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if(request != null && request.masterPassword != null) {
+  if(request != null && request.masterPassword !== undefined) {
+    if(currentSettings.storeMasterPassword != "never") {
+      session.masterPassword = request.masterPassword;
+      if(currentSettings.storeMasterPassword == "permanent") {
+        storeMasterPassword(request.masterPassword);
+      }
+    }
     if(currentSettings.showPageAction == "when-needed" && session.currentTabId !== null) {
       browser.pageAction.hide(session.currentTabId);
     }
     var currentUrl = session.currentUrl;
     activateOnPage(currentUrl, request.masterPassword);
   }
-  if(request != null && request.wantExamplePasswordForProfile !== null) {
+  if(request != null && request.wantExamplePasswordForProfile !== undefined) {
     loadSettings().then(() => {
       var profileSettings = currentSettings.profiles[request.wantExamplePasswordForProfile];
       var newExamplePassword = generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings);

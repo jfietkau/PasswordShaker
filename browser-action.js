@@ -72,6 +72,10 @@ function updatePopupForm(settings) {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
+    if(session !== undefined && session.masterPassword != undefined) {
+      console.log("close it");
+      window.close();
+    }
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);
     loadStoredHash((newStoredHash) => {
