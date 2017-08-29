@@ -86,7 +86,13 @@ function generatePassword(masterPassword, url, settings) {
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
   while(generatedPassword.length < settings.passwordLength) {
-    var hashResult = sha3_512(toHash);
+    var hashResult = null;
+    if(settings.hashAlgorithm == "sha3") {
+      hashResult = sha3_512(toHash);
+    } else if(settings.hashAlgorithm.startsWith("pbkdf2-hmac-sha256-")) {
+      var iterations = parseInt(settings.hashAlgorithm.slice("pbkdf2-hmac-sha256-".length));
+      hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword + domain, thMainSalt, iterations, settings.passwordLength);
+    }
     while(hashResult.length >= 8 && generatedPassword.length < settings.passwordLength) {
       var hashPart = parseInt(hashResult.slice(0, 8), 16) >>> 0;
       hashResult = hashResult.slice(8);

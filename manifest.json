@@ -28,6 +28,8 @@
       "data/publicsuffixlist.js",
       "data/publicsuffixlist-raw.js",
       "data/punycode.js",
+      "engine-default/asmcrypto.js",
+      "engine-default/bcrypt.js",
       "engine-default/sha3.js",
       "engine-default/engine.js",
       "engine-passwordmaker/engine.js",

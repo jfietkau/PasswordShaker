@@ -88,6 +88,9 @@
         padding: 0 .7em;
         display: inline-block;
       }
+      #deleteProfileConfirm {
+        font-weight: bold;
+      }
     </style>
   </head>
 
@@ -157,7 +160,9 @@
               <td>Hash algorithm:</td>
               <td>
                 <select id="psHashAlgorithm">
-                  <option value="sha256">SHA-256</option>
+                  <option value="pbkdf2-hmac-sha256-10000">PBKDF2-HMAC-SHA256 ×10000</option>
+                  <option value="pbkdf2-hmac-sha256-1000">PBKDF2-HMAC-SHA256 ×1000</option>
+                  <option value="sha3">SHA-3</option>
                 </select>
                 <div class="smallspace"></div>
               </td>
