@@ -113,6 +113,9 @@ function parseForm(settings) {
   if(!document.getElementById("storeMasterPasswordHash").checked) {
     clearStoredHash();
   }
+  if(document.getElementById("storeMasterPassword").value != "permanent") {
+    browser.runtime.sendMessage({clearStoredMasterPassword: true});
+  }
   var profileIndex = getProfileIndex(settings);
   for(var i = 0; i < settings.profiles.length; i++) {
     if(document.getElementById("profileTab" + i).checked) {

@@ -1,8 +1,18 @@
 
+var session = {
+  masterPassword: null,
+  currentUrl: "",
+  currentProfile: null,
+  currentTabId: null
+};
+
 // Parse the public suffix list for hostnames, this only has to happen once while the scripts are in RAM.
 publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
 
 createOrUpdateContextMenu();
+
+loadStoredMasterPassword();
+
 
 function generatePasswordForProfile(url, masterPassword, profileSettings) {
   var generatedPassword = null;
@@ -68,6 +78,28 @@ function storeMasterPassword(masterPassword) {
   return browser.storage.local.set({storedMasterPassword: storedMasterPassword});
 }
 
+function loadStoredMasterPassword() {
+  return browser.storage.local.get("storedMasterPassword").then((loadedMasterPassword) => {
+    if(loadedMasterPassword != null
+       && loadedMasterPassword.hasOwnProperty("storedMasterPassword")
+       && loadedMasterPassword["storedMasterPassword"] !== null) {
+      var loaded = loadedMasterPassword["storedMasterPassword"];
+      loaded.firstHalf = hex2arr(loaded.firstHalf);
+      loaded.secondHalf = hex2arr(loaded.secondHalf);
+      var masterPasswordArray = new Uint8Array(loaded.firstHalf.length);
+      for(var i = 0; i < masterPasswordArray.length; i++) {
+        masterPasswordArray[i] = loaded.firstHalf[i] ^ loaded.secondHalf[i];
+      }
+      var textDecoder = new TextDecoder();
+      session.masterPassword = textDecoder.decode(masterPasswordArray);
+    }
+  });
+}
+
+function clearStoredMasterPassword() {
+  return browser.storage.local.remove("storedMasterPassword");
+}
+
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.getSessionVariable !== undefined) {
     if(session != undefined) {
@@ -76,13 +108,18 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(null);
     }
   }
+  if(request != null && request.clearStoredMasterPassword !== undefined) {
+    clearStoredMasterPassword();
+  }
   if(request != null && request.masterPassword !== undefined) {
-    if(currentSettings.storeMasterPassword != "never") {
-      session.masterPassword = request.masterPassword;
-      if(currentSettings.storeMasterPassword == "permanent") {
-        storeMasterPassword(request.masterPassword);
+    loadSettings().then(() => {
+      if(currentSettings.storeMasterPassword != "never") {
+        session.masterPassword = request.masterPassword;
+        if(currentSettings.storeMasterPassword == "permanent") {
+          storeMasterPassword(request.masterPassword);
+        }
       }
-    }
+    });
     if(currentSettings.showPageAction == "when-needed" && session.currentTabId !== null) {
       browser.pageAction.hide(session.currentTabId);
     }
