@@ -41,8 +41,8 @@
         border: 1px solid #ddd;
         padding: 1em;
         background: #fff;
+        color: #000;
       }
-
       .smallspace {
         height: .5em;
       }
@@ -71,6 +71,22 @@
         max-width: 20em;
         overflow: auto;
         white-space: nowrap;
+      }
+      #deleteProfile {
+        margin: 6px 0 0;
+        display: block;
+      }
+      #deleteProfileWarning {
+        margin: 0 0 -6px -6px;
+        padding: 3px;
+        display: inline-block;
+        border: 3px solid #c00;
+        background: #fcc;
+        border-radius: 7px;
+      }
+      #deleteProfileWarning span {
+        padding: 0 .7em;
+        display: inline-block;
       }
     </style>
   </head>
@@ -251,6 +267,13 @@
         </div>
         <div class="smallspace"></div>
         <input type="checkbox" id="showInContextMenu"> <label for="showInContextMenu">Show this profile in context menu</label><br>
+        <div class="smallspace"></div>
+        <input type="button" id="deleteProfile" value="Delete this profile">
+        <div id="deleteProfileWarning">
+          <input type="button" id="deleteProfileCancel" value="Cancel">
+          <span>Are you sure you want to delete this profile?</span>
+          <input type="button" id="deleteProfileConfirm" value="Yes, please delete!">
+        </div>
       </div>
       
     </form>

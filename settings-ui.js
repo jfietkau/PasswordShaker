@@ -1,9 +1,25 @@
 var ignoreFormEvents = 0;
 
+function removeElementById(elemId) {
+  var elem = document.getElementById(elemId);
+  elem.parentNode.removeChild(elem);
+}
+
 function populateSettingsForm(settings) {
   ignoreFormEvents += 1;
   for(var property in settings) {
     if(property == "profiles") {
+      var checkedTabValue = 0;
+      var oldIndex = 0;
+      while(document.getElementById("profileTab" + oldIndex) != undefined) {
+        if(document.getElementById("profileTab" + oldIndex).checked) {
+          checkedTabValue = oldIndex;
+        }
+        removeElementById("profileTab" + oldIndex);
+        removeElementById("profileTabLabel" + oldIndex);
+        oldIndex++;
+      }
+      checkedTabValue = Math.min(checkedTabValue, settings.profiles.length - 1);
       for(var i = 0; i < settings.profiles.length; i++) {
         if(!document.getElementById("profileTab" + i)) {
           var plusTab = document.getElementById("profileTabX"); 
@@ -21,6 +37,7 @@ function populateSettingsForm(settings) {
           });
           document.getElementById("profiles").insertBefore(newRadio, plusTab);
           var newLabel = document.createElement("label");
+          newLabel.id = "profileTabLabel" + i;
           newLabel.htmlFor = "profileTab" + i;
           var tabTitle = settings.profiles[i].profileName;
           if(tabTitle.length == 0) {
@@ -32,17 +49,18 @@ function populateSettingsForm(settings) {
           }
           var labelContent = document.createTextNode(tabTitle);
           newLabel.appendChild(labelContent);
-          document.getElementById("profiles").insertBefore(newLabel, plusTab);          
+          document.getElementById("profiles").insertBefore(newLabel, plusTab);
         }
       }
       var superfluousTabIndex = settings.profiles.length;
       while(document.getElementById("profileTab" + superfluousTabIndex)) {
-        document.getElementById("profiles").removeChild(document.getElementById("profileTab" + superfluousTabIndex));
+        removeElementbyId("profileTab" + superfluousTabIndex);
+        superfluousTabIndex++;
       }
       var profileIndex = getProfileIndex(settings);
       if(profileIndex === null) {
-        document.getElementById("profileTab0").checked = true;
-        populateProfileArea(settings, 0);
+        document.getElementById("profileTab" + checkedTabValue).checked = true;
+        populateProfileArea(settings, checkedTabValue);
       }
     } else if(settings.hasOwnProperty(property)) {
       populateSettingsElement(property, settings[property]);
@@ -65,6 +83,8 @@ function populateProfileArea(settings, profileIndex) {
       populateSettingsElement(property, settings.profiles[profileIndex][property]);
     }
   }
+  document.getElementById("deleteProfileWarning").style.display = "none";
+  document.getElementById("deleteProfile").style.display = "inline";
   ignoreFormEvents -= 1;
 }
 
@@ -183,6 +203,8 @@ function updateForm() {
     (document.getElementById("pmCharacterSet").value == "custom") ? "block" : "none";
   document.getElementById("pmLeetLevel").disabled =
     (document.getElementById("pmUseLeet").value == "off");
+  document.getElementById("deleteProfile").disabled =
+    (currentSettings.profiles.length < 2);
 }
 
 function updateExamplePassword() {
@@ -234,6 +256,25 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  document.getElementById("deleteProfileWarning").style.display = "none";
+  document.getElementById("deleteProfileCancel").style.width = (document.getElementById("deleteProfile").offsetWidth) + "px";
+  document.getElementById("deleteProfile").addEventListener("click", () => {
+    document.getElementById("deleteProfileWarning").style.display = "inline-block";
+    document.getElementById("deleteProfile").style.display = "none";
+  });
+  document.getElementById("deleteProfileCancel").addEventListener("click", () => {
+    document.getElementById("deleteProfileWarning").style.display = "none";
+    document.getElementById("deleteProfile").style.display = "inline";
+  });
+  document.getElementById("deleteProfileConfirm").addEventListener("click", () => {
+    var currentProfileIndex = getProfileIndex(currentSettings);
+    currentSettings.profiles.splice(currentProfileIndex, 1);
+    saveSettings().then(() => {
+      populateSettingsForm(currentSettings);
+      updateForm();
+      updateExamplePassword();
+    });
+  });
 
   document.getElementById("wipeButton").addEventListener("click", clearSettings);
   document.getElementById("showButton").addEventListener("click", debug_showSettings);
