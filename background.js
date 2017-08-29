@@ -69,6 +69,13 @@ function storeMasterPassword(masterPassword) {
 }
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if(request != null && request.getSessionVariable !== undefined) {
+    if(session != undefined) {
+      sendResponse(session[request.getSessionVariable]);
+    } else {
+      sendResponse(null);
+    }
+  }
   if(request != null && request.masterPassword !== undefined) {
     if(currentSettings.storeMasterPassword != "never") {
       session.masterPassword = request.masterPassword;
