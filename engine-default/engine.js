@@ -96,30 +96,37 @@ function extractDomain(hostName) {
   return result.join(".");
 }
 
-function generatePassword(masterPassword, url, settings) {
+function handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve) {
   var charSet = createCharSet(settings);
-  if(charSet.length < 2) {
-    return null;
+  var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
+  while(hashResult.length >= 8 && accumulator.password.length < settings.passwordLength) {
+    var hashPart = parseInt(hashResult.slice(0, 8), 16) >>> 0;
+    hashResult = hashResult.slice(8);
+    for(var i = 0; i < maxCharactersPerUint; i++) {
+      accumulator.password += charSet[hashPart % charSet.length];
+      hashPart = Math.floor(hashPart / charSet.length);
+    }
   }
+  var combinedSaltNew = new Uint8Array(accumulator.salt.length + 1);
+  combinedSaltNew.set(accumulator.salt);
+  combinedSaltNew[combinedSaltNew.length - 1] = 0xff;
+  accumulator.salt = combinedSaltNew;
+  generatePasswordPart(masterPassword, url, settings, depth + 1, accumulator, resolve);
+}
+
+function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve) {
+  var charSet = createCharSet(settings);
   var hostName = extractHostName(url);
   var domain = extractDomain(hostName);
-  var generatedPassword = "";
   var thDomain = str2arr(domain);
-  var thMasterPassword = str2arr(masterPassword);
   var thMainSalt = hex2arr(settings.mainSalt);
-  var toHash = new Uint8Array(thDomain.length + thMasterPassword.length + thMainSalt.length);
-  toHash.set(thDomain);
-  toHash.set(thMasterPassword, thDomain.length);
-  toHash.set(thMainSalt, thDomain.length + thMasterPassword.length);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
-  var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
-  while(generatedPassword.length < settings.passwordLength) {
+  if(accumulator.password.length < settings.passwordLength) {
     var hashResult = null;
-    if(settings.hashAlgorithm == "sha3") {
-      hashResult = sha3_512(toHash);
-    } else if(settings.hashAlgorithm.startsWith("pbkdf2-hmac-sha256-")) {
+    if(settings.hashAlgorithm.startsWith("pbkdf2-hmac-sha256-")) {
       var iterations = parseInt(settings.hashAlgorithm.slice("pbkdf2-hmac-sha256-".length));
-      hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword + domain, thMainSalt, iterations, settings.passwordLength);
+      hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword, accumulator.salt, iterations, 64);
+      handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve);
     } else if(settings.hashAlgorithm.startsWith("bcrypt-")) {
       var costFactor = parseInt(settings.hashAlgorithm.slice("bcrypt-".length));
       var collapsedSalt = new Uint8Array(16);
@@ -128,27 +135,44 @@ function generatePassword(masterPassword, url, settings) {
       }
       var salt = "$2a$" + costFactor + "$";
       salt += base64ArrayBuffer(collapsedSalt).replace(/\+/g, ".").slice(0, 22);
-      var rawHash = dcodeIO.bcrypt.hashSync(masterPassword, salt);
-      hashResult = rawHash.slice(salt.length);
-      hashResult = arr2hex(base64ToArrayBuffer(hashResult.replace(/\./g, "+")));
+      dcodeIO.bcrypt.hash(masterPassword, salt, function(err, rawHash) {
+        hashResult = rawHash.slice(salt.length);
+        hashResult = arr2hex(base64ToArrayBuffer(hashResult.replace(/\./g, "+")));
+        handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve);
+      });
+    } else if(settings.hashAlgorithm.startsWith("scrypt-")) {
+      var costFactor = parseInt(settings.hashAlgorithm.slice("scrypt-".length));
+      var N = 1024, r = 8, p = 1;
+      var dkLen = 32;
+      scrypt(str2arr(masterPassword), accumulator.salt, N, r, p, dkLen, function(error, progress, key) {
+        if (key) {
+          handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve);
+        } else if (error) {
+          console.log("Error: " + error);
+        }
+      });
     }
-    while(hashResult.length >= 8 && generatedPassword.length < settings.passwordLength) {
-      var hashPart = parseInt(hashResult.slice(0, 8), 16) >>> 0;
-      hashResult = hashResult.slice(8);
-      for(var i = 0; i < maxCharactersPerUint; i++) {
-        generatedPassword += charSet[hashPart % charSet.length];
-        hashPart = Math.floor(hashPart / charSet.length);
-      }
-    }
-    var toHashNew = new Uint8Array(toHash.length + 1);
-    toHashNew.set(toHash);
-    toHashNew[toHashNew.length - 1] = 0xff;
-    toHash = toHashNew;
+  } else {
+    accumulator.password = accumulator.password.slice(0, settings.passwordLength);
+    resolve(accumulator.password);
   }
-  if(generatedPassword.length > settings.passwordLength) {
-    generatedPassword = generatedPassword.slice(0, settings.passwordLength);
+}
+
+function generatePassword(masterPassword, url, settings) {
+  var charSet = createCharSet(settings);
+  if(charSet.length < 2) {
+    return null;
   }
-  return generatedPassword;
+  var hostName = extractHostName(url);
+  var domain = extractDomain(hostName);
+  var thDomain = str2arr(domain);
+  var thMainSalt = hex2arr(settings.mainSalt);
+  var combinedSalt = new Uint8Array(thDomain.length + thMainSalt.length);
+  combinedSalt.set(thDomain);
+  combinedSalt.set(thMainSalt, thDomain.length);
+  return new Promise((resolve, reject) => {
+    generatePasswordPart(masterPassword, url, settings, 0, {salt: combinedSalt, password: ""}, resolve);
+  });
 }
 
 // Provide the main interface for this password generation engine

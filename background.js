@@ -57,12 +57,13 @@ function activateOnPage(url, masterPassword) {
     return;
   }
   var profileSettings = currentSettings.profiles[session.currentProfile];
-  var generatedPassword = generatePasswordForProfile(url, masterPassword, profileSettings);
-  if(generatedPassword !== null) {
-    browser.tabs.executeScript({file: "/injector.js"}).then(() => {
-      browser.tabs.executeScript({code: "passwordshaker_fill('" + generatedPassword + "');"})
-    });
- }
+  generatePasswordForProfile(url, masterPassword, profileSettings).then((generatedPassword) => {
+    if(generatedPassword !== null) {
+      browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+        browser.tabs.executeScript({code: "passwordshaker_fill('" + generatedPassword + "');"})
+      });
+    }
+  });
 }
 
 function storeMasterPassword(masterPassword) {
@@ -129,8 +130,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.wantExamplePasswordForProfile !== undefined) {
     loadSettings().then(() => {
       var profileSettings = currentSettings.profiles[request.wantExamplePasswordForProfile];
-      var newExamplePassword = generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings);
-      sendResponse({examplePassword: newExamplePassword});
+      generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings).then((generatedPassword) => {
+        sendResponse({examplePassword: generatedPassword});
+      });
     });
     return true;
   }

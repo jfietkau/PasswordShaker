@@ -999,15 +999,6 @@ function rijndaelDecrypt(ciphertext, key, mode) {
 
 // scripts/passwordmaker.js
 
-var passwdMaster, passwdUrl, passwdGenerated,
-  passwdLength, protocolCB, domainCB, subdomainCB, pathCB, leetLevelLB,
-  ifSaveMasterPassword, saveMasterBtn, hashAlgorithmLB, whereLeetLB, usernameTB, counter,
-  passwordPrefix, passwordSuffix, charMinWarning,
-  tipsWnd, userCharsetValue, ifHidePasswd, ifSavePreferences, preUrl;
-
-var base93="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={}|[]\\:\";\'<>?,./";
-var base16="0123456789abcdef";
-
 function preGeneratePassword(masterPassword, url, settings) {
    var selectedChar = settings.charSet;
 
@@ -2410,7 +2401,9 @@ if (typeof(PasswordMaker_HashUtils) != "object") {
 
 // Provide the main interface for this password generation engine
 base.pmGeneratePassword = function(masterPassword, url, settings) {
-  return preGeneratePassword(masterPassword, url, settings);
+  return new Promise((resolve, reject) => {
+    resolve(preGeneratePassword(masterPassword, url, settings));
+  });
 }
 
 })();
