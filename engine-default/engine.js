@@ -123,8 +123,8 @@ function generatePassword(masterPassword, url, settings) {
     } else if(settings.hashAlgorithm.startsWith("bcrypt-")) {
       var costFactor = parseInt(settings.hashAlgorithm.slice("bcrypt-".length));
       var collapsedSalt = new Uint8Array(16);
-      for(var i = 0; i < toHash.length; i++) {
-        collapsedSalt[i % 16] = collapsedSalt[i % 16] ^ toHash[i];
+      for(var i = 0; i < thDomain.length + thMainSalt.length; i++) {
+        collapsedSalt[i % 16] = collapsedSalt[i % 16] ^ ((i < thDomain.length) ? thDomain[i] : thMainSalt[i - thDomain.length];
       }
       var salt = "$2a$" + costFactor + "$";
       salt += base64ArrayBuffer(collapsedSalt).replace(/\+/g, ".").slice(0, 22);
