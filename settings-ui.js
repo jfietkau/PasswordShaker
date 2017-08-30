@@ -208,8 +208,10 @@ function updateForm() {
 }
 
 function updateExamplePassword() {
+  document.getElementById("loadingIcon").style.display = "block";
   saveSettings().then(() => {
     browser.runtime.sendMessage({wantExamplePasswordForProfile: getProfileIndex(currentSettings)}).then((message) => {
+      document.getElementById("loadingIcon").style.display = "none";
       var displayPassword = message.examplePassword;
       if(typeof displayPassword == "string") {
         displayPassword = displayPassword.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");

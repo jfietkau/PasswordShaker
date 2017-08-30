@@ -72,6 +72,12 @@
         overflow: auto;
         white-space: nowrap;
       }
+      #loadingIcon {
+        display: none;
+        float: left;
+        width: 32px;
+        margin: 8px;
+      }
       #deleteProfile {
         margin: 6px 0 0;
         display: block;
@@ -129,6 +135,7 @@
       </div>
       <div id="profileContent">
         <div id="examplePasswordContainer">
+          <img src="/icons/loading.gif" id="loadingIcon" alt="Generating example password..." title="Generating example password...">
           Example password for the current settings: <span id="examplePassword"></span>
         </div>
         <div class="smallspace"></div>
