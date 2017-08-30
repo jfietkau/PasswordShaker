@@ -142,7 +142,7 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
       });
     } else if(settings.hashAlgorithm.startsWith("scrypt-")) {
       var costFactor = parseInt(settings.hashAlgorithm.slice("scrypt-".length));
-      var N = 1024, r = 8, p = 1;
+      var N = 2 ** costFactor, r = 8, p = 1;
       var dkLen = 32;
       scrypt(str2arr(masterPassword), accumulator.salt, N, r, p, dkLen, function(error, progress, key) {
         if (key) {
