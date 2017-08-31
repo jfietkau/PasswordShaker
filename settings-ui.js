@@ -83,6 +83,16 @@ function populateProfileArea(settings, profileIndex) {
       populateSettingsElement(property, settings.profiles[profileIndex][property]);
     }
   }
+  var currentAlgoName = document.getElementById("psHashAlgorithm").value;
+  var newAlgoCoefficientName = getCoefficientNameByAlgorithm(currentAlgoName);
+  if(currentAlgoName.startsWith("pbkdf2-")) {
+    document.getElementById("psAlgorithmCoefficient").step = 10000;
+    document.getElementById("psAlgorithmCoefficient").min = 10000;
+  } else {
+    document.getElementById("psAlgorithmCoefficient").step = 1;
+    document.getElementById("psAlgorithmCoefficient").min = (currentAlgoName == "bcrypt") ? 4 : 1;
+  }
+  document.getElementById("psAlgorithmCoefficientName").innerHTML = newAlgoCoefficientName + ":";
   document.getElementById("deleteProfileWarning").style.display = "none";
   document.getElementById("deleteProfile").style.display = "inline";
   ignoreFormEvents -= 1;
@@ -227,6 +237,20 @@ function updateExamplePassword() {
   });
 }
 
+function getCoefficientNameByAlgorithm(algo) {
+  var name = "Algorithm coefficient";
+  if(algo == "argon2") {
+    name = "Execution time exponent";
+  } else if(algo == "scrypt") {
+    name = "Cost parameter";
+  } else if(algo == "bcrypt") {
+    name = "Cost parameter";
+  } else if(algo == "pbkdf2-hmac-sha256") {
+    name = "Iteration count";
+  }
+  return name;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
@@ -242,8 +266,33 @@ document.addEventListener("DOMContentLoaded", () => {
   var selects = Array.from(document.getElementsByTagName("select"));
   var elems = inputs.concat(selects);
   for(var i = 0; i < elems.length; i++) {
-    elems[i].addEventListener("change", () => {
+    elems[i].addEventListener("change", (e) => {
       if(ignoreFormEvents == 0) {
+        if(e.target.id == "psHashAlgorithm") {
+          ignoreFormEvents += 1;
+          var newAlgo = e.target.value;
+          var newAlgoCoefficient = 0;
+          var newAlgoCoefficientStepSize = 1;
+          var newAlgoCoefficientMinimum = 1;
+          if(newAlgo == "argon2") {
+            newAlgoCoefficient = 4;
+          } else if(newAlgo == "scrypt") {
+            newAlgoCoefficient = 10;
+          } else if(newAlgo == "bcrypt") {
+            newAlgoCoefficient = 10;
+            newAlgoCoefficientMinimum = 4;
+          } else if(newAlgo == "pbkdf2-hmac-sha256") {
+            newAlgoCoefficient = 50000;
+            newAlgoCoefficientStepSize = 10000;
+            newAlgoCoefficientMinimum = 10000;
+          }
+          document.getElementById("psAlgorithmCoefficient").value = newAlgoCoefficient;
+          document.getElementById("psAlgorithmCoefficient").step = newAlgoCoefficientStepSize;
+          document.getElementById("psAlgorithmCoefficient").min = newAlgoCoefficientMinimum;
+          var newAlgoCoefficientName = getCoefficientNameByAlgorithm(newAlgo);
+          document.getElementById("psAlgorithmCoefficientName").innerHTML = newAlgoCoefficientName + ":";
+          ignoreFormEvents -= 1;
+        }
         updateForm();
         parseForm(currentSettings);
         updateExamplePassword();

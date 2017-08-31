@@ -78,6 +78,12 @@
         width: 32px;
         margin: 8px;
       }
+      #psHashAlgorithm {
+        margin-right: 1em;
+      }
+      #psAlgorithmCoefficient {
+        width: 7em;
+      }
       #deleteProfile {
         margin: 6px 0 0;
         display: block;
@@ -167,25 +173,13 @@
               <td>Hash algorithm:</td>
               <td>
                 <select id="psHashAlgorithm">
-                  <option value="pbkdf2-hmac-sha256">PBKDF2 ×10000</option>
-                  <option value="pbkdf2-hmac-sha256-1000">PBKDF2 ×1000</option>
-                  <option value="bcrypt-14">bcrypt w/ 14</option>
-                  <option value="bcrypt-12">bcrypt w/ 12</option>
-                  <option value="bcrypt-10">bcrypt w/ 10</option>
-                  <option value="scrypt-14">scrypt w/ 14</option>
-                  <option value="scrypt-12">scrypt w/ 12</option>
-                  <option value="scrypt-10">scrypt w/ 10</option>
-                  <option value="argon2-10">Argon2 w/ 10</option>
-                  <option value="argon2-9">Argon2 w/ 9</option>
-                  <option value="argon2-8">Argon2 w/ 8</option>
-                  <option value="argon2-7">Argon2 w/ 7</option>
-                  <option value="argon2-6">Argon2 w/ 6</option>
-                  <option value="argon2-5">Argon2 w/ 5</option>
-                  <option value="argon2-4">Argon2 w/ 4</option>
-                  <option value="argon2-3">Argon2 w/ 3</option>
-                  <option value="argon2-2">Argon2 w/ 2</option>
-                  <option value="argon2-1">Argon2 w/ 1</option>
+                  <option value="argon2">Argon2</option>
+                  <option value="scrypt">scrypt</option>
+                  <option value="bcrypt">bcrypt</option>
+                  <option value="pbkdf2-hmac-sha256">PBKDF2</option>
                 </select>
+                <label for="psAlgorithmCoefficient" id="psAlgorithmCoefficientName"></label>
+                <input type="number" id="psAlgorithmCoefficient" value="">
                 <div class="smallspace"></div>
               </td>
             </tr>

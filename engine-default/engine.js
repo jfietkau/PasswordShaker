@@ -123,26 +123,27 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   if(accumulator.password.length < settings.passwordLength) {
     var hashResult = null;
-    if(settings.hashAlgorithm.startsWith("pbkdf2-hmac-sha256-")) {
-      var iterations = parseInt(settings.hashAlgorithm.slice("pbkdf2-hmac-sha256-".length));
-      hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword, accumulator.salt, iterations, 64);
+    if(settings.hashAlgorithm == "pbkdf2-hmac-sha256") {
+      hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword, accumulator.salt, settings.hashAlgorithmCoefficient, 64);
       handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve);
-    } else if(settings.hashAlgorithm.startsWith("bcrypt-")) {
-      var costFactor = parseInt(settings.hashAlgorithm.slice("bcrypt-".length));
+    } else if(settings.hashAlgorithm == "bcrypt") {
       var collapsedSalt = new Uint8Array(16);
       for(var i = 0; i < thDomain.length + thMainSalt.length; i++) {
         collapsedSalt[i % 16] = collapsedSalt[i % 16] ^ ((i < thDomain.length) ? thDomain[i] : thMainSalt[i - thDomain.length]);
       }
-      var salt = "$2a$" + costFactor + "$";
+      var saltPart = "" + settings.hashAlgorithmCoefficient;
+      if(settings.hashAlgorithmCoefficient < 10) {
+        saltPart = "0" + saltPart;
+      }
+      var salt = "$2a$" + saltPart + "$";
       salt += base64ArrayBuffer(collapsedSalt).replace(/\+/g, ".").slice(0, 22);
       dcodeIO.bcrypt.hash(masterPassword, salt, function(err, rawHash) {
         hashResult = rawHash.slice(salt.length);
         hashResult = arr2hex(base64ToArrayBuffer(hashResult.replace(/\./g, "+")));
         handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve);
       });
-    } else if(settings.hashAlgorithm.startsWith("scrypt-")) {
-      var costFactor = parseInt(settings.hashAlgorithm.slice("scrypt-".length));
-      var N = 2 ** costFactor, r = 8, p = 1;
+    } else if(settings.hashAlgorithm == "scrypt") {
+      var N = 2 ** settings.hashAlgorithmCoefficient, r = 8, p = 1;
       var dkLen = 64;
       scrypt(str2arr(masterPassword), accumulator.salt, N, r, p, dkLen, function(error, progress, key) {
         if (key) {
@@ -151,9 +152,8 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
           console.log("Error: " + error);
         }
       });
-    } else if(settings.hashAlgorithm.startsWith("argon2-")) {
-      var costFactor = parseInt(settings.hashAlgorithm.slice("argon2-".length));
-      var t_cost = 2 ** costFactor;
+    } else if(settings.hashAlgorithm == "argon2") {
+      var t_cost = 2 ** settings.hashAlgorithmCoefficient;
       var m_cost = 1024;
       var parallelism = 1;
       var pwd = Module.allocate(Module.intArrayFromString(masterPassword), 'i8', Module.ALLOC_NORMAL);

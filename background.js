@@ -27,6 +27,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings) {
       charactersCustom: profileSettings.psCharactersCustom,
       charactersCustomList: profileSettings.psCharactersCustomList,
       hashAlgorithm: profileSettings.psHashAlgorithm,
+      hashAlgorithmCoefficient: profileSettings.psAlgorithmCoefficient,
       mainSalt: profileSettings.psMainSalt,
       useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements
     };
