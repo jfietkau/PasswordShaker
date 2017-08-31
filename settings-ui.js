@@ -274,9 +274,19 @@ document.addEventListener("DOMContentLoaded", () => {
   var inputs = Array.from(document.getElementsByTagName("input"));
   var selects = Array.from(document.getElementsByTagName("select"));
   var elems = inputs.concat(selects);
+
   for(var i = 0; i < elems.length; i++) {
     elems[i].addEventListener("change", (e) => {
       if(ignoreFormEvents == 0) {
+        if(e.target.id == "showPageAction" && false) {
+          // Gotta postpone this until Firefox 56, because 55 has a bug where this promise doesn't fire.
+          // (verified fixed in the 56 beta)
+          ignoreFormEvents += 1;
+          browser.permissions.request({permissions: [], origins: ["<all_urls>"]}).then((response) => {
+            console.log(response);
+          });
+          ignoreFormEvents -= 1;
+        }
         if(e.target.id == "psHashAlgorithm") {
           ignoreFormEvents += 1;
           var newAlgo = e.target.value;
