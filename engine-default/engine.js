@@ -8,31 +8,31 @@ var str2arr = function(str) {
 }
 
 function base64ToArrayBuffer(b64str) {
-    b64str += "===";
-    b64str = b64str.slice(0, b64str.length - (b64str.length % 4));
+  b64str += "===";
+  b64str = b64str.slice(0, b64str.length - (b64str.length % 4));
 
-    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    var result = new Array();
+  var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  var result = new Array();
 
-    for(var i = 0; i < b64str.length; i += 4) {
-        var sub1 = chars.indexOf(b64str.charAt(i));
-        var sub2 = chars.indexOf(b64str.charAt(i + 1));
-        var sub3 = chars.indexOf(b64str.charAt(i + 2));
-        var sub4 = chars.indexOf(b64str.charAt(i + 3));
+  for(var i = 0; i < b64str.length; i += 4) {
+    var sub1 = chars.indexOf(b64str.charAt(i));
+    var sub2 = chars.indexOf(b64str.charAt(i + 1));
+    var sub3 = chars.indexOf(b64str.charAt(i + 2));
+    var sub4 = chars.indexOf(b64str.charAt(i + 3));
 
-        var bits = (sub1 << 18) | (sub2 << 12) | (sub3 << 6) | sub4;
+    var bits = (sub1 << 18) | (sub2 << 12) | (sub3 << 6) | sub4;
 
-        result.push((bits >>> 16) & 0xff);
+    result.push((bits >>> 16) & 0xff);
 
-        if(sub3 != 64) {
-          result.push((bits >>> 8) & 0xff);
-        }
-        if(sub4 != 64) {
-          result.push(bits & 0xff);
-        }
+    if(sub3 != 64) {
+      result.push((bits >>> 8) & 0xff);
     }
+    if(sub4 != 64) {
+      result.push(bits & 0xff);
+    }
+  }
 
-    return Uint8Array.from(result);
+  return Uint8Array.from(result);
 }
 
 function getRandomBytes(numberOfBytes) {
@@ -72,14 +72,6 @@ function extractHostName(url) {
   return hostName;
 }
 
-function isCompoundTld(urlPart) {
-  if(urlPart.startsWith(".")) {
-    urlPart = urlPart.slice(1);
-  }
-  // TODO
-  return false;
-}
-
 function extractDomain(hostName) {
   var parts = hostName.split(".");
   if(!isNaN(parseInt(parts.slice(-1)[0]))) {
@@ -96,7 +88,7 @@ function extractDomain(hostName) {
   return result.join(".");
 }
 
-function handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve) {
+function handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId) {
   var charSet = createCharSet(settings);
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
   while(hashResult.length >= 8 && accumulator.password.length < settings.passwordLength) {
@@ -111,10 +103,10 @@ function handleHashResult(hashResult, masterPassword, url, settings, depth, accu
   combinedSaltNew.set(accumulator.salt);
   combinedSaltNew[combinedSaltNew.length - 1] = 0xff;
   accumulator.salt = combinedSaltNew;
-  generatePasswordPart(masterPassword, url, settings, depth + 1, accumulator, resolve);
+  generatePasswordPart(masterPassword, url, settings, depth + 1, accumulator, resolve, requestId);
 }
 
-function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve) {
+function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve, requestId) {
   var charSet = createCharSet(settings);
   var hostName = extractHostName(url);
   var domain = extractDomain(hostName);
@@ -125,7 +117,7 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
     var hashResult = null;
     if(settings.hashAlgorithm == "pbkdf2-hmac-sha256") {
       hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword, accumulator.salt, settings.hashAlgorithmCoefficient, 64);
-      handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve);
+      handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId);
     } else if(settings.hashAlgorithm == "bcrypt") {
       var collapsedSalt = new Uint8Array(16);
       for(var i = 0; i < thDomain.length + thMainSalt.length; i++) {
@@ -140,16 +132,16 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
       dcodeIO.bcrypt.hash(masterPassword, salt, function(err, rawHash) {
         hashResult = rawHash.slice(salt.length);
         hashResult = arr2hex(base64ToArrayBuffer(hashResult.replace(/\./g, "+")));
-        handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve);
+        handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId);
       });
     } else if(settings.hashAlgorithm == "scrypt") {
       var N = 2 ** settings.hashAlgorithmCoefficient, r = 8, p = 1;
       var dkLen = 64;
       scrypt(str2arr(masterPassword), accumulator.salt, N, r, p, dkLen, function(error, progress, key) {
         if (key) {
-          handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve);
+          handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve, requestId);
         } else if (error) {
-          console.log("Error: " + error);
+          console.log("scrypt error: " + error);
         }
       });
     } else if(settings.hashAlgorithm == "argon2") {
@@ -199,15 +191,15 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
           hashArr[i] += 256;
         }
       }
-      handleHashResult(arr2hex(hashArr), masterPassword, url, settings, depth, accumulator, resolve);
+      handleHashResult(arr2hex(hashArr), masterPassword, url, settings, depth, accumulator, resolve, requestId);
     }
   } else {
     accumulator.password = accumulator.password.slice(0, settings.passwordLength);
-    resolve(accumulator.password);
+    resolve({password: accumulator.password, requestId: requestId});
   }
 }
 
-function generatePassword(masterPassword, url, settings) {
+function generatePassword(masterPassword, url, settings, requestId) {
   var charSet = createCharSet(settings);
   if(charSet.length < 2) {
     return null;
@@ -220,7 +212,7 @@ function generatePassword(masterPassword, url, settings) {
   combinedSalt.set(thDomain);
   combinedSalt.set(thMainSalt, thDomain.length);
   return new Promise((resolve, reject) => {
-    generatePasswordPart(masterPassword, url, settings, 0, {salt: combinedSalt, password: ""}, resolve);
+    generatePasswordPart(masterPassword, url, settings, 0, {salt: combinedSalt, password: ""}, resolve, requestId);
   });
 }
 

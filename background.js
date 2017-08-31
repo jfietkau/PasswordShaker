@@ -14,7 +14,7 @@ createOrUpdateContextMenu();
 loadStoredMasterPassword();
 
 
-function generatePasswordForProfile(url, masterPassword, profileSettings) {
+function generatePasswordForProfile(url, masterPassword, profileSettings, requestId) {
   var generatedPassword = null;
   if(profileSettings.profileEngine == "profileEngineDefault") {
     var engineSpecificSettings = {
@@ -31,7 +31,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings) {
       mainSalt: profileSettings.psMainSalt,
       useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements
     };
-    generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings);
+    generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
     var engineSpecificSettings = {
       charSet: (profileSettings.pmCharacterSet == "custom") ? profileSettings.pmCustomCharacterList : profileSettings.pmCharacterSet,
@@ -48,7 +48,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings) {
       useDomain: profileSettings.pmUseDomain,
       usePath: profileSettings.pmUseOther
     };
-    generatedPassword = pmGeneratePassword(masterPassword, url, engineSpecificSettings);
+    generatedPassword = pmGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   }
   return generatedPassword;
 }
@@ -58,7 +58,7 @@ function activateOnPage(url, masterPassword) {
     return;
   }
   var profileSettings = currentSettings.profiles[session.currentProfile];
-  generatePasswordForProfile(url, masterPassword, profileSettings).then((generatedPassword) => {
+  generatePasswordForProfile(url, masterPassword, profileSettings, null).then((generatedPassword) => {
     if(generatedPassword !== null) {
       browser.tabs.executeScript({file: "/injector.js"}).then(() => {
         browser.tabs.executeScript({code: "passwordshaker_fill('" + generatedPassword + "');"})
@@ -131,8 +131,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.wantExamplePasswordForProfile !== undefined) {
     loadSettings().then(() => {
       var profileSettings = currentSettings.profiles[request.wantExamplePasswordForProfile];
-      generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings).then((generatedPassword) => {
-        sendResponse({examplePassword: generatedPassword});
+      generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings, request.id).then((response) => {
+        sendResponse({examplePassword: response.password, requestId: response.requestId});
       });
     });
     return true;

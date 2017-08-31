@@ -217,21 +217,30 @@ function updateForm() {
     (currentSettings.profiles.length < 2);
 }
 
+var lastRequestId = null;
+
 function updateExamplePassword() {
   document.getElementById("loadingIcon").style.display = "block";
+  var myRequestId = Math.random();
+  lastRequestId = myRequestId;
   saveSettings().then(() => {
-    browser.runtime.sendMessage({wantExamplePasswordForProfile: getProfileIndex(currentSettings)}).then((message) => {
-      document.getElementById("loadingIcon").style.display = "none";
-      var displayPassword = message.examplePassword;
-      if(typeof displayPassword == "string") {
-        displayPassword = displayPassword.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        document.getElementById("examplePassword").innerHTML = displayPassword;
-        document.getElementById("examplePassword").style.fontWeight = "bold";
-        document.getElementById("examplePassword").style.fontStyle = "normal";
-      } else {
-        document.getElementById("examplePassword").innerHTML = "[ failed to generate ]";
-        document.getElementById("examplePassword").style.fontWeight = "normal";
-        document.getElementById("examplePassword").style.fontStyle = "italic";
+    browser.runtime.sendMessage({
+      wantExamplePasswordForProfile: getProfileIndex(currentSettings),
+      id: myRequestId,
+    }).then((message) => {
+      if(message.requestId == lastRequestId) {
+        document.getElementById("loadingIcon").style.display = "none";
+        var displayPassword = message.examplePassword;
+        if(typeof displayPassword == "string") {
+          displayPassword = displayPassword.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+          document.getElementById("examplePassword").innerHTML = displayPassword;
+          document.getElementById("examplePassword").style.fontWeight = "bold";
+          document.getElementById("examplePassword").style.fontStyle = "normal";
+        } else {
+          document.getElementById("examplePassword").innerHTML = "[ failed to generate ]";
+          document.getElementById("examplePassword").style.fontWeight = "normal";
+          document.getElementById("examplePassword").style.fontStyle = "italic";
+        }
       }
     });
   });

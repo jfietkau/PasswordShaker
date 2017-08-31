@@ -2400,9 +2400,9 @@ if (typeof(PasswordMaker_HashUtils) != "object") {
 }
 
 // Provide the main interface for this password generation engine
-base.pmGeneratePassword = function(masterPassword, url, settings) {
+base.pmGeneratePassword = function(masterPassword, url, settings, requestId) {
   return new Promise((resolve, reject) => {
-    resolve(preGeneratePassword(masterPassword, url, settings));
+    resolve({password: preGeneratePassword(masterPassword, url, settings), requestId: requestId});
   });
 }
 
