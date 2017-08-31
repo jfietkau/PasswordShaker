@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
           var newAlgoCoefficientStepSize = 1;
           var newAlgoCoefficientMinimum = 1;
           if(newAlgo == "argon2") {
-            newAlgoCoefficient = 4;
+            newAlgoCoefficient = 3;
           } else if(newAlgo == "scrypt") {
             newAlgoCoefficient = 10;
           } else if(newAlgo == "bcrypt") {

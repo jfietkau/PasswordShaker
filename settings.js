@@ -148,7 +148,7 @@ function getDefaultProfileSettings() {
     psCharactersCustom: false,
     psCharactersCustomList: "",
     psHashAlgorithm: "argon2",
-    psAlgorithmCoefficient: 4,
+    psAlgorithmCoefficient: 3,
     psMainSalt: "22a1968a9e2d8ea28e6c6a3c5e2be6c52e2a39941fdbc980da15b6c3ca05fd21b63a63d426a210546e4ac4ddc3c987f78142afa5a011bcf69c4e368139b12336",
     psUseSiteSpecificRequirements: true,
     pmUseLeet: "off",
