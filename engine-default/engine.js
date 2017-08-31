@@ -193,6 +193,12 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
         Module._free(hash);
         Module._free(encoded);
       } catch (e) {}
+      // hashArr comes back as signed bytes, so fix to unsigned
+      for(var i = 0; i < hashArr.length; i++) {
+        if(hashArr[i] < 0) {
+          hashArr[i] += 256;
+        }
+      }
       handleHashResult(arr2hex(hashArr), masterPassword, url, settings, depth, accumulator, resolve);
     }
   } else {
