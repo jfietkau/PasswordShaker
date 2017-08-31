@@ -143,7 +143,7 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
     } else if(settings.hashAlgorithm.startsWith("scrypt-")) {
       var costFactor = parseInt(settings.hashAlgorithm.slice("scrypt-".length));
       var N = 2 ** costFactor, r = 8, p = 1;
-      var dkLen = 32;
+      var dkLen = 64;
       scrypt(str2arr(masterPassword), accumulator.salt, N, r, p, dkLen, function(error, progress, key) {
         if (key) {
           handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve);
@@ -151,6 +151,49 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
           console.log("Error: " + error);
         }
       });
+    } else if(settings.hashAlgorithm.startsWith("argon2-")) {
+      var costFactor = parseInt(settings.hashAlgorithm.slice("argon2-".length));
+      var t_cost = 2 ** costFactor;
+      var m_cost = 1024;
+      var parallelism = 1;
+      var pwd = Module.allocate(Module.intArrayFromString(masterPassword), 'i8', Module.ALLOC_NORMAL);
+      var pwdlen = masterPassword.length;
+      var salt = Module.allocate(accumulator.salt, 'i8', Module.ALLOC_NORMAL);
+      var saltlen = accumulator.salt.length;
+      var hash = Module.allocate(new Array(64), 'i8', Module.ALLOC_NORMAL);
+      var hashlen = 64;
+      var encoded = Module.allocate(new Array(512), 'i8', Module.ALLOC_NORMAL);
+      var encodedlen = 512;
+      var argon2_type = 0;
+      var version = 0x13;
+      var err;
+      try {
+        var res = Module._argon2_hash(t_cost, m_cost, parallelism, pwd, pwdlen, salt, saltlen,
+                    hash, hashlen, encoded, encodedlen,
+                    argon2_type, version);
+      } catch (e) {
+        err = e;
+      }
+      if (res === 0 && !err) {
+        var hashArr = [];
+        for (var i = hash; i < hash + hashlen; i++) {
+          hashArr.push(Module.HEAP8[i]);
+        }
+      } else {
+        try {
+          if (!err) {
+            err = Module.Pointer_stringify(Module._argon2_error_message(res))
+          }
+        } catch (e) {}
+        console.log('Argon2 error: ' + res + (err ? ': ' + err : ''));
+      }
+      try {
+        Module._free(pwd);
+        Module._free(salt);
+        Module._free(hash);
+        Module._free(encoded);
+      } catch (e) {}
+      handleHashResult(arr2hex(hashArr), masterPassword, url, settings, depth, accumulator, resolve);
     }
   } else {
     accumulator.password = accumulator.password.slice(0, settings.passwordLength);
