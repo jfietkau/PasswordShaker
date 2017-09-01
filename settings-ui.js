@@ -366,6 +366,14 @@ document.addEventListener("DOMContentLoaded", () => {
       updateExamplePassword();
     });
   });
+  browser.runtime.getBrowserInfo().then((info) => {
+    if(info.vendor == "Mozilla" && info.name == "Firefox" && parseInt(info.version) < 56) {
+      var showPageAction = document.getElementById("showPageAction");
+      var whenApplicable = showPageAction.getElementsByTagName('option')[1];
+      whenApplicable.innerHTML += " (requires Firefox ≥ 56.0)";
+      whenApplicable.disabled = true;
+    }
+  });
 
   document.getElementById("wipeButton").addEventListener("click", clearSettings);
   document.getElementById("showButton").addEventListener("click", debug_showSettings);
