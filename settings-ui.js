@@ -260,6 +260,23 @@ function getCoefficientNameByAlgorithm(algo) {
   return name;
 }
 
+function isDescendantOf(descendant, ancestor) {
+  if(typeof descendant === "string") {
+    descendant = document.getElementById(descendant);
+  }
+  if(typeof ancestor === "string") {
+    ancestor = document.getElementById(ancestor);
+  }
+  console.log(descendant.id, ancestor.id);
+  var foundElem = descendant;
+  while (foundElem = foundElem.parentElement) {
+    if (foundElem == ancestor) {
+      return true;
+    }
+  }
+  return false;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
@@ -314,8 +331,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         updateForm();
         parseForm(currentSettings);
-        updateExamplePassword();
-        createOrUpdateContextMenu();
+        console.log(e.target.parentNode);
+        if((isDescendantOf(e.target, "profiles") || isDescendantOf(e.target, "profileContent"))
+           && e.target.id != "profileName" && e.target.id != "showInContextMenu") {
+          updateExamplePassword();
+          createOrUpdateContextMenu();
+        }
       }
     });
   }
