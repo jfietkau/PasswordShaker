@@ -334,9 +334,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if((isDescendantOf(e.target, "profiles") || isDescendantOf(e.target, "profileContent"))
            && e.target.id != "profileName" && e.target.id != "showInContextMenu") {
           updateExamplePassword();
-          createOrUpdateContextMenu();
         } else {
-          saveSettings();
+          saveSettings().then(() => {
+          createOrUpdateContextMenu();
+        });
         }
       }
     });
