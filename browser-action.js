@@ -29,7 +29,7 @@ function setupPopupForm(settings) {
   }
 }
 
-function updatePopupForm(settings) {
+function updatePopupForm(settings, onlyVerificationChanged) {
   var noProblems = true;
   if(settings.verifyMasterPassword) {
     var entered = document.getElementById("masterPassword").value;
@@ -75,38 +75,40 @@ function updatePopupForm(settings) {
     }
     matchStoredIcon.title = matchStoredIcon.alt;
   }
-  if(settings.showVisualHash) {
-    var hashCanvas = document.getElementById("visualHash");
-    var hashLoading = document.getElementById("visualHashLoading");
-    var input = document.getElementById("masterPassword").value;
-    if(input.length >= Math.max(1, settings.visualHashMinInputLength)) {
-      var hash = sha3_512.update(input).update("PasswordShaker").hex();
-      lastVisualHashEvent = Math.random();
-      var myEventId = lastVisualHashEvent;
-      hashCanvas.style.display = "none";
-      hashLoading.style.display = "block";
-      setTimeout(() => {
-        if(myEventId == lastVisualHashEvent) {
-          hashCanvas.style.display = "block";
-          hashLoading.style.display = "none";
-          hashCanvas.style.borderColor = "#000";
-          mosaicVisualHash(hash, hashCanvas);
-        }
-      }, settings.visualHashDelay);
-    } else {
-      lastVisualHashEvent = null;
-      hashCanvas.style.display = "block";
-      hashLoading.style.display = "none";
-      hashCanvas.style.borderColor = "#ddd";
-      var size = hashCanvas.getAttribute("width");
-      hashCanvas.getContext("2d").clearRect(0, 0, size, size);
+  if(!onlyVerificationChanged) {
+    if(settings.showVisualHash) {
+      var hashCanvas = document.getElementById("visualHash");
+      var hashLoading = document.getElementById("visualHashLoading");
+      var input = document.getElementById("masterPassword").value;
+      if(input.length >= Math.max(1, settings.visualHashMinInputLength)) {
+        var hash = sha3_512.update(input).update("PasswordShaker").hex();
+        lastVisualHashEvent = Math.random();
+        var myEventId = lastVisualHashEvent;
+        hashCanvas.style.display = "none";
+        hashLoading.style.display = "block";
+        setTimeout(() => {
+          if(myEventId == lastVisualHashEvent) {
+            hashCanvas.style.display = "block";
+            hashLoading.style.display = "none";
+            hashCanvas.style.borderColor = "#000";
+            mosaicVisualHash(hash, hashCanvas);
+          }
+        }, settings.visualHashDelay);
+      } else {
+        lastVisualHashEvent = null;
+        hashCanvas.style.display = "block";
+        hashLoading.style.display = "none";
+        hashCanvas.style.borderColor = "#ddd";
+        var size = hashCanvas.getAttribute("width");
+        hashCanvas.getContext("2d").clearRect(0, 0, size, size);
+      }
     }
-  }
-  if(settings.showGeneratedPassword) {
-    var generatedPasswordInput = document.getElementById("generatedPassword");
-    var input = document.getElementById("masterPassword").value;
-    if(generatedPasswordInput.value != "(click here to show)") {
-      updateGeneratedPasswordInput(input);
+    if(settings.showGeneratedPassword) {
+      var generatedPasswordInput = document.getElementById("generatedPassword");
+      var input = document.getElementById("masterPassword").value;
+      if(generatedPasswordInput.value != "(click here to show)") {
+        updateGeneratedPasswordInput(input);
+      }
     }
   }
   document.getElementById("okButton").disabled = !noProblems;
@@ -124,7 +126,7 @@ function updateGeneratedPasswordInput(input) {
       if(myEventId == lastGeneratedPasswordEvent) {
         generatedPasswordInput.value = "DUMMY PASSWORD";
       }
-    }, 800);
+    }, 500);
   } else {
     lastGeneratedPasswordEvent = null;
     generatedPasswordInput.style.fontStyle = "italic";
@@ -143,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     setupPopupForm(currentSettings);
-    updatePopupForm(currentSettings);
+    updatePopupForm(currentSettings, false);
     if(currentSettings.showVisualHash) {
       var container = document.getElementById("visualHashContainer");
       var targetSize = document.getElementById("mainForm").offsetHeight;
@@ -187,8 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   var passwordEntries = document.getElementsByClassName("passwordEntry");
   for(var i = 0; i < passwordEntries.length; i++) {
-    passwordEntries[i].addEventListener("keyup", () => {
-      updatePopupForm(currentSettings);
+    passwordEntries[i].addEventListener("keyup", (e) => {
+      updatePopupForm(currentSettings, (e.target.id == "masterPasswordConfirmation"));
     });
   }
 });
