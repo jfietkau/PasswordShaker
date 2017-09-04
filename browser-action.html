@@ -42,8 +42,10 @@
         margin-left: 7px;
       }
       #visualHashContainer > img, #visualHashContainer > canvas {
+        border: 1px solid #000;
         height: 100%;
         width: 100%;
+        background: #ddd;
       }
     </style>
   </head>
@@ -51,6 +53,7 @@
   <body>
 
     <script src="engine-default/sha3.js"></script>
+    <script src="engine-default/bcrypt.js"></script>
     <script src="settings.js"></script>
     <script src="mosaicVisualHash.js"></script>
     <script src="browser-action.js"></script>

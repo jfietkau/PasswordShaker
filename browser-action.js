@@ -67,6 +67,19 @@ function updatePopupForm(settings) {
     }
     matchStoredIcon.title = matchStoredIcon.alt;
   }
+  if(settings.showVisualHash) {
+    var hashCanvas = document.getElementById("visualHash");
+    var input = document.getElementById("masterPassword").value;
+    if(input.length > 0) {
+      hashCanvas.style.borderColor = "#000";
+      var hash = sha3_512.update(input).update("PasswordShaker").hex();
+      mosaicVisualHash(hash, hashCanvas);
+    } else {
+      hashCanvas.style.borderColor = "#ddd";
+      var size = hashCanvas.getAttribute("width");
+      hashCanvas.getContext("2d").clearRect(0, 0, size, size);
+    }
+  }
   document.getElementById("okButton").disabled = !noProblems;
 }
 
@@ -82,17 +95,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     if(currentSettings.showVisualHash) {
       var container = document.getElementById("visualHashContainer");
-      var formHeight = document.getElementById("mainForm").offsetHeight;
-      container.style.width = (formHeight + 10) + "px";
-      container.style.height = formHeight + "px";
+      var targetSize = document.getElementById("mainForm").offsetHeight;
+      container.style.width = (targetSize + 10) + "px";
+      container.style.height = targetSize + "px";
       var hashCanvas = document.getElementById("visualHash");
-      hashCanvas.setAttribute("width", formHeight);
-      hashCanvas.setAttribute("height", formHeight);
-      var context = hashCanvas.getContext("2d");
-      context.beginPath();
-      context.rect(0, 0, formHeight * 2, formHeight);
-      context.fillStyle = "#ddd";
-      context.fill();
+      hashCanvas.setAttribute("width", 2 * (targetSize - 2));
+      hashCanvas.setAttribute("height", 2 * (targetSize - 2));
+    } else {
+      removeElementById("visualHashContainer");
     }
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);
