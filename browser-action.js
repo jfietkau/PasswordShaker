@@ -1,5 +1,6 @@
 var storedHash = null;
 var lastVisualHashEvent = null;
+var lastGeneratedPasswordEvent = null;
 
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
@@ -22,6 +23,9 @@ function setupPopupForm(settings) {
   }
   if(!settings.showVisualHash) {
     removeElementById("visualHashContainer");    
+  }
+  if(!settings.showGeneratedPassword) {
+    removeElementById("generatedPasswordContainer");    
   }
 }
 
@@ -98,7 +102,34 @@ function updatePopupForm(settings) {
       hashCanvas.getContext("2d").clearRect(0, 0, size, size);
     }
   }
+  if(settings.showGeneratedPassword) {
+    var generatedPasswordInput = document.getElementById("generatedPassword");
+    var input = document.getElementById("masterPassword").value;
+    if(generatedPasswordInput.value != "(click here to show)") {
+      updateGeneratedPasswordInput(input);
+    }
+  }
   document.getElementById("okButton").disabled = !noProblems;
+}
+
+function updateGeneratedPasswordInput(input) {
+  var generatedPasswordInput = document.getElementById("generatedPassword");
+  var currentSiteDisplay = document.getElementById("currentSite");
+  if(input.length > 0) {
+    generatedPasswordInput.style.fontStyle = "normal";
+    generatedPasswordInput.value = ".....";
+    lastGeneratedPasswordEvent = Math.random();
+    var myEventId = lastGeneratedPasswordEvent;
+    setTimeout(() => {
+      if(myEventId == lastGeneratedPasswordEvent) {
+        generatedPasswordInput.value = "DUMMY PASSWORD";
+      }
+    }, 800);
+  } else {
+    lastGeneratedPasswordEvent = null;
+    generatedPasswordInput.style.fontStyle = "italic";
+    generatedPasswordInput.value = "requires master password";
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -121,6 +152,13 @@ document.addEventListener("DOMContentLoaded", () => {
       var hashCanvas = document.getElementById("visualHash");
       hashCanvas.setAttribute("width", 2 * (targetSize - 2));
       hashCanvas.setAttribute("height", 2 * (targetSize - 2));
+    }
+    if(currentSettings.showGeneratedPassword) {
+      var generatedPasswordInput = document.getElementById("generatedPassword");
+      generatedPasswordInput.addEventListener("click", () => {
+        generatedPasswordInput.style.cursor = "auto";
+        updateGeneratedPasswordInput(document.getElementById("masterPassword").value);
+      });
     }
     loadStoredHash((newStoredHash) => {
       storedHash = newStoredHash;

@@ -10,6 +10,7 @@
         flex-wrap: nowrap;
         flex-direction: row;
       }
+
       input {
         display: block;
       }
@@ -21,6 +22,7 @@
       #mainForm {
         width: 250px;
       }
+
       #confirmationIcons {
         float: left;
         line-height: 0;
@@ -30,11 +32,13 @@
         height: 100%;
         padding-right: .33em;
       }
+
       #okButton {
         width: 100px;
         float: right;
         font-size: 1.5em;
       }
+
       #visualHashContainer {
         display: inline-block;
         padding-left: 7px;
@@ -47,11 +51,30 @@
         width: 100%;
         background: #ddd;
       }
+
+      #generatedPasswordContainer {
+        font-size: .8em;
+        clear: both;
+        padding-top: .6em;
+        color: #888;
+      }
+      #currentSite {
+        color: #48f;
+      }
+      #generatedPassword {
+        width: 250px;
+        margin-top: .3em;
+        border: none;
+        cursor: pointer;
+      }
     </style>
   </head>
 
   <body>
 
+    <script src="data/publicsuffixlist.js"></script>
+    <script src="data/publicsuffixlist-raw.js"></script>
+    <script src="data/punycode.js"></script>
     <script src="engine-default/sha3.js"></script>
     <script src="engine-default/bcrypt.js"></script>
     <script src="settings.js"></script>
@@ -69,6 +92,11 @@
       </div>
 
       <input type="submit" id="okButton" value="OK">
+
+      <div id="generatedPasswordContainer">
+        Password for: <span id="currentSite"></span><br>
+        <input type="text" id="generatedPassword" readonly value="(click here to show)">
+      </div>
 
     </form>
 

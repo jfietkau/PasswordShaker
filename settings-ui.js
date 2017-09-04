@@ -267,7 +267,6 @@ function isDescendantOf(descendant, ancestor) {
   if(typeof ancestor === "string") {
     ancestor = document.getElementById(ancestor);
   }
-  console.log(descendant.id, ancestor.id);
   var foundElem = descendant;
   while (foundElem = foundElem.parentElement) {
     if (foundElem == ancestor) {

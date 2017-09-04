@@ -127,6 +127,7 @@ function getDefaultSettings() {
   return {
     verifyMasterPassword: true,
     showMasterPassword: false,
+    showGeneratedPassword: false,
     showVisualHash: false,
     visualHashMinInputLength: 8,
     visualHashDelay: 800,
