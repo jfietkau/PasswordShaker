@@ -1,4 +1,5 @@
 var storedHash = null;
+var lastVisualHashEvent = null;
 
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
@@ -18,6 +19,9 @@ function setupPopupForm(settings) {
   }
   if(!settings.storeMasterPasswordHash) {
     removeElementById("matchStoredIcon");    
+  }
+  if(!settings.showVisualHash) {
+    removeElementById("visualHashContainer");    
   }
 }
 
@@ -69,12 +73,26 @@ function updatePopupForm(settings) {
   }
   if(settings.showVisualHash) {
     var hashCanvas = document.getElementById("visualHash");
+    var hashLoading = document.getElementById("visualHashLoading");
     var input = document.getElementById("masterPassword").value;
     if(input.length >= Math.max(1, settings.visualHashMinInputLength)) {
-      hashCanvas.style.borderColor = "#000";
       var hash = sha3_512.update(input).update("PasswordShaker").hex();
-      mosaicVisualHash(hash, hashCanvas);
+      lastVisualHashEvent = Math.random();
+      var myEventId = lastVisualHashEvent;
+      hashCanvas.style.display = "none";
+      hashLoading.style.display = "block";
+      setTimeout(() => {
+        if(myEventId == lastVisualHashEvent) {
+          hashCanvas.style.display = "block";
+          hashLoading.style.display = "none";
+          hashCanvas.style.borderColor = "#000";
+          mosaicVisualHash(hash, hashCanvas);
+        }
+      }, settings.visualHashDelay);
     } else {
+      lastVisualHashEvent = null;
+      hashCanvas.style.display = "block";
+      hashLoading.style.display = "none";
       hashCanvas.style.borderColor = "#ddd";
       var size = hashCanvas.getAttribute("width");
       hashCanvas.getContext("2d").clearRect(0, 0, size, size);
@@ -93,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
+    setupPopupForm(currentSettings);
+    updatePopupForm(currentSettings);
     if(currentSettings.showVisualHash) {
       var container = document.getElementById("visualHashContainer");
       var targetSize = document.getElementById("mainForm").offsetHeight;
@@ -101,11 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       var hashCanvas = document.getElementById("visualHash");
       hashCanvas.setAttribute("width", 2 * (targetSize - 2));
       hashCanvas.setAttribute("height", 2 * (targetSize - 2));
-    } else {
-      removeElementById("visualHashContainer");
     }
-    setupPopupForm(currentSettings);
-    updatePopupForm(currentSettings);
     loadStoredHash((newStoredHash) => {
       storedHash = newStoredHash;
       if(storedHash != null && storedHash.salt.length < 64) {
