@@ -70,7 +70,7 @@ function updatePopupForm(settings) {
   if(settings.showVisualHash) {
     var hashCanvas = document.getElementById("visualHash");
     var input = document.getElementById("masterPassword").value;
-    if(input.length > 0) {
+    if(input.length >= Math.max(1, settings.visualHashMinInputLength)) {
       hashCanvas.style.borderColor = "#000";
       var hash = sha3_512.update(input).update("PasswordShaker").hex();
       mosaicVisualHash(hash, hashCanvas);
