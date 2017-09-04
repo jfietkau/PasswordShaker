@@ -79,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.close();
       }
     });
+    document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);
     loadStoredHash((newStoredHash) => {
