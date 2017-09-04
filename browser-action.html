@@ -6,6 +6,9 @@
     <style type="text/css">
       body {
         padding: .5em;
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
       }
       input {
         display: block;
@@ -14,6 +17,9 @@
         width: 250px;
         margin-bottom: .33em;
         font-size: 1.5em;
+      }
+      #mainForm {
+        width: 250px;
       }
       #confirmationIcons {
         float: left;
@@ -29,6 +35,16 @@
         float: right;
         font-size: 1.5em;
       }
+      #visualHashContainer {
+        display: inline-block;
+        padding-left: 7px;
+        border-left: 1px solid #e0e0e0;
+        margin-left: 7px;
+      }
+      #visualHashContainer > img, #visualHashContainer > canvas {
+        height: 100%;
+        width: 100%;
+      }
     </style>
   </head>
 
@@ -36,7 +52,9 @@
 
     <script src="engine-default/sha3.js"></script>
     <script src="settings.js"></script>
+    <script src="mosaicVisualHash.js"></script>
     <script src="browser-action.js"></script>
+
     <form id="mainForm">
 
       <input type="password" id="masterPassword" class="passwordEntry" value="" placeholder="Master password">
@@ -50,6 +68,10 @@
       <input type="submit" id="okButton" value="OK">
 
     </form>
+
+    <div id="visualHashContainer">
+      <canvas id="visualHash" width="16" height="16"></canvas>
+    </div>
 
   </body>
 

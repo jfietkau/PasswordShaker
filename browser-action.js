@@ -73,13 +73,27 @@ function updatePopupForm(settings) {
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     browser.runtime.sendMessage(
-      {getSessionVariable: "masterPassword"}
+      { getSessionVariable: "masterPassword" }
     ).then((response) => {
       if(response != null) {
         window.close();
       }
     });
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
+    if(currentSettings.showVisualHash) {
+      var container = document.getElementById("visualHashContainer");
+      var formHeight = document.getElementById("mainForm").offsetHeight;
+      container.style.width = (formHeight + 10) + "px";
+      container.style.height = formHeight + "px";
+      var hashCanvas = document.getElementById("visualHash");
+      hashCanvas.setAttribute("width", formHeight);
+      hashCanvas.setAttribute("height", formHeight);
+      var context = hashCanvas.getContext("2d");
+      context.beginPath();
+      context.rect(0, 0, formHeight * 2, formHeight);
+      context.fillStyle = "#ddd";
+      context.fill();
+    }
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);
     loadStoredHash((newStoredHash) => {
