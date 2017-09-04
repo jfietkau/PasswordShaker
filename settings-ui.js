@@ -331,11 +331,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         updateForm();
         parseForm(currentSettings);
-        console.log(e.target.parentNode);
         if((isDescendantOf(e.target, "profiles") || isDescendantOf(e.target, "profileContent"))
            && e.target.id != "profileName" && e.target.id != "showInContextMenu") {
           updateExamplePassword();
           createOrUpdateContextMenu();
+        } else {
+          saveSettings();
         }
       }
     });
