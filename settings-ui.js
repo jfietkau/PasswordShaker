@@ -286,6 +286,9 @@ document.addEventListener("DOMContentLoaded", () => {
       addNewProfile(currentSettings);
       document.getElementById("profileTab" + (currentSettings.profiles.length - 1)).checked = true;
       populateProfileArea(currentSettings, currentSettings.profiles.length - 1);
+      saveSettings().then(() => {
+        createOrUpdateContextMenu();
+      });
     });
   });
   var inputs = Array.from(document.getElementsByTagName("input"));
@@ -366,6 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
       populateSettingsForm(currentSettings);
       updateForm();
       updateExamplePassword();
+      createOrUpdateContextMenu();
     });
   });
   browser.runtime.getBrowserInfo().then((info) => {
