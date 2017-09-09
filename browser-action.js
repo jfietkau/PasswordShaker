@@ -60,11 +60,13 @@ function updatePopupForm(settings, onlyVerificationChanged) {
       matchStoredIcon.src = "/icons/stored-yellow.svg";
       matchStoredIcon.alt = "A hash for the current master password will be saved when you click OK";
     } else {
-      hashFunc = (masterPassword, salt) => { return null; }
-      if(storedHash.algorithm == "sha3-512") {
-        hashFunc = sha3_512;
+      var verificationSuccess = false;
+      if(storedHash.algorithm == "bcrypt") {
+        verificationSuccess = dcodeIO.bcrypt.compareSync(entered, storedHash.hash);
+      } else if(storedHash.algorithm == "sha3-512") {
+        verificationSuccess = (sha3_512.update(entered).update(hex2arr(storedHash.salt)).hex() == storedHash.hash);
       }
-      if(hashFunc.update(entered).update(hex2arr(storedHash.salt)).hex() == storedHash.hash) {
+      if(verificationSuccess) {
         matchStoredIcon.src = "/icons/stored-green.svg";
         matchStoredIcon.alt = "Master password matches the stored hash";
       } else {
@@ -177,9 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
       {masterPassword: enteredMasterPassword}
     ).then(() => {
       if(currentSettings.storeMasterPasswordHash && storedHash === null) {
-        var newSalt = getRandomBytes(32);
-        var newHash = sha3_512.update(enteredMasterPassword).update(newSalt).hex();
-        saveStoredHash(newHash, arr2hex(newSalt), "sha3-512").then(() => {
+        var newSalt = dcodeIO.bcrypt.genSaltSync(10);
+        var newHash = dcodeIO.bcrypt.hashSync(enteredMasterPassword, newSalt);
+        saveStoredHash(newHash, null, "bcrypt").then(() => {
           window.close();
         });
       } else {

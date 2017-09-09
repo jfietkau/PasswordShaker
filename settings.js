@@ -88,8 +88,7 @@ function loadStoredHash(callback) {
     }
     if(loadedHash == null
        || !loadedHash.hasOwnProperty("algorithm")
-       || !loadedHash.hasOwnProperty("hash")
-       || !loadedHash.hasOwnProperty("salt")) {
+       || !loadedHash.hasOwnProperty("hash")) {
       result = null;
     } else {
       result = loadedHash;
@@ -101,7 +100,9 @@ function loadStoredHash(callback) {
 function saveStoredHash(hash, salt, algorithm) {
   var storedHash = {};
   storedHash.hash = hash;
-  storedHash.salt = salt;
+  if(salt) {
+    storedHash.salt = salt;
+  }
   storedHash.algorithm = algorithm;
   return browser.storage.local.set({masterPasswordHash: storedHash});
 }
