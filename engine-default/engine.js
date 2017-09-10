@@ -72,7 +72,7 @@ function extractHostName(url) {
   return hostName;
 }
 
-function extractDomain(hostName) {
+function extractTopLevelHostname(hostName) {
   var parts = hostName.split(".");
   if(!isNaN(parseInt(parts.slice(-1)[0]))) {
     // this is an IP address
@@ -109,7 +109,7 @@ function handleHashResult(hashResult, masterPassword, url, settings, depth, accu
 function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve, requestId) {
   var charSet = createCharSet(settings);
   var hostName = extractHostName(url);
-  var domain = extractDomain(hostName);
+  var domain = extractTopLevelHostname(hostName);
   var thDomain = str2arr(domain);
   var thMainSalt = hex2arr(settings.mainSalt);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
@@ -205,7 +205,7 @@ function generatePassword(masterPassword, url, settings, requestId) {
     return null;
   }
   var hostName = extractHostName(url);
-  var domain = extractDomain(hostName);
+  var domain = extractTopLevelHostname(hostName);
   var thDomain = str2arr(domain);
   var thMainSalt = hex2arr(settings.mainSalt);
   var combinedSalt = new Uint8Array(thDomain.length + thMainSalt.length);
