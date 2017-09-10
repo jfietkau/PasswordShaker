@@ -158,6 +158,13 @@ document.addEventListener("DOMContentLoaded", () => {
         window.close();
       }
     });
+    browser.runtime.sendMessage(
+      { getCurrentTopLevelHost: true }
+    ).then((response) => {
+      if(response != null) {
+        document.getElementById("currentSite").innerHTML = response;
+      }
+    });
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings, false);

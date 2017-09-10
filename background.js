@@ -102,10 +102,34 @@ function clearStoredMasterPassword() {
   return browser.storage.local.remove("storedMasterPassword");
 }
 
+function extractTopLevelHostname(hostName) {
+  var parts = hostName.split(".");
+  if(!isNaN(parseInt(parts.slice(-1)[0]))) {
+    // this is an IP address
+    return hostName;
+  }
+  if(parts.length == 1) {
+    // assumed to be a local name (no TLD)
+    return hostName;
+  }
+  var publicSuffix = publicSuffixList.getPublicSuffix(hostName);
+  // keep the public suffix plus one more name segment below that
+  var result = parts.slice(-1 - publicSuffix.split(".").length);
+  return result.join(".");
+}
+
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.getSessionVariable !== undefined) {
     if(session != undefined) {
       sendResponse(session[request.getSessionVariable]);
+    } else {
+      sendResponse(null);
+    }
+  }
+  if(request != null && request.getCurrentTopLevelHost !== undefined) {
+    if(session != undefined && session.currentUrl != null) {
+      var url = new URL(session.currentUrl);
+      sendResponse(extractTopLevelHostname(url.hostname));
     } else {
       sendResponse(null);
     }
