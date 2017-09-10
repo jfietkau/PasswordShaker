@@ -132,6 +132,7 @@ function getDefaultSettings() {
     showVisualHash: false,
     visualHashMinInputLength: 8,
     visualHashDelay: 800,
+    showPasswordDelay: 500,
     storeMasterPasswordHash: false,
     storeMasterPassword: "volatile",
     showPageAction: "always",
