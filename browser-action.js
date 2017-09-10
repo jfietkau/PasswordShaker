@@ -126,7 +126,25 @@ function updateGeneratedPasswordInput(input) {
     var myEventId = lastGeneratedPasswordEvent;
     setTimeout(() => {
       if(myEventId == lastGeneratedPasswordEvent) {
-        generatedPasswordInput.value = "DUMMY PASSWORD";
+
+
+    browser.runtime.sendMessage({
+      generatePassword: true,
+      profileId: 0,
+      url: "example.com",
+      masterPassword: input,
+      id: myEventId,
+    }).then((message) => {
+      if(message.requestId == lastGeneratedPasswordEvent) {
+        var displayPassword = message.generatedPassword;
+        if(typeof displayPassword == "string") {
+          generatedPasswordInput.value = displayPassword;
+        } else {
+          document.getElementById("examplePassword").innerHTML = "[ failed to generate ]";
+        }
+      }
+    });
+
       }
     }, 500);
   } else {

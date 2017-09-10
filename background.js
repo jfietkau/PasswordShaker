@@ -137,6 +137,20 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+  if(request != null && request.generatePassword !== undefined) {
+    loadSettings().then(() => {
+      if(request.profileId !== undefined || session.currentProfile != null) {
+        var profileId = (request.profileId !== undefined) ? request.profileId : session.currentProfile;
+        var profileSettings = currentSettings.profiles[profileId];
+        generatePasswordForProfile(request.url, request.masterPassword, profileSettings, request.id).then((response) => {
+          sendResponse({generatedPassword: response.password, requestId: response.requestId});
+        });
+      } else {
+        sendResponse({generatedPassword: null, requestId: request.id});
+      }
+    });
+    return true;
+  }
 });
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
