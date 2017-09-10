@@ -128,8 +128,6 @@ function updateGeneratedPasswordInput(input) {
       if(myEventId == lastGeneratedPasswordEvent) {
         browser.runtime.sendMessage({
           generatePassword: true,
-          profileId: 0,
-          url: "example.com",
           masterPassword: input,
           id: myEventId,
         }).then((message) => {
@@ -138,7 +136,7 @@ function updateGeneratedPasswordInput(input) {
             if(typeof displayPassword == "string") {
               generatedPasswordInput.value = displayPassword;
             } else {
-              document.getElementById("examplePassword").innerHTML = "[ failed to generate ]";
+              generatedPasswordInput.value = "[ failed to generate ]";
             }
           }
         });
@@ -175,8 +173,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if(currentSettings.showGeneratedPassword) {
       var generatedPasswordInput = document.getElementById("generatedPassword");
       generatedPasswordInput.addEventListener("click", () => {
-        generatedPasswordInput.style.cursor = "auto";
-        updateGeneratedPasswordInput(document.getElementById("masterPassword").value);
+        if(generatedPasswordInput.style.cursor != "auto") {
+          generatedPasswordInput.style.cursor = "auto";
+          updateGeneratedPasswordInput(document.getElementById("masterPassword").value);
+        }
       });
     }
     loadStoredHash((newStoredHash) => {

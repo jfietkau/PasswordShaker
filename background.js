@@ -142,7 +142,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if(request.profileId !== undefined || session.currentProfile != null) {
         var profileId = (request.profileId !== undefined) ? request.profileId : session.currentProfile;
         var profileSettings = currentSettings.profiles[profileId];
-        generatePasswordForProfile(request.url, request.masterPassword, profileSettings, request.id).then((response) => {
+        var url = (request.url !== undefined) ? request.url : session.currentUrl;
+        generatePasswordForProfile(url, request.masterPassword, profileSettings, request.id).then((response) => {
           sendResponse({generatedPassword: response.password, requestId: response.requestId});
         });
       } else {
@@ -182,9 +183,12 @@ function reactToTabChange(tabId, newUrl) {
 browser.tabs.onActivated.addListener((activeInfo) => {
   var tabId = activeInfo.tabId;
   browser.tabs.get(tabId).then((tab) => {
+    session.currentTabId = tabId;
     reactToTabChange(tabId, tab.url);
   });
 });
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  reactToTabChange(tabId, changeInfo.url);
+  if(tabId == session.currentTabId && changeInfo.url !== undefined) {
+    reactToTabChange(tabId, changeInfo.url);
+  }
 });
