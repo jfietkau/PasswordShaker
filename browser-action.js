@@ -155,7 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
       { getSessionVariable: "masterPassword" }
     ).then((response) => {
       if(response != null) {
-        window.close();
+        var passwordEntries = document.getElementsByClassName("passwordEntry");
+        for(var i = 0; i < passwordEntries.length; i++) {
+          passwordEntries[i].value = response;
+        }
+        updatePopupForm(currentSettings);
       }
     });
     browser.runtime.sendMessage(

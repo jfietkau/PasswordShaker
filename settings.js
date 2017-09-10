@@ -200,7 +200,6 @@ function createOrUpdateContextMenu() {
           browser.contextMenus.create({
             id: "password-shaker-context-menu-" + i,
             title: itemTitle,
-            command: "_execute_page_action",
             contexts: ["password"],
           });
         }
