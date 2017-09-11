@@ -49,7 +49,8 @@ function setupPopupForm(settings) {
   }
 }
 
-function updatePopupForm(settings, onlyVerificationChanged) {
+function updatePopupForm(settings, toUpdate) {
+  toUpdate = toUpdate || {visualHash: true, generatedPassword: true};
   var noProblems = true;
   if(settings.verifyMasterPassword) {
     var entered = document.getElementById("masterPassword").value;
@@ -97,7 +98,7 @@ function updatePopupForm(settings, onlyVerificationChanged) {
     }
     matchStoredIcon.title = matchStoredIcon.alt;
   }
-  if(!onlyVerificationChanged) {
+  if(toUpdate.visualHash) {
     if(settings.showVisualHash) {
       var hashCanvas = document.getElementById("visualHash");
       var hashLoading = document.getElementById("visualHashLoading");
@@ -125,6 +126,8 @@ function updatePopupForm(settings, onlyVerificationChanged) {
         hashCanvas.getContext("2d").clearRect(0, 0, size, size);
       }
     }
+  }
+  if(toUpdate.generatedPassword) {
     if(settings.showGeneratedPassword) {
       var generatedPasswordInput = document.getElementById("generatedPassword");
       var masterPassword = document.getElementById("masterPassword").value;
@@ -193,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     setupPopupForm(currentSettings);
-    updatePopupForm(currentSettings, false);
+    updatePopupForm(currentSettings);
     if(currentSettings.showVisualHash) {
       var container = document.getElementById("visualHashContainer");
       var targetSize = document.getElementById("mainForm").offsetHeight;
@@ -242,10 +245,14 @@ document.addEventListener("DOMContentLoaded", () => {
   var passwordEntries = document.getElementsByClassName("passwordEntry");
   for(var i = 0; i < passwordEntries.length; i++) {
     passwordEntries[i].addEventListener("keyup", (e) => {
-      updatePopupForm(currentSettings, (e.target.id == "masterPasswordConfirmation"));
+      var toUpdate = undefined;
+      if(e.target.id == "masterPasswordConfirmation") {
+        toUpdate = {};
+      }
+      updatePopupForm(currentSettings, toUpdate);
     });
   }
   document.getElementById("profileSelect").addEventListener("change", (e) => {
-    updatePopupForm(currentSettings);
+    updatePopupForm(currentSettings, {generatedPassword: true});
   });
 });
