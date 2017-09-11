@@ -52,6 +52,15 @@
         background: #ddd;
       }
 
+      #profileSelectContainer {
+        clear: both;
+        padding-top: .6em;
+      }
+      #profileSelect {
+        width: 250px;
+        font-size: .8em;
+      }
+
       #generatedPasswordContainer {
         font-size: .8em;
         clear: both;
@@ -92,6 +101,12 @@
       </div>
 
       <input type="submit" id="okButton" value="OK">
+
+      <div id="profileSelectContainer">
+        <select id="profileSelect">
+          <option value="0">(default profile)</option>
+        </select>
+      </div>
 
       <div id="generatedPasswordContainer">
         Password for: <span id="currentSite"></span><br>

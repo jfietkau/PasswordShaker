@@ -8,6 +8,26 @@ function removeElementById(elemId) {
 }
 
 function setupPopupForm(settings) {
+  if(settings.profiles.length == 1) {
+    removeElementById("profileSelectContainer");
+  } else {
+    var profileSelect = document.getElementById("profileSelect");
+    profileSelect.innerHTML = "";
+    for(var i = 0; i < settings.profiles.length; i++) {
+      var newOption = document.createElement("option");
+      newOption.value = i;
+      var profileName = settings.profiles[i].profileName;
+      if(profileName.length == 0) {
+        if(i == 0) {
+          profileName = "(default profile)";
+        } else {
+          profileName = "(profile " + (i + 1) + ")";
+        }
+      }
+      newOption.appendChild(document.createTextNode(profileName));
+      profileSelect.appendChild(newOption);
+    }
+  }
   if(!settings.verifyMasterPassword) {
     removeElementById("masterPasswordConfirmation");
     removeElementById("equalsIcon");
@@ -107,16 +127,17 @@ function updatePopupForm(settings, onlyVerificationChanged) {
     }
     if(settings.showGeneratedPassword) {
       var generatedPasswordInput = document.getElementById("generatedPassword");
-      var input = document.getElementById("masterPassword").value;
+      var masterPassword = document.getElementById("masterPassword").value;
+      var profileId = document.getElementById("profileSelect").value;
       if(generatedPasswordInput.value != "(click here to show)") {
-        updateGeneratedPasswordInput(input);
+        updateGeneratedPasswordInput(masterPassword, profileId);
       }
     }
   }
   document.getElementById("okButton").disabled = !noProblems;
 }
 
-function updateGeneratedPasswordInput(input) {
+function updateGeneratedPasswordInput(input, profileId) {
   var generatedPasswordInput = document.getElementById("generatedPassword");
   var currentSiteDisplay = document.getElementById("currentSite");
   if(input.length > 0) {
@@ -129,6 +150,7 @@ function updateGeneratedPasswordInput(input) {
         browser.runtime.sendMessage({
           generatePassword: true,
           masterPassword: input,
+          profileId: profileId,
           id: myEventId,
         }).then((message) => {
           if(message.requestId == lastGeneratedPasswordEvent) {
@@ -186,13 +208,13 @@ document.addEventListener("DOMContentLoaded", () => {
       generatedPasswordInput.addEventListener("click", () => {
         if(generatedPasswordInput.style.cursor != "auto") {
           generatedPasswordInput.style.cursor = "auto";
-          updateGeneratedPasswordInput(document.getElementById("masterPassword").value);
+          updateGeneratedPasswordInput(document.getElementById("masterPassword").value, document.getElementById("profileSelect").value);
         }
       });
     }
     loadStoredHash((newStoredHash) => {
       storedHash = newStoredHash;
-      if(storedHash != null && storedHash.salt.length < 64) {
+      if(storedHash != null && (storedHash.salt === undefined || storedHash.salt.length >= 64)) {
         storedHash = null;
       }
     });
@@ -201,9 +223,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("mainForm").addEventListener("submit", (e) => {
     e.preventDefault();
     var enteredMasterPassword = document.getElementById("masterPassword").value;
-    browser.runtime.sendMessage(
-      {masterPassword: enteredMasterPassword}
-    ).then(() => {
+    var enteredProfileId = document.getElementById("profileSelect").value;
+    browser.runtime.sendMessage({
+      masterPassword: enteredMasterPassword,
+      profileId: enteredProfileId
+    }).then(() => {
       if(currentSettings.storeMasterPasswordHash && storedHash === null) {
         var newSalt = dcodeIO.bcrypt.genSaltSync(10);
         var newHash = dcodeIO.bcrypt.hashSync(enteredMasterPassword, newSalt);
@@ -221,4 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updatePopupForm(currentSettings, (e.target.id == "masterPasswordConfirmation"));
     });
   }
+  document.getElementById("profileSelect").addEventListener("change", (e) => {
+    updatePopupForm(currentSettings);
+  });
 });

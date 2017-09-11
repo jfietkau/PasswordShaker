@@ -53,15 +53,19 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, reques
   return generatedPassword;
 }
 
-function activateOnPage(url, masterPassword) {
-  if(session.currentProfile === null) {
+function activateOnPage(url, masterPassword, profileId) {
+  if(profileId === undefined) {
+    profileId = session.currentProfile;
+  }
+  if(profileId === null) {
     return;
   }
-  var profileSettings = currentSettings.profiles[session.currentProfile];
+  var profileSettings = currentSettings.profiles[profileId];
+  console.log(url + " - " + profileSettings.profileEngine);
   generatePasswordForProfile(url, masterPassword, profileSettings, null).then((generatedPassword) => {
     if(generatedPassword !== null) {
       browser.tabs.executeScript({file: "/injector.js"}).then(() => {
-        browser.tabs.executeScript({code: "passwordshaker_fill('" + generatedPassword + "');"})
+        browser.tabs.executeScript({code: "passwordshaker_fill('" + generatedPassword.password + "');"})
       });
     }
   });
@@ -150,7 +154,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       browser.pageAction.hide(session.currentTabId);
     }
     var currentUrl = session.currentUrl;
-    activateOnPage(currentUrl, request.masterPassword);
+    activateOnPage(currentUrl, request.masterPassword, request.profileId);
   }
   if(request != null && request.wantExamplePasswordForProfile !== undefined) {
     loadSettings().then(() => {
@@ -180,12 +184,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId.startsWith("password-shaker-context-menu-")) {
-    session.currentProfile = parseInt(info.menuItemId.slice("password-shaker-context-menu-".length));
+    var selectedProfile = parseInt(info.menuItemId.slice("password-shaker-context-menu-".length));
+    session.currentProfile = selectedProfile;
     if(session.masterPassword === null) {
       browser.pageAction.show(tab.id);
       session.currentTabId = tab.id;
     } else {
-      activateOnPage(info["pageUrl"], session.masterPassword);
+      activateOnPage(info["pageUrl"], session.masterPassword, selectedProfile);
     }
   }
 });
