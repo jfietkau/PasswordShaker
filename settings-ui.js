@@ -282,6 +282,7 @@ function isDescendantOf(descendant, ancestor) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
     updateForm();
@@ -294,7 +295,13 @@ document.addEventListener("DOMContentLoaded", () => {
         createOrUpdateContextMenu();
       });
     });
+    if(currentSettings.showSecurityAlerts) {
+      document.getElementById("securityAlertsContainer").style.display = "block";
+    } else {
+      document.getElementById("securityAlertsReplacement").style.display = "block";
+    }
   });
+
   var inputs = Array.from(document.getElementsByTagName("input"));
   var selects = Array.from(document.getElementsByTagName("select"));
   var elems = inputs.concat(selects);
@@ -356,6 +363,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  document.getElementById("showSecurityAlerts").addEventListener("click", () => {
+    document.getElementById("securityAlertsContainer").style.display = "block";
+    document.getElementById("securityAlertsReplacement").style.display = "none";
+  });
+  document.getElementById("hideSecurityAlerts").addEventListener("click", () => {
+    document.getElementById("securityAlertsContainer").style.display = "none";
+    document.getElementById("securityAlertsReplacement").style.display = "block";
+  });
+
   document.getElementById("deleteProfileWarning").style.display = "none";
   document.getElementById("deleteProfileCancel").style.width = (document.getElementById("deleteProfile").offsetWidth) + "px";
   document.getElementById("deleteProfile").addEventListener("click", () => {
@@ -376,6 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
       createOrUpdateContextMenu();
     });
   });
+
   browser.runtime.getBrowserInfo().then((info) => {
     if(info.vendor == "Mozilla" && info.name == "Firefox" && parseInt(info.version) < 56) {
       var showPageAction = document.getElementById("showPageAction");
@@ -384,4 +402,5 @@ document.addEventListener("DOMContentLoaded", () => {
       whenApplicable.disabled = true;
     }
   });
+
 });

@@ -4,11 +4,94 @@
   <head>
     <meta charset="utf-8">
     <style type="text/css">
+      body {
+        padding-right: 1px;
+      }
       label, input {
         vertical-align: middle;
       }
       input[type="checkbox"] {
         margin-right: .5em;
+      }
+
+      #infoboxes {
+        float: right;
+        padding-right: .5em;
+      }
+
+      .infobox {
+        width: 15em;
+        border: 1px solid #888;
+        background: #eee;
+        border-radius: .7em;
+        padding: 0 0 .7em;
+        margin-bottom: 1em;
+      }
+      .infobox span:first-child {
+        display: block;
+        border-radius: .5em .5em 0 0;
+        padding: .2em 1em;
+        background: #888;
+        color: #fff;
+        font-weight: bold;
+        text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+      }
+      .infobox ul {
+        padding: .3em 1em 0;
+        margin: 0;
+        list-style-type: none;
+      }
+      .infobox li {
+        padding: 0;
+        margin-top: .3em;
+      }
+      .infobox li a {
+        cursor: pointer;
+      }
+      .infobox.blue {
+        border-color: #48f;
+        background: #eef;
+      }
+      .infobox.blue span:first-child {
+        background: #48f;
+      }
+      .infobox.green {
+        border-color: #00b00c;
+        background: #efe;
+      }
+      .infobox.green span:first-child {
+        background: #00b00c;
+      }
+      .infobox.yellow {
+        border-color: #f2cb2f;
+        background: #ffe;
+      }
+      .infobox.yellow span:first-child {
+        background: #f2cb2f;
+      }
+      .infobox.red {
+        border-color: #c72a00;
+        background: #fee;
+      }
+      .infobox.red span:first-child {
+        background: #c72a00;
+      }
+      #hideSecurityAlerts {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: .8em;
+        cursor: pointer;
+        opacity: 0.6;
+      }
+      #securityAlertsReplacement {
+        width: 15em;
+        text-align: center;
+        margin-bottom: 1em;
+        opacity: 0.3;
+      }
+      #securityAlertsReplacement a {
+        cursor: pointer;
       }
 
       #profiles {
@@ -40,9 +123,11 @@
         background: #fff;
         color: #000;
       }
+
       .smallspace {
         height: .5em;
       }
+
       table, td {
         margin: 0;
         padding: 0;
@@ -51,6 +136,7 @@
       td:first-child {
         padding-right: 1em;
       }
+
       #profileEngineDefaultConfig td {
         padding-bottom: .6em;
       }
@@ -62,6 +148,7 @@
       #profileEnginePasswordMaker:checked ~ #profileEnginePasswordMakerConfig {
         display: block;
       }
+
       #examplePasswordContainer {
         float: right;
         padding: 0 1em 1em;
@@ -82,6 +169,7 @@
         width: 32px;
         margin: 8px;
       }
+
       #psHashAlgorithm {
         margin-right: 1em;
       }
@@ -92,6 +180,7 @@
         margin: 6px 0 0;
         display: block;
       }
+
       #deleteProfileWarning {
         margin: 0 0 -6px -6px;
         padding: 3px;
@@ -117,6 +206,35 @@
     <script src="settings-ui.js"></script>
 
     <form id="settingsForm">
+
+      <div id="infoboxes">
+
+        <div class="infobox blue">
+          <span>Documentation</span>
+          <ul>
+            <li><a>Getting started</a></li>
+            <li><a>Topic overview</a></li>
+            <li><a>Acknowledgements</a></li>
+          </ul>
+        </div>
+
+        <div id="securityAlertsContainer" class="infobox green" style="display: none">
+          <span>Security Alerts</span>
+          <ul id="securityAlerts">
+            <li>abc</li>
+            <li>def</li>
+            <li>ghi</li>
+            <li>def</li>
+            <li>abc</li>
+          </ul>
+          <a id="hideSecurityAlerts">hide security alerts</a>
+        </div>
+
+        <div id="securityAlertsReplacement" style="display: none">
+          <a id="showSecurityAlerts">show security alerts</a>
+        </div>
+
+      </div>
 
       <input type="checkbox" id="verifyMasterPassword"><label for="verifyMasterPassword">Require verification of master password (enter it twice)</label><br>
       <input type="checkbox" id="showMasterPassword"><label for="showMasterPassword">Show master password in plain text</label><br>
@@ -144,7 +262,7 @@
         <label for="profileTabX" style="font-weight: bold;">+</label>
       </div>
       <div id="profileContent">
-        <div id="examplePasswordContainer">
+        <div id="examplePasswordContainer" style="clear: right;">
           <img src="/icons/loading.gif" id="loadingIcon" alt="Generating example password..." title="Generating example password...">
           Example password for the current settings: <span id="examplePassword"></span>
         </div>

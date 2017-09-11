@@ -108,6 +108,7 @@ function getDefaultSettings() {
     storeMasterPasswordHash: false,
     showPageAction: "always",
     showPasswordDelay: 500,
+    showSecurityAlerts: true,
     profiles: []
   };
 }
