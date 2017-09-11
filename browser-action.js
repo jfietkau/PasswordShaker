@@ -194,6 +194,14 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("currentSite").innerHTML = response;
       }
     });
+    browser.runtime.sendMessage(
+      { getSessionVariable: "currentProfile" }
+    ).then((response) => {
+      if(response != null) {
+        document.getElementById("profileSelect").value = response;
+        updatePopupForm(currentSettings, {generatedPassword: true});
+      }
+    });
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);

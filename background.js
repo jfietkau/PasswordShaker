@@ -195,6 +195,12 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
+browser.commands.onCommand.addListener(function(command) {
+  if(command == "activate") {
+    console.log("activated!");
+  }
+});
+
 function reactToTabChange(tabId, newUrl) {
   loadSettings().then(() => {
     session.currentUrl = newUrl;

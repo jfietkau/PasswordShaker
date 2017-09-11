@@ -155,6 +155,11 @@ function parseForm(settings) {
   }
   for(var property in settings.profiles[profileIndex]) {
     if(settings.profiles[profileIndex].hasOwnProperty(property)) {
+      if(property == "useForHotkey" && document.getElementById(property).checked) {
+        for(var i = 0; i < settings.profiles.length; i++) {
+          settings.profiles[i].useForHotkey = false;
+        }
+      }
       parseSettingsElement(property, settings.profiles[profileIndex]);
     }
   }
@@ -334,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateForm();
         parseForm(currentSettings);
         if((isDescendantOf(e.target, "profiles") || isDescendantOf(e.target, "profileContent"))
-           && e.target.id != "profileName" && e.target.id != "showInContextMenu") {
+           && e.target.id != "profileName" && e.target.id != "showInContextMenu" && e.target.id != "useForHotkey") {
           updateExamplePassword();
         } else {
           saveSettings().then(() => {

@@ -54,6 +54,15 @@
     "default_popup": "browser-action.html"
   },
 
+  "commands": {
+    "activate": {
+      "suggested_key": {
+        "default": "Alt+Shift+P"
+      },
+      "description": "Activate PasswordShaker for the current tab"
+    }
+  },
+
   "options_ui": {
     "page": "settings.html"
   }

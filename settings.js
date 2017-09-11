@@ -142,7 +142,8 @@ function getDefaultProfileSettings() {
     pmCustomCharacterList: "",
     pmPasswordPrefix: "",
     pmPasswordSuffix: "",
-    showInContextMenu: true
+    showInContextMenu: true,
+    useForHotkey: false
   };
 }
 
