@@ -23,6 +23,7 @@
         width: 15em;
         border: 1px solid #888;
         background: #eee;
+        color: #111;
         border-radius: .7em;
         padding: 0 0 .7em;
         margin-bottom: 1em;
@@ -76,6 +77,15 @@
       .infobox.red span:first-child {
         background: #c72a00;
       }
+      #securityAlerts {
+        padding: 6px;
+        font-size: .8em;
+      }
+      #securityAlerts li {
+        padding-bottom: 6px;
+        margin-bottom: 6px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+      }
       #hideSecurityAlerts {
         display: block;
         width: 100%;
@@ -92,6 +102,11 @@
       }
       #securityAlertsReplacement a {
         cursor: pointer;
+      }
+      #alertNone {
+        font-style: italic;
+        text-align: center;
+        opacity: 0.7;
       }
 
       #profiles {
@@ -153,6 +168,9 @@
         float: right;
         padding: 0 1em 1em;
         text-align: right;
+      }
+      #examplePasswordContainer img {
+        margin-left: -32px;
       }
       #examplePassword {
         display: block;
@@ -218,14 +236,9 @@
           </ul>
         </div>
 
-        <div id="securityAlertsContainer" class="infobox green" style="display: none">
+        <div id="securityAlertsContainer" class="infobox" style="display: none">
           <span>Security Alerts</span>
           <ul id="securityAlerts">
-            <li>abc</li>
-            <li>def</li>
-            <li>ghi</li>
-            <li>def</li>
-            <li>abc</li>
           </ul>
           <a id="hideSecurityAlerts">hide security alerts</a>
         </div>
@@ -410,7 +423,7 @@
           </table>
         </div>
         <div class="smallspace"></div>
-        <input type="checkbox" id="showInContextMenu"> <label for="showInContextMenu">Show this profile in context menu</label><br>
+        <input type="checkbox" id="showInContextMenu"> <label for="showInContextMenu">Show this profile in password field context menu</label><br>
         <div class="smallspace"></div>
         <input type="checkbox" id="useForHotkey"> <label for="useForHotkey">Enable keyboard shortcut (Alt+Shift+P) to activate this profile</label><br>
         <div class="smallspace"></div>
@@ -420,6 +433,7 @@
           <span>Are you sure you want to delete this profile?</span>
           <input type="button" id="deleteProfileConfirm" value="Yes, please delete!">
         </div>
+        <div style="clear: right;"></div>
       </div>
       
     </form>

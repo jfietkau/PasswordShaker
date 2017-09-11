@@ -32,6 +32,7 @@ function populateSettingsForm(settings) {
             ignoreFormEvents += 1;
             populateProfileArea(currentSettings, parseInt(e.target.value));
             updateForm();
+            updateSecurityAlerts();
             updateExamplePassword();
             ignoreFormEvents -= 1;
           });
@@ -251,6 +252,157 @@ function updateExamplePassword() {
   });
 }
 
+var alertMessages = {
+  plainTextMasterPassword: "You have set your master password to be displayed in plain text. This makes you vulnerable to over-the-shoulder-attacks as well as malicious screengrabbers.",
+  masterPasswordStored: "<strong>You have set your master password to be saved permanently. This means that other software on your device can easily steal it.</strong>",
+  usedPasswordMaker: "You have chosen the legacy PasswordMaker engine for this profile. The algorithms it can use are older and much more vulnerable to attacks.",
+  shortPasswordLength: "The length of generated passwords for this profile is very short. They are likely to leave you vulnerable to attacks.",
+  shortCharSet: "You have selected a small number of characters for your generated passwords. This makes them more vulnerable to attacks.",
+  lowCostParameter: "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks.",
+  visHashShortMinInput: "You have set the visual hash to appear for very short master password fragments. This makes it much easier for over-the-shoulder attackers and screen recorders to reconstruct your master password.",
+  visHashShortDelay: "You have set the visual hash to render very quickly. This may make it easier for over-the-shoulder attackers and screen recorders to reconstruct your master password if you type slowly."
+};
+var profileSpecificAlertMessages = [
+  "usedPasswordMaker",
+  "shortPasswordLength",
+  "shortCharSet",
+  "lowCostParameter"
+];
+
+function populateSecurityAlerts() {
+  document.getElementById("securityAlerts").innerHTML = "";
+  var newAlertLi = document.createElement("li");
+  newAlertLi.id = "alertNone";
+  newAlertLi.innerHTML = "No security issues were found in your current settings.";
+  document.getElementById("securityAlerts").appendChild(newAlertLi);
+  for(var property in alertMessages) {
+    if(alertMessages.hasOwnProperty(property) && !profileSpecificAlertMessages.includes(property)) {
+      var newAlertLi = document.createElement("li");
+      newAlertLi.id = "alert" + property.charAt(0).toUpperCase() + property.slice(1);
+      newAlertLi.innerHTML = alertMessages[property];
+      document.getElementById("securityAlerts").appendChild(newAlertLi);
+    }
+  }
+  for(var i = 0; i < currentSettings.profiles.length; i++) {
+    for(var property in alertMessages) {
+      if(alertMessages.hasOwnProperty(property) && profileSpecificAlertMessages.includes(property)) {
+        var newAlertLi = document.createElement("li");
+        var profileName = currentSettings.profiles[i].profileName;
+        if(profileName.length == 0) {
+          if(i == 0) {
+            profileName = "(default profile)";
+          } else {
+            profileName = "(profile " + (i + 1) + ")";
+          }
+        }
+        newAlertLi.id = "alert" + property.charAt(0).toUpperCase() + property.slice(1) + i;
+        newAlertLi.innerHTML = "<strong>" + profileName + ":</strong> " + alertMessages[property];
+        document.getElementById("securityAlerts").appendChild(newAlertLi);
+      }
+    }
+  }
+}
+
+function updateSecurityAlerts() {
+  function setDisplay(alertId, visible) {
+    document.getElementById("alert" + alertId.charAt(0).toUpperCase() + alertId.slice(1)).style.display = visible ? "block" : "none";
+  }
+  var severity = 0;
+  if(currentSettings.showMasterPassword) {
+    setDisplay("plainTextMasterPassword", true);
+    severity = Math.max(1, severity);
+  } else {
+    setDisplay("plainTextMasterPassword", false);
+  }
+  if(currentSettings.storeMasterPassword == "permanent") {
+    setDisplay("masterPasswordStored", true);
+    severity = Math.max(2, severity);
+  } else {
+    setDisplay("masterPasswordStored", false);
+  }
+  if(currentSettings.visualHashMinInputLength < 6) {
+    setDisplay("visHashShortMinInput", true);
+    severity = Math.max(1, severity);
+  } else {
+    setDisplay("visHashShortMinInput", false);
+  }
+  if(currentSettings.visualHashDelay < 500) {
+    setDisplay("visHashShortDelay", true);
+    severity = Math.max(1, severity);
+  } else {
+    setDisplay("visHashShortDelay", false);
+  }
+  for(var profileId = 0; profileId < currentSettings.profiles.length; profileId++) {
+    var profileSettings = currentSettings.profiles[profileId];
+    if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
+      setDisplay("usedPasswordMaker" + profileId, true);
+      severity = Math.max(1, severity);
+    } else {
+      setDisplay("usedPasswordMaker" + profileId, false);
+    }
+    if((profileSettings.profileEngine == "profileEngineDefault" && profileSettings.psPasswordLength < 12)
+       || (profileSettings.profileEngine == "profileEnginePasswordMaker" && profileSettings.pmPasswordLength < 12)) {
+      setDisplay("shortPasswordLength" + profileId, true);
+      severity = Math.max(1, severity);
+    } else {
+      setDisplay("shortPasswordLength" + profileId, false);
+    }
+    var charSetLength = 0;
+    if(profileSettings.profileEngine == "profileEngineDefault") {
+      charSetLength += profileSettings.psCharactersAlphaCap ? 26 : 0;
+      charSetLength += profileSettings.psCharactersAlphaLower ? 26 : 0;
+      charSetLength += profileSettings.psCharactersNumbers ? 10 : 0;
+      charSetLength += profileSettings.psCharactersSpecial ? 29 : 0;
+      charSetLength += profileSettings.psCharactersSpaceQuotation ? 3 : 0;
+      charSetLength += profileSettings.psCharactersCustom ? profileSettings.psCharactersCustomList.length : 0;
+    }
+    if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
+      charSetLength += profileSettings.pmCharacterSet.length;
+      charSetLength += profileSettings.pmCustomCharacterList.length;
+    }
+    if(charSetLength < 55) {
+      setDisplay("shortCharSet" + profileId, true);
+      severity = Math.max(1, severity);
+    } else {
+      setDisplay("shortCharSet" + profileId, false);
+    }
+    function getCoefficientWarningMinimum(algo) {
+      var result = null;
+      if(algo == "argon2") {
+        result = 2;
+      } else if(algo == "scrypt") {
+        result = 9;
+      } else if(algo == "bcrypt") {
+        result = 9;
+      } else if(algo == "pbkdf2-hmac-sha256") {
+        result = 30000;
+      }
+      return result;
+    }
+    if(profileSettings.profileEngine == "profileEngineDefault" && profileSettings.psAlgorithmCoefficient < getCoefficientWarningMinimum(profileSettings.psHashAlgorithm)) {
+      setDisplay("lowCostParameter" + profileId, true);
+      severity = Math.max(1, severity);
+    } else {
+      setDisplay("lowCostParameter" + profileId, false);
+    }
+  }
+  setDisplay("none", severity == 0);
+  var alertBox = document.getElementById("securityAlertsContainer");
+  if(severity == 0) {
+    alertBox.classList.add("green");
+    alertBox.classList.remove("yellow");
+    alertBox.classList.remove("red");
+  } else if(severity == 1) {
+    alertBox.classList.remove("green");
+    alertBox.classList.add("yellow");
+    alertBox.classList.remove("red");
+  } else if(severity == 2) {
+    alertBox.classList.remove("green");
+    alertBox.classList.remove("yellow");
+    alertBox.classList.add("red");
+  }
+}
+
 function getCoefficientNameByAlgorithm(algo) {
   var name = "Algorithm coefficient";
   if(algo == "argon2") {
@@ -285,12 +437,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadSettings().then(() => {
     populateSettingsForm(currentSettings);
+    populateSecurityAlerts();
     updateForm();
+    updateSecurityAlerts();
     updateExamplePassword();
     document.getElementById("profileTabX").addEventListener("click", () => {
       addNewProfile(currentSettings);
       document.getElementById("profileTab" + (currentSettings.profiles.length - 1)).checked = true;
       populateProfileArea(currentSettings, currentSettings.profiles.length - 1);
+      populateSecurityAlerts();
       saveSettings().then(() => {
         createOrUpdateContextMenu();
       });
@@ -345,6 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         updateForm();
         parseForm(currentSettings);
+        updateSecurityAlerts();
         if((isDescendantOf(e.target, "profiles") || isDescendantOf(e.target, "profileContent"))
            && e.target.id != "profileName" && e.target.id != "showInContextMenu" && e.target.id != "useForHotkey") {
           updateExamplePassword();
@@ -360,6 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
     inputs[i].addEventListener("keyup", () => {
       if(ignoreFormEvents == 0) {
         updateForm();
+        updateSecurityAlerts();
       }
     });
   }
@@ -367,10 +524,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("showSecurityAlerts").addEventListener("click", () => {
     document.getElementById("securityAlertsContainer").style.display = "block";
     document.getElementById("securityAlertsReplacement").style.display = "none";
+    currentSettings.showSecurityAlerts = true;
+    saveSettings();
   });
   document.getElementById("hideSecurityAlerts").addEventListener("click", () => {
     document.getElementById("securityAlertsContainer").style.display = "none";
     document.getElementById("securityAlertsReplacement").style.display = "block";
+    currentSettings.showSecurityAlerts = false;
+    saveSettings();
   });
 
   document.getElementById("deleteProfileWarning").style.display = "none";
@@ -389,6 +550,8 @@ document.addEventListener("DOMContentLoaded", () => {
     saveSettings().then(() => {
       populateSettingsForm(currentSettings);
       updateForm();
+      populateSecurityAlerts();
+      updateSecurityAlerts();
       updateExamplePassword();
       createOrUpdateContextMenu();
     });
