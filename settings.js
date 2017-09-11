@@ -29,34 +29,6 @@ function clearSettings() {
   return browser.storage.local.remove("settings");
 }
 
-function debug_showSettings() {
-  alert("Current settings: " + debug_tostr(currentSettings));
-}
-
-function debug_tostr(obj) {
-  if(obj === null) {
-    return "null";
-  } else if(Array.isArray(obj)) {
-    var result = [];
-    for(var i = 0; i < obj.length; i++) {
-      result.push(debug_tostr(obj[i]));
-    }
-    return "[" + result.join(", ") + "]";
-  } else if(typeof obj === "string") {
-    return "\"" + obj + "\"";
-  } else if(typeof obj === "object") {
-    var result = [];
-    for(var property in obj) {
-      if(obj.hasOwnProperty(property)) {
-        result.push(property + ": " + debug_tostr(obj[property]));
-      }
-    }
-    return "{" + result.join(", ") + "}";
-  } else {
-    return "" + obj;
-  }
-}
-
 function loadSettings() {
   return browser.storage.local.get("settings").then((loadedSettings) => {
     if(loadedSettings != null
@@ -132,10 +104,10 @@ function getDefaultSettings() {
     showVisualHash: false,
     visualHashMinInputLength: 8,
     visualHashDelay: 800,
-    showPasswordDelay: 500,
-    storeMasterPasswordHash: false,
     storeMasterPassword: "volatile",
+    storeMasterPasswordHash: false,
     showPageAction: "always",
+    showPasswordDelay: 500,
     profiles: []
   };
 }

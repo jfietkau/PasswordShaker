@@ -48,6 +48,9 @@
         padding: 0;
         border-collapse: collapse;
       }
+      td:first-child {
+        padding-right: 1em;
+      }
       #profileEngineDefaultConfig td {
         padding-bottom: .6em;
       }
@@ -115,21 +118,19 @@
 
     <form id="settingsForm">
 
-      <input type="button" id="wipeButton" value="Wipe!">
-      <input type="button" id="showButton" value="Show!">
-      <br>
-
       <input type="checkbox" id="verifyMasterPassword"><label for="verifyMasterPassword">Require verification of master password (enter it twice)</label><br>
       <input type="checkbox" id="showMasterPassword"><label for="showMasterPassword">Show master password in plain text</label><br>
       <input type="checkbox" id="showGeneratedPassword"><label for="showGeneratedPassword">Show generated passwords as part of the popup</label><br>
       <input type="checkbox" id="showVisualHash"><label for="showVisualHash">Show a visual hash while entering master password</label><br>
-      <input type="checkbox" id="storeMasterPasswordHash"><label for="storeMasterPasswordHash">Store master password hash for automatic verification</label><br>
+      <div class="smallspace"></div>
       <label for="storeMasterPassword">Once entered, save master password</label>
       <select id="storeMasterPassword">
         <option value="permanent">in permanent storage</option>
         <option value="volatile">in RAM only</option>
         <option value="never">not at all</option>
       </select><br>
+      <div class="smallspace"></div>
+      <input type="checkbox" id="storeMasterPasswordHash"><label for="storeMasterPasswordHash">Store master password hash for automatic verification</label><br>
       <div class="smallspace"></div>
       <label for="showPageAction">Show the page action (address bar button)</label>
       <select id="showPageAction">

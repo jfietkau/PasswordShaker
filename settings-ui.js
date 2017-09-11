@@ -379,7 +379,4 @@ document.addEventListener("DOMContentLoaded", () => {
       whenApplicable.disabled = true;
     }
   });
-
-  document.getElementById("wipeButton").addEventListener("click", clearSettings);
-  document.getElementById("showButton").addEventListener("click", debug_showSettings);
 });
