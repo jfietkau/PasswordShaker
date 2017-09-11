@@ -182,22 +182,41 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+function activateProfile(profileId, url) {
+  session.currentProfile = profileId;
+  if(session.masterPassword === null) {
+    if(session.currentTabId !== null) {
+      browser.pageAction.show(session.currentTabId);
+    }
+  } else {
+    activateOnPage(url, session.masterPassword, profileId);
+  }
+}
+
 browser.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId.startsWith("password-shaker-context-menu-")) {
     var selectedProfile = parseInt(info.menuItemId.slice("password-shaker-context-menu-".length));
-    session.currentProfile = selectedProfile;
-    if(session.masterPassword === null) {
-      browser.pageAction.show(tab.id);
-      session.currentTabId = tab.id;
-    } else {
-      activateOnPage(info["pageUrl"], session.masterPassword, selectedProfile);
-    }
+    session.currentTabId = tab.id;
+    activateProfile(selectedProfile, info["pageUrl"]);
   }
 });
 
 browser.commands.onCommand.addListener(function(command) {
   if(command == "activate") {
-    console.log("activated!");
+    loadSettings().then(() => {
+      var hotkeyProfile = null;
+      for(var i = 0; i < currentSettings.profiles.length; i++) {
+        if(currentSettings.profiles[i].useForHotkey) {
+          hotkeyProfile = i;
+          break;
+        }
+      }
+      if(hotkeyProfile !== null) {
+        browser.tabs.get(session.currentTabId).then((tab) => {
+          activateProfile(hotkeyProfile, tab.url);
+        });
+      }
+    });
   }
 });
 
