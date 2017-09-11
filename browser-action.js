@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     loadStoredHash((newStoredHash) => {
       storedHash = newStoredHash;
-      if(storedHash != null && (storedHash.salt === undefined || storedHash.salt.length >= 64)) {
+      if(storedHash != null && (storedHash.salt !== undefined && storedHash.salt.length < 64)) {
         storedHash = null;
       }
     });
