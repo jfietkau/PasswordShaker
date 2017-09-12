@@ -52,6 +52,9 @@ function setupPopupForm(settings) {
 function updatePopupForm(settings, toUpdate) {
   toUpdate = toUpdate || {visualHash: true, generatedPassword: true};
   var noProblems = true;
+  if(document.getElementById("masterPassword").value.length == 0) {
+    noProblems = false;
+  }
   if(settings.verifyMasterPassword) {
     var entered = document.getElementById("masterPassword").value;
     var enteredConf = document.getElementById("masterPasswordConfirmation").value;
