@@ -66,9 +66,13 @@ function createCharSet(settings) {
 }
 
 function extractHostName(url) {
-  var parseHelper = document.createElement("a");
-  parseHelper.href = url;
-  var hostName = parseHelper.hostname;
+  var urlObject = new URL(url);
+  var hostName;
+  if(urlObject.protocol == "file:") {
+    hostName = "file";
+  } else {
+    hostName = parseHelper.hostname;
+  }
   return hostName;
 }
 

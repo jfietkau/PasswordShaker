@@ -134,7 +134,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.getCurrentTopLevelHost !== undefined) {
     if(session != undefined && session.currentUrl != null) {
       var url = new URL(session.currentUrl);
-      sendResponse(extractTopLevelHostname(url.hostname));
+      var hostName;
+      if(url.protocol == "file:") {
+        hostName = "Local file";
+      } else {
+        hostName = extractTopLevelHostname(url.hostname);
+      }
+      sendResponse(hostName);
     } else {
       sendResponse(null);
     }
