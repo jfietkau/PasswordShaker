@@ -71,7 +71,7 @@ function extractHostName(url) {
   if(urlObject.protocol == "file:") {
     hostName = "file";
   } else {
-    hostName = parseHelper.hostname;
+    hostName = urlObject.hostname;
   }
   return hostName;
 }
