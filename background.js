@@ -1,6 +1,7 @@
 
 var session = {
   masterPassword: null,
+  runningPageActionAnimation: false,
   currentUrl: "",
   currentProfile: null,
   currentTabId: null,
@@ -200,7 +201,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function activateProfile(profileId, url) {
   session.currentProfile = profileId;
   if(session.masterPassword === null) {
-    if(session.currentTabId !== null) {
+    if(session.currentTabId !== null && !session.runningPageActionAnimation) {
       browser.pageAction.show(session.currentTabId);
       var animation = [
         "l1:30", "l2:30", "l3:45", "l2:30", "l1:30", "b:30",
@@ -245,7 +246,9 @@ browser.commands.onCommand.addListener(function(command) {
 });
 
 function animatePageAction(script, tabId) {
+  session.runningPageActionAnimation = true;
   if(script.length == 0) {
+    session.runningPageActionAnimation = false;
     return;
   }
   var frame = script[0].split(":");
