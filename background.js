@@ -203,29 +203,12 @@ function activateProfile(profileId, url) {
     if(session.currentTabId !== null) {
       browser.pageAction.show(session.currentTabId);
       var animation = [
-        "l1:30",
-        "l2:30",
-        "l3:45",
-        "l2:30",
-        "b:30",
-        "r1:30",
-        "r2:30",
-        "r3:45",
-        "r2:30",
-        "r1:30",
-        "b:30",
-        "l1:30",
-        "l2:45",
-        "l1:30",
-        "b:30",
-        "r1:30",
-        "r2:45",
-        "r1:30",
-        "b:30",
-        "l1:40",
-        "b:30",
-        "r1:40",
-        "b:30",
+        "l1:30", "l2:30", "l3:45", "l2:30", "l1:30", "b:30",
+        "r1:30", "r2:30", "r3:45", "r2:30", "r1:30", "b:30",
+        "l1:30", "l2:45", "l1:30", "b:30",
+        "r1:30", "r2:45", "r1:30", "b:30",
+        "l1:40", "b:30",
+        "r1:40", "b:30",
       ];
       animatePageAction(animation, session.currentTabId);
     }
