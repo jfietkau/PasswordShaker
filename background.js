@@ -3,7 +3,8 @@ var session = {
   masterPassword: null,
   currentUrl: "",
   currentProfile: null,
-  currentTabId: null
+  currentTabId: null,
+  injectedTabs: []
 };
 
 // Parse the public suffix list for hostnames, this only has to happen once while the scripts are in RAM.
@@ -65,7 +66,7 @@ function activateOnPage(url, masterPassword, profileId) {
   generatePasswordForProfile(url, masterPassword, profileSettings, null).then((generatedPassword) => {
     if(generatedPassword !== null) {
       browser.tabs.executeScript({file: "/injector.js"}).then(() => {
-        browser.tabs.executeScript({code: "passwordshaker_fill('" + generatedPassword.password + "');"})
+        browser.tabs.executeScript({code: "fillPassword('" + generatedPassword.password + "');"});
       });
     }
   });
@@ -180,6 +181,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+  if(request != null && request.numberOfPasswordFields !== undefined && currentSettings.showPageAction == "when-applicable") {
+    console.log(request);
+    if(request.numberOfPasswordFields > 0) {
+      browser.pageAction.show(request.tabId);
+    } else {
+      browser.pageAction.hide(request.tabId);
+    }
+  }
 });
 
 function activateProfile(profileId, url) {
@@ -229,7 +238,7 @@ function reactToTabChange(tabId, newUrl) {
        && !newUrl.startsWith("about:")
        && newUrl.length > 0) {
       browser.pageAction.show(tabId);
-    } else {
+    } else if(currentSettings.showPageAction == "when-needed") {
       browser.pageAction.hide(tabId);
     }
   });
@@ -237,6 +246,14 @@ function reactToTabChange(tabId, newUrl) {
 browser.tabs.onActivated.addListener((activeInfo) => {
   var tabId = activeInfo.tabId;
   browser.tabs.get(tabId).then((tab) => {
+    if(currentSettings.showPageAction == "when-applicable" && !tab.url.startsWith("about:")) {
+      if(!session.injectedTabs.includes(tabId)) {
+        session.injectedTabs.push(tabId);
+        browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+          browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
+        });
+      }
+    }
     session.currentTabId = tabId;
     reactToTabChange(tabId, tab.url);
   });
@@ -244,5 +261,13 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if(tabId == session.currentTabId && changeInfo.url !== undefined) {
     reactToTabChange(tabId, changeInfo.url);
+    if(currentSettings.showPageAction == "when-applicable") {
+      browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+        browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
+        if(!session.injectedTabs.includes(tabId)) {
+          session.injectedTabs.push(tabId);
+        }
+      });
+    }
   }
 });

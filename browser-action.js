@@ -131,7 +131,7 @@ function updatePopupForm(settings, toUpdate) {
     if(settings.showGeneratedPassword) {
       var generatedPasswordInput = document.getElementById("generatedPassword");
       var masterPassword = document.getElementById("masterPassword").value;
-      var profileId = document.getElementById("profileSelect").value;
+      var profileId = document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 0;
       if(generatedPasswordInput.value != "(click here to show)") {
         updateGeneratedPasswordInput(masterPassword, profileId);
       }
@@ -198,7 +198,9 @@ document.addEventListener("DOMContentLoaded", () => {
       { getSessionVariable: "currentProfile" }
     ).then((response) => {
       if(response != null) {
-        document.getElementById("profileSelect").value = response;
+        if(document.getElementById("profileSelect")) {
+          document.getElementById("profileSelect").value = response;
+        }
         updatePopupForm(currentSettings, {generatedPassword: true});
       }
     });
@@ -219,7 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
       generatedPasswordInput.addEventListener("click", () => {
         if(generatedPasswordInput.style.cursor != "auto") {
           generatedPasswordInput.style.cursor = "auto";
-          updateGeneratedPasswordInput(document.getElementById("masterPassword").value, document.getElementById("profileSelect").value);
+          updateGeneratedPasswordInput(document.getElementById("masterPassword").value,
+                                       document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 0);
         }
       });
     }
@@ -234,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("mainForm").addEventListener("submit", (e) => {
     e.preventDefault();
     var enteredMasterPassword = document.getElementById("masterPassword").value;
-    var enteredProfileId = document.getElementById("profileSelect").value;
+    var enteredProfileId = document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 0;
     browser.runtime.sendMessage({
       masterPassword: enteredMasterPassword,
       profileId: enteredProfileId
