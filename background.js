@@ -202,6 +202,32 @@ function activateProfile(profileId, url) {
   if(session.masterPassword === null) {
     if(session.currentTabId !== null) {
       browser.pageAction.show(session.currentTabId);
+      var animation = [
+        "l1:30",
+        "l2:30",
+        "l3:45",
+        "l2:30",
+        "b:30",
+        "r1:30",
+        "r2:30",
+        "r3:45",
+        "r2:30",
+        "r1:30",
+        "b:30",
+        "l1:30",
+        "l2:45",
+        "l1:30",
+        "b:30",
+        "r1:30",
+        "r2:45",
+        "r1:30",
+        "b:30",
+        "l1:40",
+        "b:30",
+        "r1:40",
+        "b:30",
+      ];
+      animatePageAction(animation, session.currentTabId);
     }
   } else {
     activateOnPage(url, session.masterPassword, profileId);
@@ -234,6 +260,20 @@ browser.commands.onCommand.addListener(function(command) {
     });
   }
 });
+
+function animatePageAction(script, tabId) {
+  if(script.length == 0) {
+    return;
+  }
+  var frame = script[0].split(":");
+  browser.pageAction.setIcon({
+    path: "/icons/logo-" + frame[0] + ".svg",
+    tabId: tabId
+  });
+  window.setTimeout(() => {
+    animatePageAction(script.slice(1), tabId);
+  }, parseInt(frame[1], 10));
+}
 
 function reactToTabChange(tabId, newUrl) {
   loadSettings().then(() => {
