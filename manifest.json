@@ -13,7 +13,7 @@
   },
 
   "icons": {
-    "48": "icons/shaker.svg"
+    "48": "icons/logo.svg"
   },
 
   "permissions": [
@@ -48,7 +48,7 @@
   "page_action": {
     "browser_style": true,
     "default_icon": {
-      "19": "icons/shaker.svg"
+      "19": "icons/logo.svg"
     },
     "default_title": "PasswordShaker",
     "default_popup": "browser-action.html"
