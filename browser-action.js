@@ -239,6 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     var enteredMasterPassword = document.getElementById("masterPassword").value;
     var enteredProfileId = document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 0;
     browser.runtime.sendMessage({
+      activateOnPage: true,
       masterPassword: enteredMasterPassword,
       profileId: enteredProfileId
     }).then(() => {

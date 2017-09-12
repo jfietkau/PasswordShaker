@@ -142,7 +142,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.clearStoredMasterPassword !== undefined) {
     clearStoredMasterPassword();
   }
-  if(request != null && request.masterPassword !== undefined) {
+  if(request != null && request.activateOnPage !== undefined) {
     loadSettings().then(() => {
       if(currentSettings.storeMasterPassword != "never") {
         session.masterPassword = request.masterPassword;
