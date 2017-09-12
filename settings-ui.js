@@ -253,14 +253,14 @@ function updateExamplePassword() {
 }
 
 var alertMessages = {
-  plainTextMasterPassword: "You have set your master password to be displayed in plain text. This makes you vulnerable to over-the-shoulder-attacks as well as malicious screengrabbers.",
   masterPasswordStored: "<strong>You have set your master password to be saved permanently. This means that other software on your device can easily steal it.</strong>",
+  plainTextMasterPassword: "You have set your master password to be displayed in plain text. This makes you vulnerable to over-the-shoulder-attacks as well as malicious screengrabbers.",
+  visHashShortMinInput: "You have set the visual hash to appear for very short master password fragments. This makes it much easier for over-the-shoulder attackers and screen recorders to reconstruct your master password.",
+  visHashShortDelay: "You have set the visual hash to render very quickly. This may make it easier for over-the-shoulder attackers and screen recorders to reconstruct your master password if you type slowly.",
   usedPasswordMaker: "You have chosen the legacy PasswordMaker engine for this profile. The algorithms it can use are older and much more vulnerable to attacks.",
   shortPasswordLength: "The length of generated passwords for this profile is very short. They are likely to leave you vulnerable to attacks.",
   shortCharSet: "You have selected a small number of characters for your generated passwords. This makes them more vulnerable to attacks.",
-  lowCostParameter: "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks.",
-  visHashShortMinInput: "You have set the visual hash to appear for very short master password fragments. This makes it much easier for over-the-shoulder attackers and screen recorders to reconstruct your master password.",
-  visHashShortDelay: "You have set the visual hash to render very quickly. This may make it easier for over-the-shoulder attackers and screen recorders to reconstruct your master password if you type slowly."
+  lowCostParameter: "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks."
 };
 var profileSpecificAlertMessages = [
   "usedPasswordMaker",
@@ -273,7 +273,7 @@ function populateSecurityAlerts() {
   document.getElementById("securityAlerts").innerHTML = "";
   var newAlertLi = document.createElement("li");
   newAlertLi.id = "alertNone";
-  newAlertLi.innerHTML = "No security issues were found in your current settings.";
+  newAlertLi.innerHTML = "No issues found.";
   document.getElementById("securityAlerts").appendChild(newAlertLi);
   for(var property in alertMessages) {
     if(alertMessages.hasOwnProperty(property) && !profileSpecificAlertMessages.includes(property)) {
