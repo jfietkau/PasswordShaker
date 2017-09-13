@@ -67,14 +67,32 @@
         padding-top: .6em;
         color: #888;
       }
-      #currentSite {
+      #currentSiteArea {
         display: inline-block;
         min-width: 150px;
-        color: #48f;
         font-weight: bold;
       }
-      #currentSite.verified {
+      #currentSite {
+        color: #48f;
+        white-space: pre;
+      }
+      #currentSiteArea .checkmark {
+        display: none;
+      }
+      #currentSiteArea.verified #currentSite {
         color: #080;
+      }
+      #currentSiteArea.verified .checkmark {
+        display: inline-block;
+        margin: -1em 0 -1em .7em;
+        width: 1.5em;
+        height: 1.5em;
+        border-radius: .75em;
+        background: #48f;
+        color: #fff;
+        font-size: .8em;
+        font-weight: bold;
+        text-align: center;
       }
       #currentSiteInput {
         display: inline;
@@ -127,7 +145,7 @@
       </form>
 
       <form id="generatedPasswordForm">
-        Password for: <span id="currentSite"></span><br>
+        Password for: <span id="currentSiteArea"><span id="currentSite"></span><span class="checkmark">✓</span></span><br>
         <input type="text" id="generatedPassword" readonly value="(click here to show)">
         <input type="submit" style="display: none;">
       </form>
@@ -135,7 +153,7 @@
     </div>
 
     <div id="visualHashContainer">
-      <canvas id="visualHash" width="16" height="16"></canvas>
+      <canvas id="visualHash" width="32" height="32"></canvas>
       <img src="/icons/loading-big.svg" id="visualHashLoading" alt="Loading..." title="Loading..." style="display: none;">
     </div>
 

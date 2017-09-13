@@ -178,7 +178,7 @@ function updateGeneratedPasswordInput(input, profileId) {
 }
 
 function updateCurrentSite(siteText) {
-  document.getElementById("currentSite").classList.remove("verified");
+  document.getElementById("currentSiteArea").classList.remove("verified");
   var siteTextOriginal = document.getElementById("currentSiteOriginal").value;
   if(siteText.length == 0) {
     siteText = siteTextOriginal;
@@ -192,7 +192,7 @@ function updateCurrentSite(siteText) {
     }
     document.getElementById("currentSite").innerHTML = siteTextFancy;
     if(siteTextFancy != siteText) {
-      document.getElementById("currentSite").classList.add("verified");
+      document.getElementById("currentSiteArea").classList.add("verified");
     }
   } else {
     document.getElementById("currentSiteCustom").value = siteText;
@@ -220,17 +220,19 @@ document.addEventListener("DOMContentLoaded", () => {
         var currentSiteDisplay = document.getElementById("currentSite");
         document.getElementById("currentSiteOriginal").value = response;
         updateCurrentSite(response);
-        currentSiteDisplay.addEventListener("click", (e) => {
+        document.getElementById("currentSiteArea").addEventListener("click", (e) => {
+          var currentSiteArea = document.getElementById("currentSiteArea");
           var siteInput = document.createElement("input");
           siteInput.type = "text";
           siteInput.id = "currentSiteInput";
-          if(e.target.classList.contains("verified")) {
+          if(currentSiteArea.classList.contains("verified")) {
             siteInput.value = document.getElementById("currentSiteOriginal").value;
           } else {
-            siteInput.value = e.target.innerHTML;
+            siteInput.value = currentSiteDisplay.innerHTML;
           }
-          e.target.parentNode.insertBefore(siteInput, e.target);
-          e.target.style.display = "none";
+          currentSiteArea.classList.remove("verified");
+          currentSiteArea.insertBefore(siteInput, document.getElementById("currentSite"));
+          currentSiteDisplay.style.display = "none";
           siteInput.focus();
           siteInput.addEventListener("blur", (e) => {
             updateCurrentSite(e.target.value);
