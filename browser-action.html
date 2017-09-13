@@ -69,8 +69,9 @@
       }
       #currentSite {
         display: inline-block;
-        color: #48f;
         min-width: 150px;
+        color: #48f;
+        font-weight: bold;
       }
       #currentSiteInput {
         display: inline;
@@ -117,7 +118,8 @@
           </select>
         </div>
 
-        <input type="hidden" id="originalCurrentSite" value="">
+        <input type="hidden" id="currentSiteOriginal" value="">
+        <input type="hidden" id="currentSiteCustom" value="">
       </form>
 
       <form id="generatedPasswordForm">

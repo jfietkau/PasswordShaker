@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(response != null) {
         var currentSiteDisplay = document.getElementById("currentSite");
         currentSiteDisplay.innerHTML = response;
-        document.getElementById("originalCurrentSite").value = response;
+        document.getElementById("currentSiteOriginal").value = response;
         currentSiteDisplay.addEventListener("click", (e) => {
           var siteInput = document.createElement("input");
           siteInput.type = "text";
@@ -208,8 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
           siteInput.addEventListener("blur", (e) => {
             var newSiteInput = e.target.value;
             if(newSiteInput.length == 0) {
-              newSiteInput = document.getElementById("originalCurrentSite").value;
+              newSiteInput = document.getElementById("currentSiteOriginal").value;
             }
+            document.getElementById("currentSiteCustom").value = newSiteInput;
             currentSiteDisplay.innerHTML = newSiteInput;
             e.target.parentNode.removeChild(e.target);
             currentSiteDisplay.style.display = "inline-block";
