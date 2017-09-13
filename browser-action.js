@@ -260,7 +260,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("generatedPasswordForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    document.getElementById("currentSiteInput").blur();
+    if(document.getElementById("currentSiteInput")) {
+      document.getElementById("currentSiteInput").blur();
+    }
   });
   document.getElementById("mainForm").addEventListener("submit", (e) => {
     e.preventDefault();
