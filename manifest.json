@@ -30,6 +30,7 @@
 
   "background": {
     "scripts": [
+      "data/password-req-list.js",
       "data/publicsuffixlist.js",
       "data/publicsuffixlist-raw.js",
       "data/punycode.js",

@@ -177,6 +177,29 @@ function updateGeneratedPasswordInput(input, profileId) {
   }
 }
 
+function updateCurrentSite(siteText) {
+  document.getElementById("currentSite").classList.remove("verified");
+  var siteTextOriginal = document.getElementById("currentSiteOriginal").value;
+  if(siteText.length == 0) {
+    siteText = siteTextOriginal;
+  }
+  if(siteText == siteTextOriginal) {
+    document.getElementById("currentSiteCustom").value = "";
+    var siteTextFancy = siteText;
+    var passwordReq = passwordReqList.byHostname(siteText);
+    if(passwordReq != null) {
+      siteTextFancy = passwordReq.name;
+    }
+    document.getElementById("currentSite").innerHTML = siteTextFancy;
+    if(siteTextFancy != siteText) {
+      document.getElementById("currentSite").classList.add("verified");
+    }
+  } else {
+    document.getElementById("currentSiteCustom").value = siteText;
+    document.getElementById("currentSite").innerHTML = siteText;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     browser.runtime.sendMessage(
@@ -195,23 +218,22 @@ document.addEventListener("DOMContentLoaded", () => {
     ).then((response) => {
       if(response != null) {
         var currentSiteDisplay = document.getElementById("currentSite");
-        currentSiteDisplay.innerHTML = response;
         document.getElementById("currentSiteOriginal").value = response;
+        updateCurrentSite(response);
         currentSiteDisplay.addEventListener("click", (e) => {
           var siteInput = document.createElement("input");
           siteInput.type = "text";
           siteInput.id = "currentSiteInput";
-          siteInput.value = e.target.innerHTML;
+          if(e.target.classList.contains("verified")) {
+            siteInput.value = document.getElementById("currentSiteOriginal").value;
+          } else {
+            siteInput.value = e.target.innerHTML;
+          }
           e.target.parentNode.insertBefore(siteInput, e.target);
           e.target.style.display = "none";
           siteInput.focus();
           siteInput.addEventListener("blur", (e) => {
-            var newSiteInput = e.target.value;
-            if(newSiteInput.length == 0) {
-              newSiteInput = document.getElementById("currentSiteOriginal").value;
-            }
-            document.getElementById("currentSiteCustom").value = newSiteInput;
-            currentSiteDisplay.innerHTML = newSiteInput;
+            updateCurrentSite(e.target.value);
             e.target.parentNode.removeChild(e.target);
             currentSiteDisplay.style.display = "inline-block";
           });
