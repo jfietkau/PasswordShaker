@@ -68,7 +68,15 @@
         color: #888;
       }
       #currentSite {
+        display: inline-block;
         color: #48f;
+        min-width: 150px;
+      }
+      #currentSiteInput {
+        display: inline;
+        margin: -1em 0;
+        font-size: 1em;
+        width: 150px;
       }
       #generatedPassword {
         width: 250px;
@@ -109,6 +117,7 @@
       </div>
 
       <div id="generatedPasswordContainer">
+        <input type="hidden" id="originalCurrentSite" value="">
         Password for: <span id="currentSite"></span><br>
         <input type="text" id="generatedPassword" readonly value="(click here to show)">
       </div>

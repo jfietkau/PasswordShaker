@@ -194,7 +194,27 @@ document.addEventListener("DOMContentLoaded", () => {
       { getCurrentTopLevelHost: true }
     ).then((response) => {
       if(response != null) {
-        document.getElementById("currentSite").innerHTML = response;
+        var currentSiteDisplay = document.getElementById("currentSite");
+        currentSiteDisplay.innerHTML = response;
+        document.getElementById("originalCurrentSite").value = response;
+        currentSiteDisplay.addEventListener("click", (e) => {
+          var siteInput = document.createElement("input");
+          siteInput.type = "text";
+          siteInput.id = "currentSiteInput";
+          siteInput.value = e.target.innerHTML;
+          e.target.parentNode.insertBefore(siteInput, e.target);
+          e.target.style.display = "none";
+          siteInput.focus();
+          siteInput.addEventListener("blur", (e) => {
+            var newSiteInput = e.target.value;
+            if(newSiteInput.length == 0) {
+              newSiteInput = document.getElementById("originalCurrentSite").value;
+            }
+            currentSiteDisplay.innerHTML = newSiteInput;
+            e.target.parentNode.removeChild(e.target);
+            currentSiteDisplay.style.display = "inline";
+          });
+        });
       }
     });
     browser.runtime.sendMessage(
