@@ -19,7 +19,7 @@
         margin-bottom: .33em;
         font-size: 1.5em;
       }
-      #mainForm {
+      #forms {
         width: 250px;
       }
 
@@ -61,7 +61,7 @@
         font-size: .8em;
       }
 
-      #generatedPasswordContainer {
+      #generatedPasswordForm {
         font-size: .8em;
         clear: both;
         padding-top: .6em;
@@ -98,31 +98,35 @@
     <script src="mosaicVisualHash.js"></script>
     <script src="browser-action.js"></script>
 
-    <form id="mainForm">
+    <div id="forms">
+      <form id="mainForm">
 
-      <input type="password" id="masterPassword" class="passwordEntry" value="" placeholder="Master password">
-      <input type="password" id="masterPasswordConfirmation" class="passwordEntry" value="" placeholder="Master password (confirm)">
+        <input type="password" id="masterPassword" class="passwordEntry" value="" placeholder="Master password">
+        <input type="password" id="masterPasswordConfirmation" class="passwordEntry" value="" placeholder="Master password (confirm)">
 
-      <div id="confirmationIcons">
-        <img src="/icons/equals-gray.svg" id="equalsIcon">
-        <img src="/icons/stored-gray.svg" id="matchStoredIcon">
-      </div>
+        <div id="confirmationIcons">
+          <img src="/icons/equals-gray.svg" id="equalsIcon">
+          <img src="/icons/stored-gray.svg" id="matchStoredIcon">
+        </div>
 
-      <input type="submit" id="okButton" value="OK">
+        <input type="submit" id="okButton" value="OK">
 
-      <div id="profileSelectContainer">
-        <select id="profileSelect">
-          <option value="0">(default profile)</option>
-        </select>
-      </div>
+        <div id="profileSelectContainer">
+          <select id="profileSelect">
+            <option value="0">(default profile)</option>
+          </select>
+        </div>
 
-      <div id="generatedPasswordContainer">
         <input type="hidden" id="originalCurrentSite" value="">
+      </form>
+
+      <form id="generatedPasswordForm">
         Password for: <span id="currentSite"></span><br>
         <input type="text" id="generatedPassword" readonly value="(click here to show)">
-      </div>
+        <input type="submit" style="display: none;">
+      </form>
 
-    </form>
+    </div>
 
     <div id="visualHashContainer">
       <canvas id="visualHash" width="16" height="16"></canvas>

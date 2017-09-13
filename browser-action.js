@@ -45,7 +45,7 @@ function setupPopupForm(settings) {
     removeElementById("visualHashContainer");    
   }
   if(!settings.showGeneratedPassword) {
-    removeElementById("generatedPasswordContainer");    
+    removeElementById("generatedPasswordForm");    
   }
 }
 
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             currentSiteDisplay.innerHTML = newSiteInput;
             e.target.parentNode.removeChild(e.target);
-            currentSiteDisplay.style.display = "inline";
+            currentSiteDisplay.style.display = "inline-block";
           });
         });
       }
@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePopupForm(currentSettings);
     if(currentSettings.showVisualHash) {
       var container = document.getElementById("visualHashContainer");
-      var targetSize = document.getElementById("mainForm").offsetHeight;
+      var targetSize = document.getElementById("forms").offsetHeight;
       container.style.width = (targetSize + 10) + "px";
       container.style.height = targetSize + "px";
       var hashCanvas = document.getElementById("visualHash");
@@ -256,6 +256,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     document.getElementById("masterPassword").focus();
+  });
+  document.getElementById("generatedPasswordForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    document.getElementById("currentSiteInput").blur();
   });
   document.getElementById("mainForm").addEventListener("submit", (e) => {
     e.preventDefault();
