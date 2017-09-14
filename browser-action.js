@@ -218,8 +218,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ).then((response) => {
       if(response != null) {
         var currentSiteDisplay = document.getElementById("currentSite");
-        document.getElementById("currentSiteOriginal").value = response;
-        updateCurrentSite(response);
+        var canonicalHostname = response;
+        var passwordReq = passwordReqList.byHostname(canonicalHostname);
+        if(passwordReq != null) {
+          canonicalHostname = passwordReq.hostnames[0];
+        }
+        document.getElementById("currentSiteOriginal").value = canonicalHostname;
+        updateCurrentSite(canonicalHostname);
         document.getElementById("currentSiteArea").addEventListener("click", (e) => {
           var currentSiteArea = document.getElementById("currentSiteArea");
           var siteInput = document.createElement("input");
