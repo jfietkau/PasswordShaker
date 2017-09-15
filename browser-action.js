@@ -1,6 +1,7 @@
 var storedHash = null;
 var lastVisualHashEvent = null;
 var lastGeneratedPasswordEvent = null;
+var clickEventInProgress = false;
 
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
@@ -212,6 +213,14 @@ function getSelectedProfile() {
 }
 
 function reactToCurrentSiteClick(evt) {
+  if(clickEventInProgress) {
+    return;
+  }
+  clickEventInProgress = true;
+  document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
+  setTimeout(() => {
+    clickEventInProgress = false;
+  }, 500);
   var currentSiteDisplay = document.getElementById("currentSite");
   var currentSiteArea = document.getElementById("currentSiteArea");
   var siteInput = document.createElement("input");
@@ -230,6 +239,7 @@ function reactToCurrentSiteClick(evt) {
     updateCurrentSite(e.target.value);
     e.target.parentNode.removeChild(e.target);
     currentSiteDisplay.style.display = "inline-block";
+    document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
   });
 }
 
