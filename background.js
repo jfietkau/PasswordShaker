@@ -34,6 +34,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
       useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements,
       hostnameOverride: hostnameOverride
     };
+    console.log("A: " + hostnameOverride);
     generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
     var engineSpecificSettings = {

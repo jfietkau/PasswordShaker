@@ -156,6 +156,8 @@ function updateGeneratedPasswordInput(input, profileId) {
         var hostnameOverride = undefined;
         if(document.getElementById("currentSiteCustom").value.length > 0) {
           hostnameOverride = document.getElementById("currentSiteCustom").value;
+        } else if(document.getElementById("currentSiteOriginal").value.length > 0) {
+          hostnameOverride = document.getElementById("currentSiteOriginal").value;
         }
         browser.runtime.sendMessage({
           generatePassword: true,
@@ -251,8 +253,9 @@ function initializeCurrentSiteDisplay(settings) {
         document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
       } else {
         currentSiteArea.classList.remove("verified");
+        document.getElementById("currentSiteOriginal").value = "";
+        document.getElementById("currentSiteCustom").value = "";
         document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
-        document.getElementById("currentSiteOriginal").value = response;
         currentSiteDisplay.innerHTML = response;
         if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
           currentSiteDisplay.style.display = "inline";
