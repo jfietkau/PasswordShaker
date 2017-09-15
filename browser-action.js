@@ -232,13 +232,15 @@ function reactToCurrentSiteClick(evt) {
 }
 
 function initializeCurrentSiteDisplay(settings) {
-  browser.runtime.sendMessage(
-    { getCurrentTopLevelHost: true }
-  ).then((response) => {
+  browser.runtime.sendMessage({
+    getCurrentTopLevelHost: true
+  }).then((response) => {
     if(response != null) {
       var currentSiteDisplay = document.getElementById("currentSite");
       if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault"
          && settings.profiles[getSelectedProfile()].psUseSiteSpecificRequirements) {
+        document.getElementById("currentSiteIntro").innerHTML = "Password for:";
+        currentSiteDisplay.style.display = "inline";
         var canonicalHostname = response;
         var passwordReq = passwordReqList.byHostname(canonicalHostname);
         if(passwordReq != null) {
@@ -250,8 +252,15 @@ function initializeCurrentSiteDisplay(settings) {
       } else {
         currentSiteArea.classList.remove("verified");
         document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
-        document.getElementById("currentSite").innerHTML = response;
         document.getElementById("currentSiteOriginal").value = response;
+        currentSiteDisplay.innerHTML = response;
+        if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
+          currentSiteDisplay.style.display = "inline";
+          document.getElementById("currentSiteIntro").innerHTML = "Password for:";
+        } else {
+          currentSiteDisplay.style.display = "none";
+          document.getElementById("currentSiteIntro").innerHTML = "Password for this site:";
+        }
       }
     }
   });
