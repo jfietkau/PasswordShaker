@@ -240,6 +240,7 @@ function reactToCurrentSiteClick(evt) {
     e.target.parentNode.removeChild(e.target);
     currentSiteDisplay.style.display = "inline-block";
     document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
+    updatePopupForm(currentSettings, {generatedPassword: true});
   });
 }
 
