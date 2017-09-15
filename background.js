@@ -16,7 +16,7 @@ createOrUpdateContextMenu();
 loadStoredMasterPassword();
 
 
-function generatePasswordForProfile(url, masterPassword, profileSettings, requestId) {
+function generatePasswordForProfile(url, masterPassword, profileSettings, hostnameOverride, requestId) {
   var generatedPassword = null;
   if(profileSettings.profileEngine == "profileEngineDefault") {
     var engineSpecificSettings = {
@@ -31,7 +31,8 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, reques
       hashAlgorithm: profileSettings.psHashAlgorithm,
       hashAlgorithmCoefficient: profileSettings.psAlgorithmCoefficient,
       mainSalt: profileSettings.psMainSalt,
-      useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements
+      useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements,
+      hostnameOverride: hostnameOverride
     };
     generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
@@ -64,7 +65,7 @@ function activateOnPage(url, masterPassword, profileId) {
   }
   var profileSettings = currentSettings.profiles[profileId];
   console.log(url + " - " + profileSettings.profileEngine);
-  generatePasswordForProfile(url, masterPassword, profileSettings, null).then((generatedPassword) => {
+  generatePasswordForProfile(url, masterPassword, profileSettings, null, null).then((generatedPassword) => {
     if(generatedPassword !== null) {
       browser.tabs.executeScript({file: "/injector.js"}).then(() => {
         browser.tabs.executeScript({code: "fillPassword('" + generatedPassword.password + "');"});
@@ -167,7 +168,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.wantExamplePasswordForProfile !== undefined) {
     loadSettings().then(() => {
       var profileSettings = currentSettings.profiles[request.wantExamplePasswordForProfile];
-      generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings, request.id).then((response) => {
+      generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings, null, request.id).then((response) => {
         sendResponse({examplePassword: response.password, requestId: response.requestId});
       });
     });
@@ -179,7 +180,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         var profileId = (request.profileId !== undefined) ? request.profileId : session.currentProfile;
         var profileSettings = currentSettings.profiles[profileId];
         var url = (request.url !== undefined) ? request.url : session.currentUrl;
-        generatePasswordForProfile(url, request.masterPassword, profileSettings, request.id).then((response) => {
+        generatePasswordForProfile(url, request.masterPassword, profileSettings, request.hostnameOverride, request.id).then((response) => {
           sendResponse({generatedPassword: response.password, requestId: response.requestId});
         });
       } else {
@@ -189,7 +190,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   if(request != null && request.numberOfPasswordFields !== undefined && currentSettings.showPageAction == "when-applicable") {
-    console.log(request);
     if(request.numberOfPasswordFields > 0) {
       browser.pageAction.show(request.tabId);
     } else {

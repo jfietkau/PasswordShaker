@@ -210,6 +210,9 @@ function generatePassword(masterPassword, url, settings, requestId) {
   }
   var hostName = extractHostName(url);
   var domain = extractTopLevelHostname(hostName);
+  if(settings.hostnameOverride) {
+    domain = settings.hostnameOverride;
+  }
   var thDomain = str2arr(domain);
   var thMainSalt = hex2arr(settings.mainSalt);
   var combinedSalt = new Uint8Array(thDomain.length + thMainSalt.length);

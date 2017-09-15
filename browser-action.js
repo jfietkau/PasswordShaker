@@ -134,7 +134,7 @@ function updatePopupForm(settings, toUpdate) {
     if(settings.showGeneratedPassword) {
       var generatedPasswordInput = document.getElementById("generatedPassword");
       var masterPassword = document.getElementById("masterPassword").value;
-      var profileId = document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 0;
+      var profileId = getSelectedProfile();
       if(generatedPasswordInput.value != "(click here to show)") {
         updateGeneratedPasswordInput(masterPassword, profileId);
       }
@@ -153,10 +153,15 @@ function updateGeneratedPasswordInput(input, profileId) {
     var myEventId = lastGeneratedPasswordEvent;
     setTimeout(() => {
       if(myEventId == lastGeneratedPasswordEvent) {
+        var hostnameOverride = undefined;
+        if(document.getElementById("currentSiteCustom").value.length > 0) {
+          hostnameOverride = document.getElementById("currentSiteCustom").value;
+        }
         browser.runtime.sendMessage({
           generatePassword: true,
           masterPassword: input,
           profileId: profileId,
+          hostnameOverride: hostnameOverride,
           id: myEventId,
         }).then((message) => {
           if(message.requestId == lastGeneratedPasswordEvent) {
@@ -200,6 +205,58 @@ function updateCurrentSite(siteText) {
   }
 }
 
+function getSelectedProfile() {
+  return document.getElementById("profileSelect") ? parseInt(document.getElementById("profileSelect").value, 10) : 0;
+}
+
+function reactToCurrentSiteClick(evt) {
+  var currentSiteDisplay = document.getElementById("currentSite");
+  var currentSiteArea = document.getElementById("currentSiteArea");
+  var siteInput = document.createElement("input");
+  siteInput.type = "text";
+  siteInput.id = "currentSiteInput";
+  if(currentSiteArea.classList.contains("verified")) {
+    siteInput.value = document.getElementById("currentSiteOriginal").value;
+  } else {
+    siteInput.value = currentSiteDisplay.innerHTML;
+  }
+  currentSiteArea.classList.remove("verified");
+  currentSiteArea.insertBefore(siteInput, document.getElementById("currentSite"));
+  currentSiteDisplay.style.display = "none";
+  siteInput.focus();
+  siteInput.addEventListener("blur", (e) => {
+    updateCurrentSite(e.target.value);
+    e.target.parentNode.removeChild(e.target);
+    currentSiteDisplay.style.display = "inline-block";
+  });
+}
+
+function initializeCurrentSiteDisplay(settings) {
+  browser.runtime.sendMessage(
+    { getCurrentTopLevelHost: true }
+  ).then((response) => {
+    if(response != null) {
+      var currentSiteDisplay = document.getElementById("currentSite");
+      if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault"
+         && settings.profiles[getSelectedProfile()].psUseSiteSpecificRequirements) {
+        var canonicalHostname = response;
+        var passwordReq = passwordReqList.byHostname(canonicalHostname);
+        if(passwordReq != null) {
+          canonicalHostname = passwordReq.hostnames[0];
+        }
+        document.getElementById("currentSiteOriginal").value = canonicalHostname;
+        updateCurrentSite(canonicalHostname);
+        document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
+      } else {
+        currentSiteArea.classList.remove("verified");
+        document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
+        document.getElementById("currentSite").innerHTML = response;
+        document.getElementById("currentSiteOriginal").value = response;
+      }
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
     browser.runtime.sendMessage(
@@ -213,40 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePopupForm(currentSettings);
       }
     });
-    browser.runtime.sendMessage(
-      { getCurrentTopLevelHost: true }
-    ).then((response) => {
-      if(response != null) {
-        var currentSiteDisplay = document.getElementById("currentSite");
-        var canonicalHostname = response;
-        var passwordReq = passwordReqList.byHostname(canonicalHostname);
-        if(passwordReq != null) {
-          canonicalHostname = passwordReq.hostnames[0];
-        }
-        document.getElementById("currentSiteOriginal").value = canonicalHostname;
-        updateCurrentSite(canonicalHostname);
-        document.getElementById("currentSiteArea").addEventListener("click", (e) => {
-          var currentSiteArea = document.getElementById("currentSiteArea");
-          var siteInput = document.createElement("input");
-          siteInput.type = "text";
-          siteInput.id = "currentSiteInput";
-          if(currentSiteArea.classList.contains("verified")) {
-            siteInput.value = document.getElementById("currentSiteOriginal").value;
-          } else {
-            siteInput.value = currentSiteDisplay.innerHTML;
-          }
-          currentSiteArea.classList.remove("verified");
-          currentSiteArea.insertBefore(siteInput, document.getElementById("currentSite"));
-          currentSiteDisplay.style.display = "none";
-          siteInput.focus();
-          siteInput.addEventListener("blur", (e) => {
-            updateCurrentSite(e.target.value);
-            e.target.parentNode.removeChild(e.target);
-            currentSiteDisplay.style.display = "inline-block";
-          });
-        });
-      }
-    });
+    initializeCurrentSiteDisplay(currentSettings);
     browser.runtime.sendMessage(
       { getSessionVariable: "currentProfile" }
     ).then((response) => {
@@ -274,8 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       generatedPasswordInput.addEventListener("click", () => {
         if(generatedPasswordInput.style.cursor != "auto") {
           generatedPasswordInput.style.cursor = "auto";
-          updateGeneratedPasswordInput(document.getElementById("masterPassword").value,
-                                       document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 0);
+          updateGeneratedPasswordInput(document.getElementById("masterPassword").value, getSelectedProfile());
         }
       });
     }
@@ -296,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("mainForm").addEventListener("submit", (e) => {
     e.preventDefault();
     var enteredMasterPassword = document.getElementById("masterPassword").value;
-    var enteredProfileId = document.getElementById("profileSelect") ? document.getElementById("profileSelect").value : 0;
+    var enteredProfileId = getSelectedProfile();
     browser.runtime.sendMessage({
       activateOnPage: true,
       masterPassword: enteredMasterPassword,
@@ -324,6 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   document.getElementById("profileSelect").addEventListener("change", (e) => {
+    initializeCurrentSiteDisplay(currentSettings);
     updatePopupForm(currentSettings, {generatedPassword: true});
   });
 });
