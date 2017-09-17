@@ -343,10 +343,17 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     var enteredMasterPassword = document.getElementById("masterPassword").value;
     var enteredProfileId = getSelectedProfile();
+    var hostnameOverride = undefined;
+    if(document.getElementById("currentSiteCustom").value.length > 0) {
+      hostnameOverride = document.getElementById("currentSiteCustom").value;
+    } else if(document.getElementById("currentSiteOriginal").value.length > 0) {
+      hostnameOverride = document.getElementById("currentSiteOriginal").value;
+    }
     browser.runtime.sendMessage({
       activateOnPage: true,
       masterPassword: enteredMasterPassword,
-      profileId: enteredProfileId
+      profileId: enteredProfileId,
+      hostnameOverride: hostnameOverride,
     }).then(() => {
       if(currentSettings.storeMasterPasswordHash && storedHash === null) {
         var newSalt = dcodeIO.bcrypt.genSaltSync(10);

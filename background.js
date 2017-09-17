@@ -34,7 +34,8 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
       hashAlgorithmCoefficient: profileSettings.psAlgorithmCoefficient,
       mainSalt: profileSettings.psMainSalt,
       useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements,
-      hostnameOverride: hostnameOverride
+      passwordRequirements: passwordReqListParser.byUrl(url),
+      hostnameOverride: hostnameOverride,
     };
     generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
@@ -51,14 +52,14 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
       useProtocol: profileSettings.pmUseProtocol,
       useSubdomains: profileSettings.pmUseSubdomains,
       useDomain: profileSettings.pmUseDomain,
-      usePath: profileSettings.pmUseOther
+      usePath: profileSettings.pmUseOther,
     };
     generatedPassword = pmGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   }
   return generatedPassword;
 }
 
-function activateOnPage(url, masterPassword, profileId) {
+function activateOnPage(url, masterPassword, profileId, hostnameOverride) {
   if(profileId === undefined) {
     profileId = session.currentProfile;
   }
@@ -66,8 +67,7 @@ function activateOnPage(url, masterPassword, profileId) {
     return;
   }
   var profileSettings = currentSettings.profiles[profileId];
-  console.log(url + " - " + profileSettings.profileEngine);
-  generatePasswordForProfile(url, masterPassword, profileSettings, null, null).then((generatedPassword) => {
+  generatePasswordForProfile(url, masterPassword, profileSettings, hostnameOverride, null).then((generatedPassword) => {
     if(generatedPassword !== null) {
       browser.tabs.executeScript({file: "/injector.js"}).then(() => {
         browser.tabs.executeScript({code: "fillPassword('" + generatedPassword.password + "');"});
@@ -171,7 +171,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       browser.pageAction.hide(session.currentTabId);
     }
     var currentUrl = session.currentUrl;
-    activateOnPage(currentUrl, request.masterPassword, request.profileId);
+    activateOnPage(currentUrl, request.masterPassword, request.profileId, request.hostnameOverride);
   }
   if(request != null && request.wantExamplePasswordForProfile !== undefined) {
     loadSettings().then(() => {
@@ -222,7 +222,7 @@ function activateProfile(profileId, url) {
       animatePageAction(animation, session.currentTabId);
     }
   } else {
-    activateOnPage(url, session.masterPassword, profileId);
+    activateOnPage(url, session.masterPassword, profileId, null);
   }
 }
 
