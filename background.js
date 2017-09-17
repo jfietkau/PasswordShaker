@@ -10,6 +10,8 @@ var session = {
 
 // Parse the public suffix list for hostnames, this only has to happen once while the scripts are in RAM.
 publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
+// Same for the password requirement list.
+passwordReqListParser.parse(passwordReqList);
 
 createOrUpdateContextMenu();
 
@@ -34,7 +36,6 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
       useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements,
       hostnameOverride: hostnameOverride
     };
-    console.log("A: " + hostnameOverride);
     generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
     var engineSpecificSettings = {
@@ -134,16 +135,22 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(null);
     }
   }
-  if(request != null && request.getCurrentTopLevelHost !== undefined) {
+  if(request != null && request.getCurrentUrlDetails !== undefined) {
     if(session != undefined && session.currentUrl != null) {
       var url = new URL(session.currentUrl);
-      var hostName;
+      var publicSuffix;
       if(url.protocol == "file:") {
-        hostName = "Local file";
+        publicSuffix = "Local file";
       } else {
-        hostName = extractTopLevelHostname(url.hostname);
+        publicSuffix = extractTopLevelHostname(url.hostname);
       }
-      sendResponse(hostName);
+      var response = {
+        url: url,
+        hostname: url.hostname,
+        passwordReq: passwordReqListParser.byUrl(session.currentUrl),
+        publicSuffix: publicSuffix,
+      };
+      sendResponse(response);
     } else {
       sendResponse(null);
     }

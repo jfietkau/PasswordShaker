@@ -2,6 +2,7 @@ var storedHash = null;
 var lastVisualHashEvent = null;
 var lastGeneratedPasswordEvent = null;
 var clickEventInProgress = false;
+var currentPasswordReq = null;
 
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
@@ -194,9 +195,8 @@ function updateCurrentSite(siteText) {
   if(siteText == siteTextOriginal) {
     document.getElementById("currentSiteCustom").value = "";
     var siteTextFancy = siteText;
-    var passwordReq = passwordReqList.byHostname(siteText);
-    if(passwordReq != null) {
-      siteTextFancy = passwordReq.name;
+    if(currentPasswordReq != null) {
+      siteTextFancy = currentPasswordReq.name;
     }
     document.getElementById("currentSite").innerHTML = siteTextFancy;
     if(siteTextFancy != siteText) {
@@ -246,7 +246,7 @@ function reactToCurrentSiteClick(evt) {
 
 function initializeCurrentSiteDisplay(settings) {
   browser.runtime.sendMessage({
-    getCurrentTopLevelHost: true
+    getCurrentUrlDetails: true
   }).then((response) => {
     if(response != null) {
       var currentSiteDisplay = document.getElementById("currentSite");
@@ -254,11 +254,11 @@ function initializeCurrentSiteDisplay(settings) {
          && settings.profiles[getSelectedProfile()].psUseSiteSpecificRequirements) {
         document.getElementById("currentSiteIntro").innerHTML = "Password for:";
         currentSiteDisplay.style.display = "inline";
-        var canonicalHostname = response;
-        var passwordReq = passwordReqList.byHostname(canonicalHostname);
-        if(passwordReq != null) {
-          canonicalHostname = passwordReq.hostnames[0];
+        var canonicalHostname = response.publicSuffix;
+        if(response.passwordReq != null) {
+          canonicalHostname = response.passwordReq.hostnames[0];
         }
+        currentPasswordReq = response.passwordReq;
         document.getElementById("currentSiteOriginal").value = canonicalHostname;
         updateCurrentSite(canonicalHostname);
         document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
@@ -267,7 +267,7 @@ function initializeCurrentSiteDisplay(settings) {
         document.getElementById("currentSiteOriginal").value = "";
         document.getElementById("currentSiteCustom").value = "";
         document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
-        currentSiteDisplay.innerHTML = response;
+        currentSiteDisplay.innerHTML = response.publicSuffix;
         if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
           currentSiteDisplay.style.display = "inline";
           document.getElementById("currentSiteIntro").innerHTML = "Password for:";

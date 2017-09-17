@@ -76,23 +76,18 @@
         color: #48f;
         white-space: pre;
       }
-      #currentSiteArea .checkmark {
+      #currentSiteArea img.checkmark {
         display: none;
       }
       #currentSiteArea.verified #currentSite {
         color: #080;
       }
-      #currentSiteArea.verified .checkmark {
-        display: inline-block;
-        margin: -1em 0 -1em .7em;
-        width: 1.5em;
-        height: 1.5em;
-        border-radius: .75em;
-        background: #48f;
-        color: #fff;
-        font-size: .8em;
-        font-weight: bold;
-        text-align: center;
+      #currentSiteArea.verified img.checkmark {
+        display: inline;
+        width: 1.2em;
+        height: 1.2em;
+        margin-left: .4em;
+        vertical-align: middle;
       }
       #currentSiteInput {
         display: inline;
@@ -146,7 +141,7 @@
 
       <form id="generatedPasswordForm">
         <span id="currentSiteIntro">Password for:</span>
-        <span id="currentSiteArea"><span id="currentSite"></span><span class="checkmark">✓</span></span><br>
+        <span id="currentSiteArea"><span id="currentSite"></span><img src="/icons/verified.svg" alt="verified" class="checkmark"></span><br>
         <input type="text" id="generatedPassword" readonly value="(click here to show)">
         <input type="submit" style="display: none;">
       </form>
