@@ -141,9 +141,31 @@ function countNumberOf(alphabet, data) {
   return count;
 }
 
+function replaceAt(str, index, char) {
+  return str.substr(0, index) + char + str.substr(index + 1);
+}
+
 function forceInto(alphabet, data, number) {
-  // TODO
+  var offsetCandidates = [7, 37, 71, 103, 139, 181];
+  while(number > 0) {
+    number--;
+    var offset = offsetCandidates[offsetCandidates.length - 1];
+    while(alphabet.indexOf(data[offset % data.length]) > -1) {
+      offset += offsetCandidates[offset % offsetCandidates.length];
+    }
+    data = replaceAt(data, offset % data.length, alphabet[offset % alphabet.length]);
+  }
   return data;
+}
+
+function countDistinct(str) {
+  var chars = "";
+  for(var i = 0; i < str.length; i++) {
+    if(chars.indexOf(str[i]) == -1) {
+      chars += str[i];
+    }
+  }
+  return chars.length;
 }
 
 function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve, requestId) {
@@ -258,7 +280,24 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
         }
       }
     }
-    resolve({password: accumulator.password, requestId: requestId});
+    if(settings.passwordRequirements.hasOwnProperty("minDistinctCharacters")) {
+      var offset = 151;
+      while(countDistinct(accumulator.password) < settings.passwordRequirements.minDistinctCharacters) {
+        console.log(offset);
+        console.log(charSet.length);
+        console.log(offset % charSet.length);
+        console.log(accumulator.password[offset % accumulator.password.length] + " -> " + charSet[offset % charSet.length]);
+        accumulator.password = replaceAt(accumulator.password, offset % accumulator.password.length, charSet[offset % charSet.length]);
+        offset += 151;
+        if(offset < 0) {
+          offset = 0;
+        }
+      }
+    }
+    resolve({
+      password: accumulator.password,
+      requestId: requestId
+    });
   }
 }
 
@@ -288,5 +327,6 @@ function generatePassword(masterPassword, url, settings, requestId) {
 
 // Provide the main interface for this password generation engine
 base.psGeneratePassword = generatePassword;
+base.countDistinct = countDistinct;
 
 })();
