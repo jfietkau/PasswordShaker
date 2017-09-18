@@ -42,25 +42,38 @@ function getRandomBytes(numberOfBytes) {
   return uint8View;
 }
 
+var charSetSegment = {
+  upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  lower: "abcdefghijklmnopqrstuvwxyz",
+  letter: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+  digit: "0123456789",
+  special: "!#$%&()*+,-./:;<=>?@[\]^_`{|}~",
+  spaceQuotation: "\"' ",
+};
+
 function createCharSet(settings) {
   var charSet = "";
-  if(settings.charactersAlphaCap || settings.passwordRequirements.minNumUpper > 0) {
-    charSet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  if((settings.charactersAlphaCap || settings.passwordRequirements.minNumUpper > 0)
+     && (!settings.passwordRequirements.hasOwnProperty("maxNumUpper") || (settings.passwordRequirements.maxNumUpper > 0))) {
+    charSet += charSetSegment.upper;
   }
-  if(settings.charactersAlphaLower || settings.passwordRequirements.minNumLower > 0) {
-    charSet += "abcdefghijklmnopqrstuvwxyz";
+  if((settings.charactersAlphaLower || settings.passwordRequirements.minNumLower > 0)
+     && (!settings.passwordRequirements.hasOwnProperty("maxNumLower") || (settings.passwordRequirements.maxNumLower > 0))) {
+    charSet += charSetSegment.lower;
   }
   if(charSet.length == 0 && settings.passwordRequirements.minNumLetter > 0) {
-    charSet += "abcdefghijklmnopqrstuvwxyz";
+    charSet += charSetSegment.letter;
   }
-  if(settings.charactersNumbers || settings.passwordRequirements.minNumDigit > 0) {
-    charSet += "0123456789";
+  if((settings.charactersNumbers || settings.passwordRequirements.minNumDigit > 0)
+     && (!settings.passwordRequirements.hasOwnProperty("maxNumDigit") || (settings.passwordRequirements.maxNumDigit > 0))) {
+    charSet += charSetSegment.digit;
   }
-  if(settings.charactersSpecial || settings.passwordRequirements.minNumSpecial > 0) {
-    charSet += "!#$%&()*+,-./:;<=>?@[\]^_`{|}~";
+  if((settings.charactersSpecial || settings.passwordRequirements.minNumSpecial > 0)
+     && (!settings.passwordRequirements.hasOwnProperty("maxNumSpecial") || (settings.passwordRequirements.maxNumSpecial > 0))) {
+    charSet += charSetSegment.special;
   }
   if(settings.charactersSpaceQuotation) {
-    charSet += "\"' ";
+    charSet += charSetSegment.spaceQuotation;
   }
   if(settings.charactersCustom) {
     charSet += settings.charactersCustomList;
@@ -98,7 +111,14 @@ function extractTopLevelHostname(hostName) {
 function handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId) {
   var charSet = createCharSet(settings);
   var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
-  while(hashResult.length >= 8 && accumulator.password.length < settings.passwordLength) {
+  var desiredPasswordLength = settings.passwordLength;
+  if(settings.passwordRequirements.minLength) {
+    desiredPasswordLength = Math.max(desiredPasswordLength, settings.passwordRequirements.minLength);
+  }
+  if(settings.passwordRequirements.maxLength) {
+    desiredPasswordLength = Math.min(desiredPasswordLength, settings.passwordRequirements.maxLength);
+  }
+  while(hashResult.length >= 8 && accumulator.password.length < desiredPasswordLength) {
     var hashPart = parseInt(hashResult.slice(0, 8), 16) >>> 0;
     hashResult = hashResult.slice(8);
     for(var i = 0; i < maxCharactersPerUint; i++) {
@@ -111,6 +131,19 @@ function handleHashResult(hashResult, masterPassword, url, settings, depth, accu
   combinedSaltNew[combinedSaltNew.length - 1] = 0xff;
   accumulator.salt = combinedSaltNew;
   generatePasswordPart(masterPassword, url, settings, depth + 1, accumulator, resolve, requestId);
+}
+
+function countNumberOf(alphabet, data) {
+  var count = 0;
+  for(var i = 0; i < alphabet.length; i++) {
+    count += data.split(alphabet[i]).length - 1;
+  }
+  return count;
+}
+
+function forceInto(alphabet, data, number) {
+  // TODO
+  return data;
 }
 
 function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve, requestId) {
@@ -126,7 +159,14 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   var thDomain = str2arr(domain);
   var thMainSalt = hex2arr(settings.mainSalt);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
-  if(accumulator.password.length < settings.passwordLength) {
+  var desiredPasswordLength = settings.passwordLength;
+  if(settings.passwordRequirements.minLength) {
+    desiredPasswordLength = Math.max(desiredPasswordLength, settings.passwordRequirements.minLength);
+  }
+  if(settings.passwordRequirements.maxLength) {
+    desiredPasswordLength = Math.min(desiredPasswordLength, settings.passwordRequirements.maxLength);
+  }
+  if(accumulator.password.length < desiredPasswordLength) {
     var hashResult = null;
     if(settings.hashAlgorithm == "pbkdf2-hmac-sha256") {
       hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword, accumulator.salt, settings.hashAlgorithmCoefficient, 64);
@@ -207,22 +247,31 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
       handleHashResult(arr2hex(hashArr), masterPassword, url, settings, depth, accumulator, resolve, requestId);
     }
   } else {
-    accumulator.password = accumulator.password.slice(0, settings.passwordLength);
+    accumulator.password = accumulator.password.slice(0, desiredPasswordLength);
+    var charClasses = ["Upper", "Lower", "Letter", "Digit", "Special"];
+    for(var i = 0; i < charClasses.length; i++) {
+      if(settings.passwordRequirements.hasOwnProperty("minNum" + charClasses[i])) {
+        if(countNumberOf(charSetSegment[charClasses[i].toLowerCase()], accumulator.password) < settings.passwordRequirements["minNum" + charClasses[i]]) {
+          accumulator.password = forceInto(charSetSegment[charClasses[i].toLowerCase()], accumulator.password,
+                                           settings.passwordRequirements["minNum" + charClasses[i]] - 
+                                             countNumberOf(charSetSegment[charClasses[i].toLowerCase()], accumulator.password));
+        }
+      }
+    }
     resolve({password: accumulator.password, requestId: requestId});
   }
 }
 
 function generatePassword(masterPassword, url, settings, requestId) {
+  settings.passwordRequirements = settings.passwordRequirements || {};
   var charSet = createCharSet(settings);
   if(charSet.length < 2) {
     return null;
   }
   var hostName = extractHostName(url);
   var domain = extractTopLevelHostname(hostName);
-  if(settings.passwordRequirements) {
+  if(settings.passwordRequirements.hasOwnProperty("hostnames")) {
     domain = settings.passwordRequirements.hostnames[0];
-  } else {
-    settings.passwordRequirements = {};
   }
   if(settings.hostnameOverride) {
     domain = settings.hostnameOverride;

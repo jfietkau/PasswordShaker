@@ -34,9 +34,12 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
       hashAlgorithmCoefficient: profileSettings.psAlgorithmCoefficient,
       mainSalt: profileSettings.psMainSalt,
       useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements,
-      passwordRequirements: passwordReqListParser.byUrl(url),
+      passwordRequirements: null,
       hostnameOverride: hostnameOverride,
     };
+    if(profileSettings.psUseSiteSpecificRequirements) {
+      engineSpecificSettings.passwordRequirements = passwordReqListParser.byUrl(url);
+    }
     generatedPassword = psGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   } else if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
     var engineSpecificSettings = {
