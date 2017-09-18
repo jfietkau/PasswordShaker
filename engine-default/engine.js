@@ -44,16 +44,19 @@ function getRandomBytes(numberOfBytes) {
 
 function createCharSet(settings) {
   var charSet = "";
-  if(settings.charactersAlphaCap) {
+  if(settings.charactersAlphaCap || settings.passwordRequirements.minNumUpper > 0) {
     charSet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   }
-  if(settings.charactersAlphaLower) {
+  if(settings.charactersAlphaLower || settings.passwordRequirements.minNumLower > 0) {
     charSet += "abcdefghijklmnopqrstuvwxyz";
   }
-  if(settings.charactersNumbers) {
+  if(charSet.length == 0 && settings.passwordRequirements.minNumLetter > 0) {
+    charSet += "abcdefghijklmnopqrstuvwxyz";
+  }
+  if(settings.charactersNumbers || settings.passwordRequirements.minNumDigit > 0) {
     charSet += "0123456789";
   }
-  if(settings.charactersSpecial) {
+  if(settings.charactersSpecial || settings.passwordRequirements.minNumSpecial > 0) {
     charSet += "!#$%&()*+,-./:;<=>?@[\]^_`{|}~";
   }
   if(settings.charactersSpaceQuotation) {
@@ -114,6 +117,12 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   var charSet = createCharSet(settings);
   var hostName = extractHostName(url);
   var domain = extractTopLevelHostname(hostName);
+  if(settings.passwordRequirements && settings.passwordRequirements.hasOwnProperty("hostnames")) {
+    domain = settings.passwordRequirements.hostnames[0];
+  }
+  if(settings.hostnameOverride) {
+    domain = settings.hostnameOverride;
+  }
   var thDomain = str2arr(domain);
   var thMainSalt = hex2arr(settings.mainSalt);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
@@ -142,9 +151,9 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
       var N = 2 ** settings.hashAlgorithmCoefficient, r = 8, p = 1;
       var dkLen = 64;
       scrypt(str2arr(masterPassword), accumulator.salt, N, r, p, dkLen, function(error, progress, key) {
-        if (key) {
+        if(key) {
           handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve, requestId);
-        } else if (error) {
+        } else if(error) {
           console.log("scrypt error: " + error);
         }
       });
@@ -172,15 +181,15 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
       }
       if (res === 0 && !err) {
         var hashArr = [];
-        for (var i = hash; i < hash + hashlen; i++) {
+        for(var i = hash; i < hash + hashlen; i++) {
           hashArr.push(Module.HEAP8[i]);
         }
       } else {
         try {
-          if (!err) {
+          if(!err) {
             err = Module.Pointer_stringify(Module._argon2_error_message(res))
           }
-        } catch (e) {}
+        } catch(e) {}
         console.log('Argon2 error: ' + res + (err ? ': ' + err : ''));
       }
       try {
@@ -212,6 +221,8 @@ function generatePassword(masterPassword, url, settings, requestId) {
   var domain = extractTopLevelHostname(hostName);
   if(settings.passwordRequirements) {
     domain = settings.passwordRequirements.hostnames[0];
+  } else {
+    settings.passwordRequirements = {};
   }
   if(settings.hostnameOverride) {
     domain = settings.hostnameOverride;
