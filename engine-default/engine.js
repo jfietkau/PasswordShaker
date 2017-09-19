@@ -145,13 +145,13 @@ function replaceAt(str, index, char) {
   return str.substr(0, index) + char + str.substr(index + 1);
 }
 
-function forceInto(alphabet, data, number) {
+function forceInto(alphabet, data, number, seedInt) {
   var offsetCandidates = [7, 37, 71, 103, 139, 181];
   while(number > 0) {
     number--;
     var offset = offsetCandidates[offsetCandidates.length - 1];
     while(alphabet.indexOf(data[offset % data.length]) > -1) {
-      offset += offsetCandidates[offset % offsetCandidates.length];
+      offset += offsetCandidates[(offset + seedInt) % offsetCandidates.length];
     }
     data = replaceAt(data, offset % data.length, alphabet[offset % alphabet.length]);
   }
@@ -166,6 +166,64 @@ function countDistinct(str) {
     }
   }
   return chars.length;
+}
+
+function fulfillsInvariant(password, invariant) {
+  invariant = invariant.replace(/ /g, "");
+  var fulfills;
+  if(invariant.indexOf("||") > -1) {
+    fulfills = false;
+    var segments = invariant.split("||");
+    for(var i = 0; i < segments.length; i++) {
+      fulfills = fulfills || fulfillsInvariant(password, segments[i]);
+    }
+  } else if(invariant.indexOf("&&") > -1) {
+    fulfills = true;
+    var segments = invariant.split("&&");
+    for(var i = 0; i < segments.length; i++) {
+      fulfills = fulfills && fulfillsInvariant(password, segments[i]);
+    }
+  } else {
+    invariant = invariant.replace(/\(/g, "");
+    invariant = invariant.replace(/\)/g, "");
+    var charClasses = ["Upper", "Lower", "Letter", "Digit", "Special"];
+    for(var i = 0; i < charClasses.length; i++) {
+      invariant = invariant.replace(new RegExp("num" + charClasses[i], 'g'), countNumberOf(charSetSegment[charClasses[i].toLowerCase()], password));
+    }
+    var prevStep = null;
+    while(invariant != prevStep) {
+      prevStep = invariant;
+      if(invariant.match(/[0-9]+\+[0-9]+/) != null) {
+        var match = invariant.match(/[0-9]+\+[0-9]+/)[0];
+        var replacement = match.split("+");
+        replacement = parseInt(replacement[0], 10) + parseInt(replacement[1], 10);
+        invariant = invariant.split(match).join(replacement);
+      }
+      if(invariant.match(/[0-9]+-[0-9]+/) != null) {
+        var match = invariant.match(/[0-9]+-[0-9]+/)[0];
+        var replacement = match.split("-");
+        replacement = parseInt(replacement[0], 10) - parseInt(replacement[1], 10);
+        invariant = invariant.split(match).join(replacement);
+      }
+    }
+    if(invariant.indexOf(">=") > -1) {
+      var sides = invariant.split(">=");
+      fulfills = parseInt(sides[0], 10) >= parseInt(sides[1], 10);
+    } else if(invariant.indexOf("<=") > -1) {
+      var sides = invariant.split("<=");
+      fulfills = parseInt(sides[0], 10) <= parseInt(sides[1], 10);
+    } else if(invariant.indexOf("==") > -1) {
+      var sides = invariant.split("==");
+      fulfills = parseInt(sides[0], 10) == parseInt(sides[1], 10);
+    } else if(invariant.indexOf(">") > -1) {
+      var sides = invariant.split(">");
+      fulfills = parseInt(sides[0], 10) > parseInt(sides[1], 10);
+    } else if(invariant.indexOf("<") > -1) {
+      var sides = invariant.split("<");
+      fulfills = parseInt(sides[0], 10) < parseInt(sides[1], 10);
+    }
+  }
+  return fulfills;
 }
 
 function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve, requestId) {
@@ -271,27 +329,48 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   } else {
     accumulator.password = accumulator.password.slice(0, desiredPasswordLength);
     var charClasses = ["Upper", "Lower", "Letter", "Digit", "Special"];
+    var seedInts = [0, 5, 11, 17, 23];
     for(var i = 0; i < charClasses.length; i++) {
       if(settings.passwordRequirements.hasOwnProperty("minNum" + charClasses[i])) {
         if(countNumberOf(charSetSegment[charClasses[i].toLowerCase()], accumulator.password) < settings.passwordRequirements["minNum" + charClasses[i]]) {
           accumulator.password = forceInto(charSetSegment[charClasses[i].toLowerCase()], accumulator.password,
                                            settings.passwordRequirements["minNum" + charClasses[i]] - 
-                                             countNumberOf(charSetSegment[charClasses[i].toLowerCase()], accumulator.password));
+                                             countNumberOf(charSetSegment[charClasses[i].toLowerCase()], accumulator.password),
+                                           seedInts[i]);
         }
       }
     }
     if(settings.passwordRequirements.hasOwnProperty("minDistinctCharacters")) {
       var offset = 151;
       while(countDistinct(accumulator.password) < settings.passwordRequirements.minDistinctCharacters) {
-        console.log(offset);
-        console.log(charSet.length);
-        console.log(offset % charSet.length);
-        console.log(accumulator.password[offset % accumulator.password.length] + " -> " + charSet[offset % charSet.length]);
         accumulator.password = replaceAt(accumulator.password, offset % accumulator.password.length, charSet[offset % charSet.length]);
         offset += 151;
         if(offset < 0) {
           offset = 0;
         }
+      }
+    }
+    if(settings.passwordRequirements.hasOwnProperty("invariant")) {
+      var offset = 0;
+      var mentioned = [];
+      for(var i = 0; i < charClasses.length; i++) {
+        if(settings.passwordRequirements.invariant.indexOf("num" + charClasses[i]) > -1) {
+          mentioned.push(charClasses[i]);
+        }
+      }
+      var maxIter = 1000;
+      while(maxIter-- > 0 && !fulfillsInvariant(accumulator.password, settings.passwordRequirements.invariant)) {
+        // In practice, the invariant will probably always be used for minimum occurrances of whatever
+        // character class. So we make the naive assumption here that we can eventually fulfill it by
+        // increasing each character class mentioned in it in turn. Assuming the password itself is
+        // long enough, this should fulfill the invariant almost immediately. If the invariant itself
+        // is impossible or highly unlikely to fulfill at the given length, we just give up.
+        accumulator.password = forceInto(charSetSegment[mentioned[maxIter % mentioned.length].toLowerCase()], accumulator.password,
+                                         1,
+                                         seedInts[maxIter % seedInts.length]);
+      }
+      if(maxIter == 0) {
+        accumulator.password = null;
       }
     }
     resolve({
@@ -327,6 +406,5 @@ function generatePassword(masterPassword, url, settings, requestId) {
 
 // Provide the main interface for this password generation engine
 base.psGeneratePassword = generatePassword;
-base.countDistinct = countDistinct;
 
 })();
