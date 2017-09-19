@@ -71,7 +71,7 @@ function activateOnPage(url, masterPassword, profileId, hostnameOverride) {
   }
   var profileSettings = currentSettings.profiles[profileId];
   generatePasswordForProfile(url, masterPassword, profileSettings, hostnameOverride, null).then((generatedPassword) => {
-    if(generatedPassword !== null) {
+    if(generatedPassword !== null && generatedPassword.password !== null) {
       browser.tabs.executeScript({file: "/injector.js"}).then(() => {
         browser.tabs.executeScript({code: "fillPassword('" + generatedPassword.password + "');"});
       });
