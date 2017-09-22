@@ -231,9 +231,11 @@ function activateProfile(profileId, url) {
 
 browser.menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId.startsWith("password-shaker-menu-profile-") || info.menuItemId.startsWith("password-shaker-tools-profile-")) {
-    var selectedProfile = parseInt(info.menuItemId.split("-")[4]);
-    session.currentTabId = tab.id;
-    activateProfile(selectedProfile, info["pageUrl"]);
+    if(!info["pageUrl"].startsWith("about:")) {
+      var selectedProfile = parseInt(info.menuItemId.split("-")[4]);
+      session.currentTabId = tab.id;
+      activateProfile(selectedProfile, info["pageUrl"]);
+    }
   }
   if (info.menuItemId == "password-shaker-tools-settings") {
     browser.runtime.openOptionsPage();

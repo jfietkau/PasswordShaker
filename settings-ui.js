@@ -464,15 +464,6 @@ document.addEventListener("DOMContentLoaded", () => {
   for(var i = 0; i < elems.length; i++) {
     elems[i].addEventListener("change", (e) => {
       if(ignoreFormEvents == 0) {
-        if(e.target.id == "showPageAction" && false) {
-          // Gotta postpone this until Firefox 56, because 55 has a bug where this promise doesn't fire.
-          // (verified fixed in the 56 beta)
-          ignoreFormEvents += 1;
-          browser.permissions.request({permissions: [], origins: ["<all_urls>"]}).then((response) => {
-            console.log(response);
-          });
-          ignoreFormEvents -= 1;
-        }
         if(e.target.id == "psHashAlgorithm") {
           ignoreFormEvents += 1;
           var newAlgo = e.target.value;
@@ -506,8 +497,8 @@ document.addEventListener("DOMContentLoaded", () => {
           updateExamplePassword();
         } else {
           saveSettings().then(() => {
-          createOrUpdateMenu();
-        });
+            createOrUpdateMenu();
+          });
         }
       }
     });
@@ -558,10 +549,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   browser.runtime.getBrowserInfo().then((info) => {
-    if(info.vendor == "Mozilla" && info.name == "Firefox" && parseInt(info.version) < 56) {
+    if(info.vendor == "Mozilla" && info.name == "Firefox") {
       var showPageAction = document.getElementById("showPageAction");
       var whenApplicable = showPageAction.getElementsByTagName('option')[1];
-      whenApplicable.innerHTML += " (requires Firefox ≥ 56.0)";
+      whenApplicable.innerHTML += " (coming soon!)";
       whenApplicable.disabled = true;
     }
   });
