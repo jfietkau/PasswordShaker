@@ -384,7 +384,12 @@ function generatePassword(masterPassword, url, settings, requestId) {
   settings.passwordRequirements = settings.passwordRequirements || {};
   var charSet = createCharSet(settings);
   if(charSet.length < 2) {
-    return null;
+    return new Promise((resolve, reject) => {
+      resolve({
+        password: null,
+        requestId: requestId
+      });
+    });
   }
   var hostName = extractHostName(url);
   var domain = extractTopLevelHostname(hostName);
