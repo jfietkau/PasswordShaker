@@ -13,7 +13,7 @@ publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
 // Same for the password requirement list.
 passwordReqListParser.parse(passwordReqList);
 
-createOrUpdateContextMenu();
+createOrUpdateMenu();
 
 loadStoredMasterPassword();
 
@@ -229,11 +229,14 @@ function activateProfile(profileId, url) {
   }
 }
 
-browser.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId.startsWith("password-shaker-context-menu-")) {
-    var selectedProfile = parseInt(info.menuItemId.slice("password-shaker-context-menu-".length));
+browser.menus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId.startsWith("password-shaker-menu-profile-") || info.menuItemId.startsWith("password-shaker-tools-profile-")) {
+    var selectedProfile = parseInt(info.menuItemId.split("-")[4]);
     session.currentTabId = tab.id;
     activateProfile(selectedProfile, info["pageUrl"]);
+  }
+  if (info.menuItemId == "password-shaker-tools-settings") {
+    browser.runtime.openOptionsPage();
   }
 });
 

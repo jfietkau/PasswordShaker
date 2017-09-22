@@ -447,7 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
       populateProfileArea(currentSettings, currentSettings.profiles.length - 1);
       populateSecurityAlerts();
       saveSettings().then(() => {
-        createOrUpdateContextMenu();
+        createOrUpdateMenu();
       });
     });
     if(currentSettings.showSecurityAlerts) {
@@ -506,7 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
           updateExamplePassword();
         } else {
           saveSettings().then(() => {
-          createOrUpdateContextMenu();
+          createOrUpdateMenu();
         });
         }
       }
@@ -553,7 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
       populateSecurityAlerts();
       updateSecurityAlerts();
       updateExamplePassword();
-      createOrUpdateContextMenu();
+      createOrUpdateMenu();
     });
   });
 

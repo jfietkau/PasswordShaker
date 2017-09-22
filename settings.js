@@ -148,36 +148,65 @@ function getDefaultProfileSettings() {
   };
 }
 
-function createOrUpdateContextMenu() {
+function createOrUpdateMenu() {
   loadSettings().then(() => {
-    browser.contextMenus.removeAll().then(() => {
-      var numberOfContextMenuEntries = 0;
-      for(var i = 0; i < currentSettings.profiles.length; i++) {
-        if(currentSettings.profiles[i].showInContextMenu) {
-          numberOfContextMenuEntries++;
+    browser.runtime.getBrowserInfo().then((info) => {
+      var onPre56Firefox = (info.vendor == "Mozilla" && info.name == "Firefox" && parseInt(info.version, 10) < 56);
+      browser.menus.removeAll().then(() => {
+        var numberOfMenuEntries = 0;
+        for(var i = 0; i < currentSettings.profiles.length; i++) {
+          if(currentSettings.profiles[i].showInContextMenu) {
+            numberOfMenuEntries++;
+          }
         }
-      }
-      for(var i = 0; i < currentSettings.profiles.length; i++) {
-        if(currentSettings.profiles[i].showInContextMenu) {
-          var itemTitle = currentSettings.profiles[i].profileName;
-          if(itemTitle.length == 0) {
-            if(numberOfContextMenuEntries == 1) {
-              itemTitle = "PasswordShaker";
+        for(var i = 0; i < currentSettings.profiles.length; i++) {
+          var profileName = currentSettings.profiles[i].profileName;
+          var itemTitle;
+          if(profileName.length == 0) {
+            if(i == 0) {
+              profileName = "(default profile)";
             } else {
-              if(i == 0) {
-                itemTitle = "(default profile)";
-              } else {
-                itemTitle = "(profile " + (i + 1) + ")";
-              }
+              profileName = "(profile " + (i + 1) + ")";
             }
           }
-          browser.contextMenus.create({
-            id: "password-shaker-context-menu-" + i,
-            title: itemTitle,
-            contexts: ["password"],
+          if(numberOfMenuEntries == 1) {
+            itemTitle = "PasswordShaker";
+          } else {
+            itemTitle = profileName;
+          }
+          if(currentSettings.profiles[i].showInContextMenu) {
+            browser.menus.create({
+              id: "password-shaker-menu-profile-" + i,
+              title: itemTitle,
+              contexts: ["password"],
+            });
+          }
+          if(!onPre56Firefox) {
+            browser.menus.create({
+              id: "password-shaker-tools-profile-" + i,
+              title: profileName,
+              contexts: ["tools_menu"],
+            });
+          }
+        }
+        if(!onPre56Firefox) {
+          browser.menus.create({
+            id: "password-shaker-tools-separator",
+            type: "separator",
+            contexts: ["tools_menu"],
+          });
+          browser.menus.create({
+            id: "password-shaker-tools-settings",
+            title: "Settings",
+            contexts: ["tools_menu"],
+          });
+          browser.menus.create({
+            id: "password-shaker-tools-documentation",
+            title: "Documentation",
+            contexts: ["tools_menu"],
           });
         }
-      }
+      });
     });
   });
 }
