@@ -240,6 +240,11 @@ browser.menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId == "password-shaker-tools-settings") {
     browser.runtime.openOptionsPage();
   }
+  if (info.menuItemId == "password-shaker-tools-documentation") {
+    browser.tabs.create({
+      url: "/docs/index.html"
+    });
+  }
 });
 
 browser.commands.onCommand.addListener(function(command) {
