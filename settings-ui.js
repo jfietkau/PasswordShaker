@@ -289,7 +289,7 @@ function populateSecurityAlerts() {
     if(alertMessages.hasOwnProperty(property) && !profileSpecificAlertMessages.includes(property)) {
       var newAlertLi = document.createElement("li");
       newAlertLi.id = "alert_" + property;
-      var readMore = " <a href=\"/docs/internal/security-alerts/#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
+      var readMore = " <a href=\"/docs/internal/security-alerts/index.html#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
       newAlertLi.innerHTML = alertMessages[property] + readMore;
       document.getElementById("securityAlerts").appendChild(newAlertLi);
     }
@@ -307,7 +307,7 @@ function populateSecurityAlerts() {
           }
         }
         newAlertLi.id = "alert_" + property + i;
-        var readMore = " <a href=\"/docs/internal/security-alerts/#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
+        var readMore = " <a href=\"/docs/internal/security-alerts/index.html#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
         newAlertLi.innerHTML = "<strong>" + profileName + ":</strong> " + alertMessages[property] + readMore;
         document.getElementById("securityAlerts").appendChild(newAlertLi);
       }
