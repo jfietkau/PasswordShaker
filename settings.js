@@ -69,6 +69,25 @@ function loadStoredHash(callback) {
   });
 }
 
+function showAlertIfNotSeen(alertName) {
+  browser.storage.local.get("pastAlerts").then((loadedPastAlerts) => {
+    var pastAlerts = [];
+    if(loadedPastAlerts != null
+       && loadedPastAlerts.hasOwnProperty("pastAlerts")
+       && loadedPastAlerts["pastAlerts"] !== null) {
+      pastAlerts = loadedPastAlerts["pastAlerts"];
+    }
+    if(!pastAlerts.includes(alertName)) {
+      browser.tabs.create({
+        url: "/docs/internal/" + alertName + "/index.html"
+      }).then(() => {
+        pastAlerts.push(alertName);
+        browser.storage.local.set({ pastAlerts: pastAlerts });
+      });
+    }
+  });
+}
+
 function saveStoredHash(hash, salt, algorithm) {
   var storedHash = {};
   storedHash.hash = hash;
@@ -76,7 +95,7 @@ function saveStoredHash(hash, salt, algorithm) {
     storedHash.salt = salt;
   }
   storedHash.algorithm = algorithm;
-  return browser.storage.local.set({masterPasswordHash: storedHash});
+  return browser.storage.local.set({ masterPasswordHash: storedHash });
 }
 
 function clearStoredHash() {

@@ -17,6 +17,8 @@ createOrUpdateMenu();
 
 loadStoredMasterPassword();
 
+showAlertIfNotSeen("first-run");
+
 
 function generatePasswordForProfile(url, masterPassword, profileSettings, hostnameOverride, requestId) {
   var generatedPassword = null;

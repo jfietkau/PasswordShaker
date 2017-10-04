@@ -317,7 +317,6 @@ function populateSecurityAlerts() {
 
 function updateSecurityAlerts() {
   function setDisplay(alertId, visible) {
-    console.log("alert_" + alertId);
     document.getElementById("alert_" + alertId).style.display = visible ? "block" : "none";
   }
   var severity = 0;
@@ -510,6 +509,16 @@ document.addEventListener("DOMContentLoaded", () => {
           var newAlgoCoefficientName = getCoefficientNameByAlgorithm(newAlgo);
           document.getElementById("psAlgorithmCoefficientName").innerHTML = newAlgoCoefficientName + ":";
           ignoreFormEvents -= 1;
+        }
+        if(e.target.id == "showPageAction") {
+          if(e.target.value == "when-applicable") {
+            // currently blocked by https://bugzilla.mozilla.org/show_bug.cgi?id=1382953
+            browser.permissions.request({
+              origins: ["<all_urls>"],
+            }).then((result) => {
+              console.log(result);
+            });
+          }
         }
         updateForm();
         parseForm(currentSettings);
