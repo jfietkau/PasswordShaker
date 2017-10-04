@@ -253,33 +253,44 @@ function updateExamplePassword() {
 }
 
 var alertMessages = {
-  masterPasswordStored: "<strong>You have set your master password to be saved permanently. This means that other software on your device can easily steal it.</strong>",
-  plainTextMasterPassword: "You have set your master password to be displayed in plain text. This makes you vulnerable to over-the-shoulder-attacks as well as malicious screengrabbers.",
-  visHashShortMinInput: "You have set the visual hash to appear for very short master password fragments. This makes it much easier for over-the-shoulder attackers and screen recorders to reconstruct your master password.",
-  visHashShortDelay: "You have set the visual hash to render very quickly. This may make it easier for over-the-shoulder attackers and screen recorders to reconstruct your master password if you type slowly.",
-  usedPasswordMaker: "You have chosen the legacy PasswordMaker engine for this profile. The algorithms it can use are older and much more vulnerable to attacks.",
-  shortPasswordLength: "The length of generated passwords for this profile is very short. They are likely to leave you vulnerable to attacks.",
-  shortCharSet: "You have selected a small number of characters for your generated passwords. This makes them more vulnerable to attacks.",
-  lowCostParameter: "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks."
+  no_protection_against_master_password_typos:
+    "You currently have no way of detecting typos in your master password as you enter it.",
+  master_password_stored_permanently:
+   "<strong>You have set your master password to be saved permanently. This means that other software on your device can easily steal it.</strong>",
+  show_master_password_in_plain_text:
+   "You have set your master password to be displayed in plain text. This makes you vulnerable to over-the-shoulder attacks as well as malicious screengrabbers.",
+  short_minimum_input_for_the_visual_hash:
+   "You have set the visual hash to appear for very short master password fragments. This makes it much easier for over-the-shoulder attackers and screen recorders to reconstruct your master password.",
+  short_delay_for_the_visual_hash:
+   "You have set the visual hash to render very quickly. This may make it easier for over-the-shoulder attackers and screen recorders to reconstruct your master password if you type slowly.",
+  requested_use_of_the_passwordmaker_engine:
+   "You have chosen the legacy PasswordMaker engine for this profile. The algorithms it can use are older and much more vulnerable to attacks.",
+  short_generated_password_length:
+   "The length of generated passwords for this profile is very short. They are likely to leave you vulnerable to attacks.",
+  short_password_character_set:
+   "You have selected a small number of characters for your generated passwords. This makes them more vulnerable to attacks.",
+  low_algorithmic_cost_parameter:
+   "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks.",
 };
 var profileSpecificAlertMessages = [
-  "usedPasswordMaker",
-  "shortPasswordLength",
-  "shortCharSet",
-  "lowCostParameter"
+  "requested_use_of_the_passwordmaker_engine",
+  "short_generated_password_length",
+  "short_password_character_set",
+  "low_algorithmic_cost_parameter"
 ];
 
 function populateSecurityAlerts() {
   document.getElementById("securityAlerts").innerHTML = "";
   var newAlertLi = document.createElement("li");
-  newAlertLi.id = "alertNone";
+  newAlertLi.id = "alert_none";
   newAlertLi.innerHTML = "No issues found.";
   document.getElementById("securityAlerts").appendChild(newAlertLi);
   for(var property in alertMessages) {
     if(alertMessages.hasOwnProperty(property) && !profileSpecificAlertMessages.includes(property)) {
       var newAlertLi = document.createElement("li");
-      newAlertLi.id = "alert" + property.charAt(0).toUpperCase() + property.slice(1);
-      newAlertLi.innerHTML = alertMessages[property];
+      newAlertLi.id = "alert_" + property;
+      var readMore = " <a href=\"/docs/internal/security-alerts/#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
+      newAlertLi.innerHTML = alertMessages[property] + readMore;
       document.getElementById("securityAlerts").appendChild(newAlertLi);
     }
   }
@@ -295,8 +306,9 @@ function populateSecurityAlerts() {
             profileName = "(profile " + (i + 1) + ")";
           }
         }
-        newAlertLi.id = "alert" + property.charAt(0).toUpperCase() + property.slice(1) + i;
-        newAlertLi.innerHTML = "<strong>" + profileName + ":</strong> " + alertMessages[property];
+        newAlertLi.id = "alert_" + property + i;
+        var readMore = " <a href=\"/docs/internal/security-alerts/#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
+        newAlertLi.innerHTML = "<strong>" + profileName + ":</strong> " + alertMessages[property] + readMore;
         document.getElementById("securityAlerts").appendChild(newAlertLi);
       }
     }
@@ -305,47 +317,57 @@ function populateSecurityAlerts() {
 
 function updateSecurityAlerts() {
   function setDisplay(alertId, visible) {
-    document.getElementById("alert" + alertId.charAt(0).toUpperCase() + alertId.slice(1)).style.display = visible ? "block" : "none";
+    console.log("alert_" + alertId);
+    document.getElementById("alert_" + alertId).style.display = visible ? "block" : "none";
   }
   var severity = 0;
-  if(currentSettings.showMasterPassword) {
-    setDisplay("plainTextMasterPassword", true);
+  if(!currentSettings.verifyMasterPassword
+     && !currentSettings.showMasterPassword
+     && !currentSettings.storeMasterPasswordHash
+     && !currentSettings.showVisualHash) {
+    setDisplay("no_protection_against_master_password_typos", true);
     severity = Math.max(1, severity);
   } else {
-    setDisplay("plainTextMasterPassword", false);
+    setDisplay("no_protection_against_master_password_typos", false);
+  }
+  if(currentSettings.showMasterPassword) {
+    setDisplay("show_master_password_in_plain_text", true);
+    severity = Math.max(1, severity);
+  } else {
+    setDisplay("show_master_password_in_plain_text", false);
   }
   if(currentSettings.storeMasterPassword == "permanent") {
-    setDisplay("masterPasswordStored", true);
+    setDisplay("master_password_stored_permanently", true);
     severity = Math.max(2, severity);
   } else {
-    setDisplay("masterPasswordStored", false);
+    setDisplay("master_password_stored_permanently", false);
   }
   if(currentSettings.visualHashMinInputLength < 6) {
-    setDisplay("visHashShortMinInput", true);
+    setDisplay("short_minimum_input_for_the_visual_hash", true);
     severity = Math.max(1, severity);
   } else {
-    setDisplay("visHashShortMinInput", false);
+    setDisplay("short_minimum_input_for_the_visual_hash", false);
   }
   if(currentSettings.visualHashDelay < 500) {
-    setDisplay("visHashShortDelay", true);
+    setDisplay("short_delay_for_the_visual_hash", true);
     severity = Math.max(1, severity);
   } else {
-    setDisplay("visHashShortDelay", false);
+    setDisplay("short_delay_for_the_visual_hash", false);
   }
   for(var profileId = 0; profileId < currentSettings.profiles.length; profileId++) {
     var profileSettings = currentSettings.profiles[profileId];
     if(profileSettings.profileEngine == "profileEnginePasswordMaker") {
-      setDisplay("usedPasswordMaker" + profileId, true);
+      setDisplay("requested_use_of_the_passwordmaker_engine" + profileId, true);
       severity = Math.max(1, severity);
     } else {
-      setDisplay("usedPasswordMaker" + profileId, false);
+      setDisplay("requested_use_of_the_passwordmaker_engine" + profileId, false);
     }
     if((profileSettings.profileEngine == "profileEngineDefault" && profileSettings.psPasswordLength < 12)
        || (profileSettings.profileEngine == "profileEnginePasswordMaker" && profileSettings.pmPasswordLength < 12)) {
-      setDisplay("shortPasswordLength" + profileId, true);
+      setDisplay("short_generated_password_length" + profileId, true);
       severity = Math.max(1, severity);
     } else {
-      setDisplay("shortPasswordLength" + profileId, false);
+      setDisplay("short_generated_password_length" + profileId, false);
     }
     var charSetLength = 0;
     if(profileSettings.profileEngine == "profileEngineDefault") {
@@ -361,10 +383,10 @@ function updateSecurityAlerts() {
       charSetLength += profileSettings.pmCustomCharacterList.length;
     }
     if(charSetLength < 55) {
-      setDisplay("shortCharSet" + profileId, true);
+      setDisplay("short_password_character_set" + profileId, true);
       severity = Math.max(1, severity);
     } else {
-      setDisplay("shortCharSet" + profileId, false);
+      setDisplay("short_password_character_set" + profileId, false);
     }
     function getCoefficientWarningMinimum(algo) {
       var result = null;
@@ -380,10 +402,10 @@ function updateSecurityAlerts() {
       return result;
     }
     if(profileSettings.profileEngine == "profileEngineDefault" && profileSettings.psAlgorithmCoefficient < getCoefficientWarningMinimum(profileSettings.psHashAlgorithm)) {
-      setDisplay("lowCostParameter" + profileId, true);
+      setDisplay("low_algorithmic_cost_parameter" + profileId, true);
       severity = Math.max(1, severity);
     } else {
-      setDisplay("lowCostParameter" + profileId, false);
+      setDisplay("low_algorithmic_cost_parameter" + profileId, false);
     }
   }
   setDisplay("none", severity == 0);
