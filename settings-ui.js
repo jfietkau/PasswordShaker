@@ -512,11 +512,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if(e.target.id == "showPageAction") {
           if(e.target.value == "when-applicable") {
-            // currently blocked by https://bugzilla.mozilla.org/show_bug.cgi?id=1382953
-            browser.permissions.request({
+            // Directly requesting here is currently blocked by https://bugzilla.mozilla.org/show_bug.cgi?id=1382953
+            browser.permissions.contains({
               origins: ["<all_urls>"],
             }).then((result) => {
-              console.log(result);
+              if(!result) {
+                browser.tabs.create({
+                  url: "/permissions.html"
+                });
+              }
             });
           }
         }
@@ -577,15 +581,6 @@ document.addEventListener("DOMContentLoaded", () => {
       updateExamplePassword();
       createOrUpdateMenu();
     });
-  });
-
-  browser.runtime.getBrowserInfo().then((info) => {
-    if(info.vendor == "Mozilla" && info.name == "Firefox") {
-      var showPageAction = document.getElementById("showPageAction");
-      var whenApplicable = showPageAction.getElementsByTagName('option')[1];
-      whenApplicable.innerHTML += " (coming soon!)";
-      whenApplicable.disabled = true;
-    }
   });
 
 });

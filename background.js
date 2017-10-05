@@ -14,11 +14,33 @@ publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
 passwordReqListParser.parse(passwordReqList);
 
 createOrUpdateMenu();
-
 loadStoredMasterPassword();
-
+checkOptionalPermissions();
 showAlertIfNotSeen("first-run");
 
+function checkOptionalPermissions() {
+  if(currentSettings === undefined || currentSettings.showPageAction === undefined) {
+    loadSettings().then(() => {
+      checkOptionalPermissions();
+    });
+  } else {
+    console.log(currentSettings);
+    if(currentSettings.showPageAction == "when-applicable") {
+      browser.permissions.contains({
+        origins: ["<all_urls>"]
+      }).then((result) => {
+        if(!result) {
+          currentSettings.showPageAction = "when-needed";
+          saveSettings();
+        }
+      });
+    } else {
+      browser.permissions.remove({
+        origins: ["<all_urls>"]
+      });
+    }
+  }
+}
 
 function generatePasswordForProfile(url, masterPassword, profileSettings, hostnameOverride, requestId) {
   var generatedPassword = null;
@@ -291,8 +313,17 @@ function reactToTabChange(tabId, newUrl) {
     if(currentSettings.showPageAction == "always"
        && typeof newUrl == "string"
        && !newUrl.startsWith("about:")
+       && !newUrl.startsWith("moz-extension:")
        && newUrl.length > 0) {
       browser.pageAction.show(tabId);
+    } else if(currentSettings.showPageAction == "when-applicable") {
+      browser.permissions.contains({
+        origins: ["<all_urls>"]
+      }).then((result) => {
+        if(!result) {
+          browser.pageAction.hide(tabId);
+        }
+      });
     } else if(currentSettings.showPageAction == "when-needed") {
       browser.pageAction.hide(tabId);
     }
@@ -301,13 +332,17 @@ function reactToTabChange(tabId, newUrl) {
 browser.tabs.onActivated.addListener((activeInfo) => {
   var tabId = activeInfo.tabId;
   browser.tabs.get(tabId).then((tab) => {
-    if(currentSettings.showPageAction == "when-applicable" && !tab.url.startsWith("about:")) {
-      if(!session.injectedTabs.includes(tabId)) {
-        session.injectedTabs.push(tabId);
-        browser.tabs.executeScript({file: "/injector.js"}).then(() => {
-          browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
-        });
-      }
+    if(currentSettings.showPageAction == "when-applicable" && !tab.url.startsWith("about:") && !tab.url.startsWith("moz-extension:")) {
+      browser.permissions.contains({
+        origins: ["<all_urls>"]
+      }).then((result) => {
+        if(result && !session.injectedTabs.includes(tabId)) {
+          session.injectedTabs.push(tabId);
+          browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+            browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
+          });
+        }
+      });
     }
     session.currentTabId = tabId;
     reactToTabChange(tabId, tab.url);
@@ -316,12 +351,16 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if(tabId == session.currentTabId && changeInfo.url !== undefined) {
     reactToTabChange(tabId, changeInfo.url);
-    if(currentSettings.showPageAction == "when-applicable") {
-      browser.tabs.executeScript({file: "/injector.js"}).then(() => {
-        browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
-        if(!session.injectedTabs.includes(tabId)) {
-          session.injectedTabs.push(tabId);
-        }
+    if(currentSettings.showPageAction == "when-applicable" && !changeInfo.url.startsWith("about:") && !changeInfo.url.startsWith("moz-extension:")) {
+      browser.permissions.contains({
+        origins: ["<all_urls>"]
+      }).then((result) => {
+        browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+          browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
+          if(!session.injectedTabs.includes(tabId)) {
+            session.injectedTabs.push(tabId);
+          }
+        });
       });
     }
   }
