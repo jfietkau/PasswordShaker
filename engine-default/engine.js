@@ -305,8 +305,9 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
     // Here is where we actually dive into the respective algorithms. They all come from different libraries
     // and as such are handled differently.
     if(settings.hashAlgorithm == "pbkdf2-hmac-sha256") {
-      hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword, accumulator.salt, settings.hashAlgorithmCoefficient, 64);
-      handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId);
+      pbkdf2WebCrypto(str2arr(masterPassword), accumulator.salt, settings.hashAlgorithmCoefficient, 64).then((hashResult) => {
+        handleHashResult(arr2hex(hashResult), masterPassword, url, settings, depth, accumulator, resolve, requestId);
+      });
     } else if(settings.hashAlgorithm == "bcrypt") {
       var collapsedSalt = new Uint8Array(16);
       for(var i = 0; i < thDomain.length + thMainSalt.length; i++) {
