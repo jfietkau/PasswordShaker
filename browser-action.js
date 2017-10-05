@@ -243,6 +243,8 @@ function updateCurrentSite(siteText) {
   if(siteText.length == 0) {
     siteText = siteTextOriginal;
   }
+  var currentSiteElem = document.getElementById("currentSite");
+  currentSiteElem.innerHTML = "";
   if(siteText == siteTextOriginal) {
     // given site text is the original one
     document.getElementById("currentSiteCustom").value = "";
@@ -250,14 +252,14 @@ function updateCurrentSite(siteText) {
     if(currentPasswordReq != null) {
       siteTextFancy = currentPasswordReq.name;
     }
-    document.getElementById("currentSite").innerHTML = siteTextFancy;
+    currentSiteElem.appendChild(document.createTextNode(siteTextFancy));
     if(siteTextFancy != siteText) {
       document.getElementById("currentSiteArea").classList.add("verified");
     }
   } else {
     // given site text has been changed frm the original
     document.getElementById("currentSiteCustom").value = siteText;
-    document.getElementById("currentSite").innerHTML = siteText;
+    currentSiteElem.appendChild(document.createTextNode(siteText));
   }
 }
 
@@ -325,7 +327,8 @@ function initializeCurrentSiteDisplay(settings) {
         document.getElementById("currentSiteOriginal").value = "";
         document.getElementById("currentSiteCustom").value = "";
         document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
-        currentSiteDisplay.innerHTML = response.publicSuffix;
+        currentSiteDisplay.innerHTML = "";
+        currentSiteDisplay.appendChild(document.createTextNode(response.publicSuffix));
         // Differentiate the UI here: if the user uses the default engine, we display the
         // hostname because that's waht the engine always uses. The PasswordMaker engine
         // may use the same, different, both or no elements from the URL, so instead of

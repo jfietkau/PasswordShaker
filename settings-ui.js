@@ -129,7 +129,8 @@ function populateProfileArea(settings, profileIndex) {
     document.getElementById("psAlgorithmCoefficient").step = 1;
     document.getElementById("psAlgorithmCoefficient").min = (currentAlgoName == "bcrypt") ? 4 : 1;
   }
-  document.getElementById("psAlgorithmCoefficientName").innerHTML = newAlgoCoefficientName + ":";
+  document.getElementById("psAlgorithmCoefficientName").innerHTML = "";
+  document.getElementById("psAlgorithmCoefficientName").appendChild(document.createTextNode(newAlgoCoefficientName + ":"));
   document.getElementById("deleteProfileWarning").style.display = "none";
   document.getElementById("deleteProfile").style.display = "inline";
   ignoreFormEvents -= 1;
@@ -256,7 +257,8 @@ function getCurrentProfileTabTitle() {
 function updateForm() {
   var currentProfileIndex = getProfileIndex(currentSettings);
   var tabTarget = document.getElementById("profileTab" + currentProfileIndex).nextSibling;
-  tabTarget.innerHTML = getCurrentProfileTabTitle();
+  tabTarget.innerHTML = "";
+  tabTarget.appendChild(document.createTextNode(getCurrentProfileTabTitle()));
   document.getElementById("profileName").placeholder = getCurrentProfileTabTitle();
   document.getElementById("psCharactersCustomList").disabled =
     !document.getElementById("psCharactersCustom").checked;
@@ -286,15 +288,17 @@ function updateExamplePassword() {
       if(message.requestId == lastRequestId) {
         document.getElementById("loadingIcon").style.display = "none";
         var displayPassword = message.examplePassword;
+        var displayPasswordElem = document.getElementById("examplePassword");
         if(typeof displayPassword == "string") {
           displayPassword = displayPassword.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-          document.getElementById("examplePassword").innerHTML = displayPassword;
-          document.getElementById("examplePassword").style.fontWeight = "bold";
-          document.getElementById("examplePassword").style.fontStyle = "normal";
+          displayPasswordElem.innerHTML = "";
+          displayPasswordElem.appendChild(document.createTextNode(displayPassword));
+          displayPasswordElem.style.fontWeight = "bold";
+          displayPasswordElem.style.fontStyle = "normal";
         } else {
-          document.getElementById("examplePassword").innerHTML = "[ failed to generate ]";
-          document.getElementById("examplePassword").style.fontWeight = "normal";
-          document.getElementById("examplePassword").style.fontStyle = "italic";
+          displayPasswordElem.innerHTML = "[ failed to generate ]";
+          displayPasswordElem.style.fontWeight = "normal";
+          displayPasswordElem.style.fontStyle = "italic";
         }
       }
     });
@@ -341,8 +345,13 @@ function populateSecurityAlerts() {
     if(alertMessages.hasOwnProperty(property) && !profileSpecificAlertMessages.includes(property)) {
       var newAlertLi = document.createElement("li");
       newAlertLi.id = "alert_" + property;
-      var readMore = " <a href=\"/docs/internal/security-alerts/index.html#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
-      newAlertLi.innerHTML = alertMessages[property] + readMore;
+      newAlertLi.innerHTML = "";
+      newAlertLi.appendChild(document.createTextNode(" " + alertMessages[property] + " "));
+      var readMoreLink = document.createElement("a");
+      readMoreLink.href = "/docs/internal/security-alerts/index.html#" + property.replace(/_/g, "-");
+      readMoreLink.target = "_blank";
+      readMoreLink.appendChild(document.createTextNode("read more..."));
+      newAlertLi.appendChild(readMoreLink);
       document.getElementById("securityAlerts").appendChild(newAlertLi);
     }
   }
@@ -359,8 +368,16 @@ function populateSecurityAlerts() {
           }
         }
         newAlertLi.id = "alert_" + property + i;
-        var readMore = " <a href=\"/docs/internal/security-alerts/index.html#" + property.replace(/_/g, "-") + "\" target=\"_blank\">read more...</a>";
-        newAlertLi.innerHTML = "<strong>" + profileName + ":</strong> " + alertMessages[property] + readMore;
+        newAlertLi.innerHTML = "";
+        var profileNameElem = document.createElement("strong");
+        profileNameElem.appendChild(document.createTextNode(profileName + ":"));
+        newAlertLi.appendChild(profileNameElem);
+        newAlertLi.appendChild(document.createTextNode(" " + alertMessages[property] + " "));
+        var readMoreLink = document.createElement("a");
+        readMoreLink.href = "/docs/internal/security-alerts/index.html#" + property.replace(/_/g, "-");
+        readMoreLink.target = "_blank";
+        readMoreLink.appendChild(document.createTextNode("read more..."));
+        newAlertLi.appendChild(readMoreLink);
         document.getElementById("securityAlerts").appendChild(newAlertLi);
       }
     }
@@ -568,7 +585,9 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("psAlgorithmCoefficient").step = newAlgoCoefficientStepSize;
           document.getElementById("psAlgorithmCoefficient").min = newAlgoCoefficientMinimum;
           var newAlgoCoefficientName = getCoefficientNameByAlgorithm(newAlgo);
-          document.getElementById("psAlgorithmCoefficientName").innerHTML = newAlgoCoefficientName + ":";
+          var algoCoefficientElem = document.getElementById("psAlgorithmCoefficientName");
+          algoCoefficientElem.innerHTML = "";
+          algoCoefficientElem.appendChild(document.createTextNode(newAlgoCoefficientName + ":"));
           ignoreFormEvents -= 1;
         }
         if(e.target.id == "showPageAction") {
