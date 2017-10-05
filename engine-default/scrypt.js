@@ -1,5 +1,9 @@
 "use strict";
 
+// Pure JavaScript implementation of the scrypt password-based key derivation function.
+// By ricmoo, MIT licensed
+// https://github.com/ricmoo/scrypt-js
+
 (function(root) {
     var MAX_VALUE = 0x7fffffff;
 
