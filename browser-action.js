@@ -331,9 +331,11 @@ function initializeCurrentSiteDisplay(settings) {
         // may use the same, different, both or no elements from the URL, so instead of
         // showing a (potentially misleading) hostname, we just show a general "this site".
         if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
+          document.getElementById("currentSiteArea").style.minWidth = "150px";
           currentSiteDisplay.style.display = "inline";
           document.getElementById("currentSiteIntro").innerHTML = "Password for:";
         } else {
+          document.getElementById("currentSiteArea").style.minWidth = "0px";
           currentSiteDisplay.style.display = "none";
           document.getElementById("currentSiteIntro").innerHTML = "Password for this site:";
         }
