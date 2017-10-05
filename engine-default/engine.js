@@ -22,6 +22,9 @@
  *************************************************************************
  */
 
+// This is the default password generation engine for PasswordShaker (i.e. the one
+// that's not all about PasswordMaker compatibility).
+
 (function () {
 
 var base = typeof window === 'object' ? window : {};
@@ -30,6 +33,7 @@ var str2arr = function(str) {
   return textEncoder.encode(str);
 }
 
+// helper function
 function base64ToArrayBuffer(b64str) {
   b64str += "===";
   b64str = b64str.slice(0, b64str.length - (b64str.length % 4));
@@ -58,6 +62,7 @@ function base64ToArrayBuffer(b64str) {
   return Uint8Array.from(result);
 }
 
+// helper function
 function getRandomBytes(numberOfBytes) {
   var buffer = new ArrayBuffer(numberOfBytes);
   var uint8View = new Uint8Array(buffer);
@@ -65,6 +70,7 @@ function getRandomBytes(numberOfBytes) {
   return uint8View;
 }
 
+// possible parts of the character set - we enumerate them here so we can refer to them by name in the following
 var charSetSegment = {
   upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
   lower: "abcdefghijklmnopqrstuvwxyz",
@@ -74,6 +80,7 @@ var charSetSegment = {
   spaceQuotation: "\"' ",
 };
 
+// Constructs a character set according to the given settings.
 function createCharSet(settings) {
   var charSet = "";
   if((settings.charactersAlphaCap || settings.passwordRequirements.minNumUpper > 0)
@@ -104,17 +111,19 @@ function createCharSet(settings) {
   return charSet;
 }
 
+// Get hostname from full URL
 function extractHostName(url) {
   var urlObject = new URL(url);
   var hostName;
   if(urlObject.protocol == "file:") {
-    hostName = "file";
+    hostName = "Local file";
   } else {
     hostName = urlObject.hostname;
   }
   return hostName;
 }
 
+// Extract the public suffix from a hostname
 function extractTopLevelHostname(hostName) {
   var parts = hostName.split(".");
   if(!isNaN(parseInt(parts.slice(-1)[0]))) {
@@ -125,37 +134,14 @@ function extractTopLevelHostname(hostName) {
     // assumed to be a local name (no TLD)
     return hostName;
   }
+  // access the public suffix list that's been set up in the background script
   var publicSuffix = publicSuffixList.getPublicSuffix(hostName);
   // keep the public suffix plus one more name segment below that
   var result = parts.slice(-1 - publicSuffix.split(".").length);
   return result.join(".");
 }
 
-function handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId) {
-  var charSet = createCharSet(settings);
-  var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
-  var desiredPasswordLength = settings.passwordLength;
-  if(settings.passwordRequirements.minLength) {
-    desiredPasswordLength = Math.max(desiredPasswordLength, settings.passwordRequirements.minLength);
-  }
-  if(settings.passwordRequirements.maxLength) {
-    desiredPasswordLength = Math.min(desiredPasswordLength, settings.passwordRequirements.maxLength);
-  }
-  while(hashResult.length >= 8 && accumulator.password.length < desiredPasswordLength) {
-    var hashPart = parseInt(hashResult.slice(0, 8), 16) >>> 0;
-    hashResult = hashResult.slice(8);
-    for(var i = 0; i < maxCharactersPerUint; i++) {
-      accumulator.password += charSet[hashPart % charSet.length];
-      hashPart = Math.floor(hashPart / charSet.length);
-    }
-  }
-  var combinedSaltNew = new Uint8Array(accumulator.salt.length + 1);
-  combinedSaltNew.set(accumulator.salt);
-  combinedSaltNew[combinedSaltNew.length - 1] = 0xff;
-  accumulator.salt = combinedSaltNew;
-  generatePasswordPart(masterPassword, url, settings, depth + 1, accumulator, resolve, requestId);
-}
-
+// Count the number of appearances of characters from alphabet in data
 function countNumberOf(alphabet, data) {
   var count = 0;
   for(var i = 0; i < alphabet.length; i++) {
@@ -164,10 +150,12 @@ function countNumberOf(alphabet, data) {
   return count;
 }
 
+// Swap out one character in a string
 function replaceAt(str, index, char) {
   return str.substr(0, index) + char + str.substr(index + 1);
 }
 
+// Try to put a certain number of characters from the given alphabet into a string
 function forceInto(alphabet, data, number, seedInt) {
   var offsetCandidates = [7, 37, 71, 103, 139, 181];
   while(number > 0) {
@@ -181,6 +169,7 @@ function forceInto(alphabet, data, number, seedInt) {
   return data;
 }
 
+// Count the distinct characters in a string
 function countDistinct(str) {
   var chars = "";
   for(var i = 0; i < str.length; i++) {
@@ -191,6 +180,11 @@ function countDistinct(str) {
   return chars.length;
 }
 
+// Checks if the given password fulfills the given invariant. The invariant comes from the site-specific
+// password requirements and can cover things such as "at least one special character or number".
+// Worth noting is that we don't actually parse these invariants as cleanly as you would expect. Because
+// they cover only a small subset of all possible boolean expressions, we take a lot of very rude shortcuts,
+// such as ignoring parentheses entirely.
 function fulfillsInvariant(password, invariant) {
   invariant = invariant.replace(/ /g, "");
   var fulfills;
@@ -249,6 +243,43 @@ function fulfillsInvariant(password, invariant) {
   return fulfills;
 }
 
+// Some of the hash algorithms are async, so this whole password generation process here is a bit convoluted.
+// This function gets called basically when there is a new hash result ready to be processed to become part of
+// the password. handleHashResult() and generatePasswordPart() call each other recursively until the password
+// fulfills the length requirement.
+function handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId) {
+  var charSet = createCharSet(settings);
+  // The idea here is to calculate how many characters of the given charset we can extract from 32 bits.
+  // Think of it as a base conversion from binary into (charSet.length)-ary.
+  var maxCharactersPerUint = Math.floor(22.1807097779 / Math.log(charSet.length));
+  var desiredPasswordLength = settings.passwordLength;
+  if(settings.passwordRequirements.minLength) {
+    desiredPasswordLength = Math.max(desiredPasswordLength, settings.passwordRequirements.minLength);
+  }
+  if(settings.passwordRequirements.maxLength) {
+    desiredPasswordLength = Math.min(desiredPasswordLength, settings.passwordRequirements.maxLength);
+  }
+  // Look at 4 bytes at a time
+  while(hashResult.length >= 8 && accumulator.password.length < desiredPasswordLength) {
+    var hashPart = parseInt(hashResult.slice(0, 8), 16) >>> 0;
+    hashResult = hashResult.slice(8);
+    for(var i = 0; i < maxCharactersPerUint; i++) {
+      accumulator.password += charSet[hashPart % charSet.length];
+      hashPart = Math.floor(hashPart / charSet.length);
+    }
+  }
+  // Assuming the password is not long enough yet, for the next round of hashing we append a byte
+  // to our salt to get a different hash output
+  var combinedSaltNew = new Uint8Array(accumulator.salt.length + 1);
+  combinedSaltNew.set(accumulator.salt);
+  combinedSaltNew[combinedSaltNew.length - 1] = 0xff;
+  accumulator.salt = combinedSaltNew;
+  generatePasswordPart(masterPassword, url, settings, depth + 1, accumulator, resolve, requestId);
+}
+
+// This is the "main" password generation function. It prepares the data and hands things off to the
+// specific algorithm, which then goes on to handleHashResult(), and from there it's recursive. However,
+// this function handles the end of the loop when the password is long enough.
 function generatePasswordPart(masterPassword, url, settings, depth, accumulator, resolve, requestId) {
   var charSet = createCharSet(settings);
   var hostName = extractHostName(url);
@@ -271,6 +302,8 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   }
   if(accumulator.password.length < desiredPasswordLength) {
     var hashResult = null;
+    // Here is where we actually dive into the respective algorithms. They all come from different libraries
+    // and as such are handled differently.
     if(settings.hashAlgorithm == "pbkdf2-hmac-sha256") {
       hashResult = asmCrypto.PBKDF2_HMAC_SHA256.hex(masterPassword, accumulator.salt, settings.hashAlgorithmCoefficient, 64);
       handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId);
@@ -350,6 +383,8 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
       handleHashResult(arr2hex(hashArr), masterPassword, url, settings, depth, accumulator, resolve, requestId);
     }
   } else {
+    // At this point, the password generation from hashes is finished, but we may still need
+    // to force in some site-specific requirements.
     accumulator.password = accumulator.password.slice(0, desiredPasswordLength);
     var charClasses = ["Upper", "Lower", "Letter", "Digit", "Special"];
     var seedInts = [0, 5, 11, 17, 23];
@@ -403,10 +438,12 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   }
 }
 
+// The outside interface for the main password generation function.
 function generatePassword(masterPassword, url, settings, requestId) {
   settings.passwordRequirements = settings.passwordRequirements || {};
   var charSet = createCharSet(settings);
   if(charSet.length < 2) {
+    // if the character set is too short, fail immediately
     return new Promise((resolve, reject) => {
       resolve({
         password: null,

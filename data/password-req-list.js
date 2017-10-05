@@ -22,6 +22,12 @@
  *************************************************************************
  */
 
+// I was initially thinking I might turn this into a standalone project and
+// accept pull requests for an extensive database, but decided against it after
+// collecting this info because I think the quality of it is pretty inconsistent.
+// In theory this could be useful to the wider world, but it's really only a best
+// effort kinda thing.
+
 var passwordReqList = {
   "__meta": {
     "version": "0.1",

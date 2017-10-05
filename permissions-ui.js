@@ -44,6 +44,8 @@ function updatePage() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  // Make sure this page updates itself in the background every so often,
+  // just in case the user opens it in several tabs.
   updatePage();
   setInterval(updatePage, 500);
 

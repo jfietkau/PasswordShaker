@@ -22,15 +22,25 @@
  *************************************************************************
  */
 
+// This script provides access to the user settings including all profiles. It also provides
+// facilities to persist and load settings as well as some auxiliary functions.
+// This script may be loaded in different contexts (background page, page action popup,
+// settings page, etc.) and different instances of the settings object are not automatically
+// synchronized. Make sure to load and save the settings appropriately.
+
+// core data structure
 var currentSettings = {};
 
+// utility function
 function getRandomBytes(numberOfBytes) {
   var buffer = new ArrayBuffer(numberOfBytes);
   var uint8View = new Uint8Array(buffer);
+  // fancy crypto-safe randomness
   window.crypto.getRandomValues(uint8View);
   return uint8View;
 }
 
+// helper function
 function arr2hex(byteArray) {
   result = "";
   for(var i = 0; i < byteArray.length; i++) {
@@ -39,6 +49,7 @@ function arr2hex(byteArray) {
   return result;
 }
 
+// helper function
 function hex2arr(hex) {
   var buffer = new ArrayBuffer(Math.floor(hex.length / 2));
   var uint8View = new Uint8Array(buffer);
@@ -48,11 +59,13 @@ function hex2arr(hex) {
   return uint8View;
 }
 
+// This function wipes all settings.
 function clearSettings() {
   currentSettings = {};
   return browser.storage.local.remove("settings");
 }
 
+// Load settings from local storage and pre-fill with default values if anything is missing.
 function loadSettings() {
   return browser.storage.local.get("settings").then((loadedSettings) => {
     if(loadedSettings != null
@@ -70,62 +83,13 @@ function loadSettings() {
   });
 }
 
+// Save settings to storage.
 function saveSettings() {
   return browser.storage.local.set({settings: currentSettings});
 }
 
-function loadStoredHash(callback) {
-  return browser.storage.local.get("masterPasswordHash").then((loadedHash) => {
-    var result;
-    if(loadedHash != null
-       && loadedHash.hasOwnProperty("masterPasswordHash")
-       && loadedHash["masterPasswordHash"] !== null) {
-      loadedHash = loadedHash["masterPasswordHash"];
-    }
-    if(loadedHash == null
-       || !loadedHash.hasOwnProperty("algorithm")
-       || !loadedHash.hasOwnProperty("hash")) {
-      result = null;
-    } else {
-      result = loadedHash;
-    }
-    callback(result);
-  });
-}
-
-function showAlertIfNotSeen(alertName) {
-  browser.storage.local.get("pastAlerts").then((loadedPastAlerts) => {
-    var pastAlerts = [];
-    if(loadedPastAlerts != null
-       && loadedPastAlerts.hasOwnProperty("pastAlerts")
-       && loadedPastAlerts["pastAlerts"] !== null) {
-      pastAlerts = loadedPastAlerts["pastAlerts"];
-    }
-    if(!pastAlerts.includes(alertName)) {
-      browser.tabs.create({
-        url: "/docs/internal/" + alertName + "/index.html"
-      }).then(() => {
-        pastAlerts.push(alertName);
-        browser.storage.local.set({ pastAlerts: pastAlerts });
-      });
-    }
-  });
-}
-
-function saveStoredHash(hash, salt, algorithm) {
-  var storedHash = {};
-  storedHash.hash = hash;
-  if(salt) {
-    storedHash.salt = salt;
-  }
-  storedHash.algorithm = algorithm;
-  return browser.storage.local.set({ masterPasswordHash: storedHash });
-}
-
-function clearStoredHash() {
-  return browser.storage.local.remove("masterPasswordHash");
-}
-
+// This helper function extends one object with the properties of another. It's used to
+// fill an incomplete or empty settings object with any default values that are missing.
 function extendObjectWith(base, extension) {
   if(base == null || extension == null) {
     return null;
@@ -139,6 +103,7 @@ function extendObjectWith(base, extension) {
   }
 }
 
+// Default values for the overarching settings
 function getDefaultSettings() {
   return {
     verifyMasterPassword: true,
@@ -156,6 +121,7 @@ function getDefaultSettings() {
   };
 }
 
+// Default values for a new profile
 function getDefaultProfileSettings() {
   return {
     profileName: "",
@@ -189,68 +155,5 @@ function getDefaultProfileSettings() {
     showInContextMenu: true,
     useForHotkey: false
   };
-}
-
-function createOrUpdateMenu() {
-  loadSettings().then(() => {
-    browser.runtime.getBrowserInfo().then((info) => {
-      var onPre56Firefox = (info.vendor == "Mozilla" && info.name == "Firefox" && parseInt(info.version, 10) < 56);
-      browser.menus.removeAll().then(() => {
-        var numberOfMenuEntries = 0;
-        for(var i = 0; i < currentSettings.profiles.length; i++) {
-          if(currentSettings.profiles[i].showInContextMenu) {
-            numberOfMenuEntries++;
-          }
-        }
-        for(var i = 0; i < currentSettings.profiles.length; i++) {
-          var profileName = currentSettings.profiles[i].profileName;
-          var itemTitle;
-          if(profileName.length == 0) {
-            if(i == 0) {
-              profileName = "(default profile)";
-            } else {
-              profileName = "(profile " + (i + 1) + ")";
-            }
-          }
-          if(numberOfMenuEntries == 1) {
-            itemTitle = "PasswordShaker";
-          } else {
-            itemTitle = profileName;
-          }
-          if(currentSettings.profiles[i].showInContextMenu) {
-            browser.menus.create({
-              id: "password-shaker-menu-profile-" + i,
-              title: itemTitle,
-              contexts: ["password"],
-            });
-          }
-          if(!onPre56Firefox) {
-            browser.menus.create({
-              id: "password-shaker-tools-profile-" + i,
-              title: profileName,
-              contexts: ["tools_menu"],
-            });
-          }
-        }
-        if(!onPre56Firefox) {
-          browser.menus.create({
-            id: "password-shaker-tools-separator",
-            type: "separator",
-            contexts: ["tools_menu"],
-          });
-          browser.menus.create({
-            id: "password-shaker-tools-settings",
-            title: "Settings",
-            contexts: ["tools_menu"],
-          });
-          browser.menus.create({
-            id: "password-shaker-tools-documentation",
-            title: "Documentation",
-            contexts: ["tools_menu"],
-          });
-        }
-      });
-    });
-  });
 }
 

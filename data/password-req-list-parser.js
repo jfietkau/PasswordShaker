@@ -22,6 +22,21 @@
  *************************************************************************
  */
 
+// This thing takes a password requirement list (formatted as in password-req-list.js) and
+// parses it into a data structure more suitable for fast lookups. You can think of what it
+// does as taking the list of simple hostnames and using them to populate a tree with the
+// hostname fragments in reverse order.
+//
+// Example: "amazon.com" is one of the hostnames included in the list. So when "foo.amazon.com"
+// is passed in as a query, it splits it apart and climbs the tree as follows:
+// "com" -> no matching record, continuing
+// "amazon" -> matching the record for "amazon.com", keeping it as result candidate
+// "foo" -> no matching record, sticking with the one for "amazon.com" as best result candidate
+// list empty -> return best candidate
+//
+// This allows us to have a specific record for aws.amazon.com for example, but match all other
+// subdomains to the amazon.com one. It's not as complex as it may seem at first glance.
+
 (function(root) {
 
 var parsed = null;
@@ -86,6 +101,7 @@ function findMatches(db, hostnameParts, url) {
   return result;
 }
 
+// If the client queries by hostname only, any URL filters in the records are ignored.
 function byHostname(hostname) {
   if(parsed === null) {
     return null;
@@ -101,6 +117,8 @@ function byHostname(hostname) {
   }
 }
 
+// If the client queries by full URL, the hostname is extracted from it. A record is only
+// returned if the URL matches any URL filter that may be present.
 function byUrl(url) {
   if(parsed === null) {
     return null;
@@ -118,6 +136,7 @@ function byUrl(url) {
   }
 }
 
+// Provide an interface to use this thing
 root = root || window;
 root.passwordReqListParser = {
   "version": "1.0",

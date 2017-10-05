@@ -22,13 +22,22 @@
  *************************************************************************
  */
 
+// This script contains all the UI stuff, including the populating and parsing of the forms,
+// for the settings page. It's mostly pretty boring.
+
+// We use this as a sort-of semaphore to detect whether a change to an input element's value
+// is because of the user, or because we changed it ourselves. Basically, increment this variable
+// before any automated form change, decrement it afterwards. If a change event is fired while it
+// is 0, it must be caused by the user.
 var ignoreFormEvents = 0;
 
+// helper function
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
   elem.parentNode.removeChild(elem);
 }
 
+// Take a complete settings structure and populate the form accordingly
 function populateSettingsForm(settings) {
   ignoreFormEvents += 1;
   for(var property in settings) {
@@ -77,6 +86,7 @@ function populateSettingsForm(settings) {
           document.getElementById("profiles").insertBefore(newLabel, plusTab);
         }
       }
+      // Don't forget to delete profile tabs that aren't in use anymore
       var superfluousTabIndex = settings.profiles.length;
       while(document.getElementById("profileTab" + superfluousTabIndex)) {
         removeElementbyId("profileTab" + superfluousTabIndex);
@@ -94,6 +104,7 @@ function populateSettingsForm(settings) {
   ignoreFormEvents -= 1;
 }
 
+// Add a new profile (filled with default settings) to the given overall settings.
 function addNewProfile(settings) {
   var newIndex = settings.profiles.length;
   settings.profiles.push({});
@@ -101,6 +112,7 @@ function addNewProfile(settings) {
   populateSettingsForm(settings);
 }
 
+// Populate the profile area of the form with the settings from the given profile
 function populateProfileArea(settings, profileIndex) {
   ignoreFormEvents += 1;
   for(var property in settings.profiles[profileIndex]) {
@@ -123,6 +135,7 @@ function populateProfileArea(settings, profileIndex) {
   ignoreFormEvents -= 1;
 }
 
+// Populate an individual form element
 function populateSettingsElement(elem, value) {
   if(document.getElementById(elem)) {
     var domElem = document.getElementById(elem);
@@ -148,6 +161,7 @@ function populateSettingsElement(elem, value) {
   }
 }
 
+// Find out which profile is currently displayed in the settings page
 function getProfileIndex(settings) {
   var profileIndex = null;
   for(var i = 0; i < settings.profiles.length; i++) {
@@ -159,27 +173,30 @@ function getProfileIndex(settings) {
   return profileIndex;
 }
 
+// Parse the current form contents and act on them accordingly
 function parseForm(settings) {
   for(var property in settings) {
     if(property != "profiles" && settings.hasOwnProperty(property)) {
       parseSettingsElement(property, settings);
     }
   }
+  // If a master password hash is no longer desired to be stored, delete any that we may have.
   if(!document.getElementById("storeMasterPasswordHash").checked) {
-    clearStoredHash();
+    browser.runtime.sendMessage({ clearStoredHash: true });
   }
+  // Same for the stored master password.
   if(document.getElementById("storeMasterPassword").value != "permanent") {
-    browser.runtime.sendMessage({clearStoredMasterPassword: true});
-  }
-  var profileIndex = getProfileIndex(settings);
-  for(var i = 0; i < settings.profiles.length; i++) {
-    if(document.getElementById("profileTab" + i).checked) {
-      profileIndex = i;
-      break;
+    browser.runtime.sendMessage({ clearStoredMasterPassword: true });
+    // One step further: If the user opts not to cache the master password at all,
+    // delete it if it has already been cached this session.
+    if(document.getElementById("storeMasterPassword").value == "never") {
+      browser.runtime.sendMessage({ clearSessionVariable: "masterPassword" });
     }
   }
+  var profileIndex = getProfileIndex(settings);
   for(var property in settings.profiles[profileIndex]) {
     if(settings.profiles[profileIndex].hasOwnProperty(property)) {
+      // Only one profile may have the "use hotkey for this" setting checked.
       if(property == "useForHotkey" && document.getElementById(property).checked) {
         for(var i = 0; i < settings.profiles.length; i++) {
           settings.profiles[i].useForHotkey = false;
@@ -190,6 +207,7 @@ function parseForm(settings) {
   }
 }
 
+// Parse a single form element
 function parseSettingsElement(elem, settings) {
   if(document.getElementById(elem)) {
     var domElem = document.getElementById(elem);
@@ -219,10 +237,12 @@ function parseSettingsElement(elem, settings) {
   }
 }
 
+// Get a suitable title for the current profile tab.
 function getCurrentProfileTabTitle() {
   var currentProfileTabTitle = document.getElementById("profileName").value.trim();
   var currentProfileIndex = getProfileIndex(currentSettings);
   if(currentProfileTabTitle.length == 0) {
+    // If the profile doesn't have a custom name, use the same placeholder names we use everywhere.
     if(currentProfileIndex == 0) {
       currentProfileTabTitle = "(default profile)";
     } else {
@@ -232,6 +252,7 @@ function getCurrentProfileTabTitle() {
   return currentProfileTabTitle;
 }
 
+// Update the form based on the latest changes to its contents. Just some minor UI things.
 function updateForm() {
   var currentProfileIndex = getProfileIndex(currentSettings);
   var tabTarget = document.getElementById("profileTab" + currentProfileIndex).nextSibling;
@@ -247,6 +268,10 @@ function updateForm() {
     (currentSettings.profiles.length < 2);
 }
 
+// Keep track of the last request for an example password that we send. If the form contents
+// change quickly, such as when the user adjusts the password length, multiple example
+// password requests may go out very quickly before the first one returns. We only ever want
+// to display the last one.
 var lastRequestId = null;
 
 function updateExamplePassword() {
@@ -276,6 +301,7 @@ function updateExamplePassword() {
   });
 }
 
+// List of all possibly security alerts
 var alertMessages = {
   no_protection_against_master_password_typos:
     "You currently have no way of detecting typos in your master password as you enter it.",
@@ -296,6 +322,7 @@ var alertMessages = {
   low_algorithmic_cost_parameter:
    "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks.",
 };
+// These are just the ones that apply per profile
 var profileSpecificAlertMessages = [
   "requested_use_of_the_passwordmaker_engine",
   "short_generated_password_length",
@@ -303,6 +330,7 @@ var profileSpecificAlertMessages = [
   "low_algorithmic_cost_parameter"
 ];
 
+// Generate all possible security alerts for all profiles in advance. Most of these will be hidden.
 function populateSecurityAlerts() {
   document.getElementById("securityAlerts").innerHTML = "";
   var newAlertLi = document.createElement("li");
@@ -339,6 +367,7 @@ function populateSecurityAlerts() {
   }
 }
 
+// Check the current settings for security weaknesses and unhide the corresponding security alerts.
 function updateSecurityAlerts() {
   function setDisplay(alertId, visible) {
     document.getElementById("alert_" + alertId).style.display = visible ? "block" : "none";
@@ -448,6 +477,7 @@ function updateSecurityAlerts() {
   }
 }
 
+// These things are named differently depending on the algorithm
 function getCoefficientNameByAlgorithm(algo) {
   var name = "Algorithm coefficient";
   if(algo == "argon2") {
@@ -462,6 +492,7 @@ function getCoefficientNameByAlgorithm(algo) {
   return name;
 }
 
+// helper function
 function isDescendantOf(descendant, ancestor) {
   if(typeof descendant === "string") {
     descendant = document.getElementById(descendant);
@@ -478,6 +509,12 @@ function isDescendantOf(descendant, ancestor) {
   return false;
 }
 
+// We delegate the management of menu items to the background script.
+function createOrUpdateMenu() {
+  return browser.runtime.sendMessage({ createOrUpdateMenu: true });
+}
+
+// And here is where everything gets put together for the settings page.
 document.addEventListener("DOMContentLoaded", () => {
 
   loadSettings().then(() => {
@@ -536,11 +573,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if(e.target.id == "showPageAction") {
           if(e.target.value == "when-applicable") {
-            // Directly requesting here is currently blocked by https://bugzilla.mozilla.org/show_bug.cgi?id=1382953
+            // Would actually love to request the optional permission right from the settings page,
+            // but that is currently blocked by https://bugzilla.mozilla.org/show_bug.cgi?id=1382953
             browser.permissions.contains({
               origins: ["<all_urls>"],
             }).then((result) => {
               if(!result) {
+                // So instead we put it in a tab!
                 browser.tabs.create({
                   url: "/permissions.html"
                 });

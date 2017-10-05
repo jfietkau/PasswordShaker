@@ -1,13 +1,3 @@
-var storedHash = null;
-var lastVisualHashEvent = null;
-var lastGeneratedPasswordEvent = null;
-var clickEventInProgress = false;
-var currentPasswordReq = null;
-
-function removeElementById(elemId) {
-  var elem = document.getElementById(elemId);
-  elem.parentNode.removeChild(elem);
-}
 /**
  * PasswordShaker
  * https://github.com/jfietkau/PasswordShaker/
@@ -32,6 +22,34 @@ function removeElementById(elemId) {
  *************************************************************************
  */
 
+// This script gets loaded into the page action popup and handles all the UI stuff there.
+
+// storedHash starts out as undefined (semantics: stored hash has not finished being loaded).
+// If it is null, that means that loading the stored hash _has_ finished, but it was empty.
+var storedHash = undefined;
+
+// Only show the last/latest visual hash
+var lastVisualHashEvent = null;
+
+// Same for the generated password
+var lastGeneratedPasswordEvent = null;
+
+// Ran into a problem where an element was supposed to disappear upon a click, but it was
+// possible to click twice to outrace the event handled. This is just to make sure that if
+// there was already a click event, subsequent ones are ignored.
+var clickEventInProgress = false;
+
+// If the current site has known password requirements, use the metadata (site name, mostly)
+// for slightly fancier display.
+var currentPasswordReq = null;
+
+// helper function
+function removeElementById(elemId) {
+  var elem = document.getElementById(elemId);
+  elem.parentNode.removeChild(elem);
+}
+
+// Set up the form elements etc. according to the given settings.
 function setupPopupForm(settings) {
   if(settings.profiles.length == 1) {
     removeElementById("profileSelectContainer");
@@ -74,8 +92,13 @@ function setupPopupForm(settings) {
   }
 }
 
+// Update the popup form with changed settings. The second parameter can be a list
+// of parts of the form that need to be updated. This makes it possible to avoid
+// recalculating the visual hash or the generated password if no pertinent data
+// has changed.
 function updatePopupForm(settings, toUpdate) {
   toUpdate = toUpdate || {visualHash: true, generatedPassword: true};
+  // only allow OK button to be clicked if everything checks out
   var noProblems = true;
   if(document.getElementById("masterPassword").value.length == 0) {
     noProblems = false;
@@ -101,7 +124,7 @@ function updatePopupForm(settings, toUpdate) {
   if(settings.storeMasterPasswordHash) {
     var entered = document.getElementById("masterPassword").value;
     var matchStoredIcon = document.getElementById("matchStoredIcon");
-    if(entered.length == 0) {
+    if(entered.length == 0 || storedHash === undefined) {
       matchStoredIcon.src = "/icons/stored-gray.svg";
       matchStoredIcon.alt = "Master password not entered yet";
       noProblems = false;
@@ -168,6 +191,8 @@ function updatePopupForm(settings, toUpdate) {
   document.getElementById("okButton").disabled = !noProblems;
 }
 
+// If the user configures it, the popup can display the generated password. This
+// function retrieves it from the background script.
 function updateGeneratedPasswordInput(input, profileId) {
   var generatedPasswordInput = document.getElementById("generatedPassword");
   var currentSiteDisplay = document.getElementById("currentSite");
@@ -209,13 +234,17 @@ function updateGeneratedPasswordInput(input, profileId) {
   }
 }
 
+// Given a specific input text, update the display of the current site.
 function updateCurrentSite(siteText) {
+  // This is a tiny bit unwieldy, but we have the hostname for verified websites
+  // stored in a hidden input field while we put the fancy text into the displayed span.
   document.getElementById("currentSiteArea").classList.remove("verified");
   var siteTextOriginal = document.getElementById("currentSiteOriginal").value;
   if(siteText.length == 0) {
     siteText = siteTextOriginal;
   }
   if(siteText == siteTextOriginal) {
+    // given site text is the original one
     document.getElementById("currentSiteCustom").value = "";
     var siteTextFancy = siteText;
     if(currentPasswordReq != null) {
@@ -226,15 +255,19 @@ function updateCurrentSite(siteText) {
       document.getElementById("currentSiteArea").classList.add("verified");
     }
   } else {
+    // given site text has been changed frm the original
     document.getElementById("currentSiteCustom").value = siteText;
     document.getElementById("currentSite").innerHTML = siteText;
   }
 }
 
+// helper function
 function getSelectedProfile() {
   return document.getElementById("profileSelect") ? parseInt(document.getElementById("profileSelect").value, 10) : 0;
 }
 
+// This is what happens when the user clicks on the current site name. It replaces the span with a text input
+// and makes sure it works smoothly.
 function reactToCurrentSiteClick(evt) {
   if(clickEventInProgress) {
     return;
@@ -267,6 +300,7 @@ function reactToCurrentSiteClick(evt) {
   });
 }
 
+// Set up the portion of the popup that displays the current site, depending on the settings.
 function initializeCurrentSiteDisplay(settings) {
   browser.runtime.sendMessage({
     getCurrentUrlDetails: true
@@ -275,6 +309,7 @@ function initializeCurrentSiteDisplay(settings) {
       var currentSiteDisplay = document.getElementById("currentSite");
       if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault"
          && settings.profiles[getSelectedProfile()].psUseSiteSpecificRequirements) {
+        // Only if we use the site-specific things at all can there be verified websites.
         document.getElementById("currentSiteIntro").innerHTML = "Password for:";
         currentSiteDisplay.style.display = "inline";
         var canonicalHostname = response.publicSuffix;
@@ -291,6 +326,10 @@ function initializeCurrentSiteDisplay(settings) {
         document.getElementById("currentSiteCustom").value = "";
         document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
         currentSiteDisplay.innerHTML = response.publicSuffix;
+        // Differentiate the UI here: if the user uses the default engine, we display the
+        // hostname because that's waht the engine always uses. The PasswordMaker engine
+        // may use the same, different, both or no elements from the URL, so instead of
+        // showing a (potentially misleading) hostname, we just show a general "this site".
         if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
           currentSiteDisplay.style.display = "inline";
           document.getElementById("currentSiteIntro").innerHTML = "Password for:";
@@ -303,8 +342,10 @@ function initializeCurrentSiteDisplay(settings) {
   });
 }
 
+// Install event listeners and do things etc.
 document.addEventListener("DOMContentLoaded", () => {
   loadSettings().then(() => {
+    // If a master password is already cached this session, put it into the field(s)
     browser.runtime.sendMessage(
       { getSessionVariable: "masterPassword" }
     ).then((response) => {
@@ -316,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePopupForm(currentSettings);
       }
     });
-    initializeCurrentSiteDisplay(currentSettings);
+    // If there are multiple profiles and one has already been selected this session, stick with it
     browser.runtime.sendMessage(
       { getSessionVariable: "currentProfile" }
     ).then((response) => {
@@ -327,6 +368,16 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePopupForm(currentSettings, {generatedPassword: true});
       }
     });
+    // See if there is a stored master password hash for us to use
+    browser.runtime.sendMessage({ loadStoredHash: true }).then((response) => {
+      storedHash = response;
+      if(storedHash != null && (storedHash.salt !== undefined && storedHash.salt.length < 64)) {
+        storedHash = null;
+      }
+      updatePopupForm(currentSettings, {});
+    });
+
+    initializeCurrentSiteDisplay(currentSettings);
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);
@@ -348,15 +399,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
-    loadStoredHash((newStoredHash) => {
-      storedHash = newStoredHash;
-      if(storedHash != null && (storedHash.salt !== undefined && storedHash.salt.length < 64)) {
-        storedHash = null;
-      }
-    });
+    // This is where the user is going to want to type (or press enter to submit)
     document.getElementById("masterPassword").focus();
   });
   document.getElementById("generatedPasswordForm").addEventListener("submit", (e) => {
+    // The generated password form actually doesn't have a submit button, but if the
+    // user presses enter while the current site input is focused, we want to trigger
+    // the blur event to finalize the changes
     e.preventDefault();
     if(document.getElementById("currentSiteInput")) {
       document.getElementById("currentSiteInput").blur();
@@ -379,9 +428,16 @@ document.addEventListener("DOMContentLoaded", () => {
       hostnameOverride: hostnameOverride,
     }).then(() => {
       if(currentSettings.storeMasterPasswordHash && storedHash === null) {
+        // Initially we used to do this as a plain SHA3 hash, but since we have
+        // more suitable algorithms right there, why not use one.
         var newSalt = dcodeIO.bcrypt.genSaltSync(10);
         var newHash = dcodeIO.bcrypt.hashSync(enteredMasterPassword, newSalt);
-        saveStoredHash(newHash, null, "bcrypt").then(() => {
+        browser.runtime.sendMessage({
+          saveStoredHash: true,
+          hash: newHash,
+          salt: null,
+          algorithm: "bcrypt",
+        }).then(() => {
           window.close();
         });
       } else {
