@@ -5,11 +5,11 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   width="64"
-   height="64"
-   viewBox="0 0 64.000001 64.000001"
+   version="1.1"
    id="svg2"
-   version="1.1">
+   viewBox="0 0 64.000001 64.000001"
+   height="64"
+   width="64">
   <defs
      id="defs4" />
   <metadata
@@ -25,18 +25,22 @@
     </rdf:RDF>
   </metadata>
   <circle
-     r="32"
-     cy="31.999962"
-     cx="32"
+     style="fill:#7f7f7f;fill-opacity:0.24705882;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:8, 8;stroke-dashoffset:0;stroke-opacity:1"
      id="path4684"
-     style="fill:#7f7f7f;fill-opacity:0.24705882;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:8, 8;stroke-dashoffset:0;stroke-opacity:1" />
+     cx="32"
+     cy="31.999962"
+     r="32" />
   <text
-     id="text4692"
-     y="22.557457"
-     x="40.786884"
+     xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     xml:space="preserve"><tspan
-       y="22.557457"
+     x="40.786884"
+     y="22.557457"
+     id="text4692"><tspan
+       id="tspan4694"
        x="40.786884"
-       id="tspan4694" /></text>
+       y="22.557457" /></text>
+  <path
+     d="m 41.048828,18.142578 c -9.136885,-1.31e-4 -16.543749,2.943377 -16.542969,6.574219 0.0019,3.630079 7.305385,6.315849 16.44035,6.315718 9.134965,1.31e-4 16.643653,-2.685639 16.645588,-6.315718 7.8e-4,-3.630842 -7.406084,-6.57435 -16.542969,-6.574219 z M 24.49699,24.922591 v 14.004456 c -3.02e-4,2.348711 3.152827,4.519046 8.271485,5.693359 5.118379,1.174362 11.424589,1.174362 16.542968,0 5.118658,-1.174313 8.271787,-3.344648 8.271485,-5.693359 l 0.102619,-14.11072"
+     style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.49803922"
+     id="path4485" />
 </svg>

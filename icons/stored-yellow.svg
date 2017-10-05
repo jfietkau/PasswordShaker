@@ -5,11 +5,11 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   version="1.1"
-   id="svg2"
-   viewBox="0 0 64.000001 64.000001"
+   width="64"
    height="64"
-   width="64">
+   viewBox="0 0 64.000001 64.000001"
+   id="svg2"
+   version="1.1">
   <defs
      id="defs4" />
   <metadata
@@ -24,26 +24,40 @@
       </cc:Work>
     </rdf:RDF>
   </metadata>
+  <circle
+     r="32"
+     cy="31.999962"
+     cx="32"
+     id="path4684"
+     style="fill:#dec539;fill-opacity:0.49803922;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:8, 8;stroke-dashoffset:0;stroke-opacity:1" />
   <g
      transform="translate(0,-988.36216)"
-     id="layer1">
-    <circle
-       r="32"
-       cy="1020.3621"
-       cx="32"
-       id="path4684"
-       style="fill:#dec539;fill-opacity:0.49803922;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:8, 8;stroke-dashoffset:0;stroke-opacity:1" />
-    <g
-       id="text4688"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:0.49803922;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-    <text
-       id="text4692"
-       y="1010.9196"
+     id="text4688"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:0.49803922;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+  <text
+     id="text4692"
+     y="22.557457"
+     x="40.786884"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     xml:space="preserve"><tspan
+       y="22.557457"
        x="40.786884"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         y="1010.9196"
-         x="40.786884"
-         id="tspan4694" /></text>
-  </g>
+       id="tspan4694" /></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="40.78688"
+     y="22.557495"
+     id="text4692-6"><tspan
+       id="tspan4694-7"
+       x="40.78688"
+       y="22.557495" /></text>
+  <path
+     d="m 41.048825,18.142616 c -9.136885,-1.31e-4 -16.543749,2.943377 -16.542969,6.574219 0.0019,3.630079 7.305385,6.315849 16.44035,6.315718 9.134965,1.31e-4 16.643653,-2.685639 16.645588,-6.315718 7.8e-4,-3.630842 -7.406084,-6.57435 -16.542969,-6.574219 z m -16.551838,6.780013 v 14.004456 c -3.02e-4,2.348711 3.152827,4.519046 8.271485,5.693359 5.118379,1.174362 11.424589,1.174362 16.542968,0 5.118658,-1.174313 8.271787,-3.344648 8.271485,-5.693359 l 0.102619,-14.11072"
+     style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.49803922"
+     id="path4485" />
+  <path
+     id="rect4501"
+     d="M 12.203125 23.957031 C 11.936016 23.957031 11.669517 24.058999 11.464844 24.263672 L 9.9355469 25.792969 C 9.5262007 26.202315 9.5262007 26.862138 9.9355469 27.271484 L 12.5625 29.898438 L 3.8066406 29.898438 C 3.2277377 29.898438 2.7617188 30.364456 2.7617188 30.943359 L 2.7617188 33.105469 C 2.7617188 33.684372 3.2277377 34.150391 3.8066406 34.150391 L 12.46875 34.150391 L 9.8867188 36.732422 C 9.4773725 37.141768 9.4773725 37.801591 9.8867188 38.210938 L 11.416016 39.740234 C 11.825362 40.149581 12.485185 40.149581 12.894531 39.740234 L 18.386719 34.246094 L 19.916016 32.716797 C 20.325362 32.307451 20.325362 31.649581 19.916016 31.240234 L 18.386719 29.710938 L 12.941406 24.263672 C 12.736733 24.058999 12.470234 23.957031 12.203125 23.957031 z "
+     style="opacity:1;fill:#ffffff;fill-opacity:0.49803922;stroke:none;stroke-width:1.00157475;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
 </svg>
