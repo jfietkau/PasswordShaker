@@ -123,8 +123,8 @@ function populateProfileArea(settings, profileIndex) {
   var currentAlgoName = document.getElementById("psHashAlgorithm").value;
   var newAlgoCoefficientName = getCoefficientNameByAlgorithm(currentAlgoName);
   if(currentAlgoName.startsWith("pbkdf2-")) {
-    document.getElementById("psAlgorithmCoefficient").step = 10000;
-    document.getElementById("psAlgorithmCoefficient").min = 10000;
+    document.getElementById("psAlgorithmCoefficient").step = 25000;
+    document.getElementById("psAlgorithmCoefficient").min = 25000;
   } else {
     document.getElementById("psAlgorithmCoefficient").step = 1;
     document.getElementById("psAlgorithmCoefficient").min = (currentAlgoName == "bcrypt") ? 4 : 1;
@@ -466,7 +466,7 @@ function updateSecurityAlerts() {
       } else if(algo == "bcrypt") {
         result = 9;
       } else if(algo == "pbkdf2-hmac-sha256") {
-        result = 30000;
+        result = 50000;
       }
       return result;
     }
@@ -577,9 +577,9 @@ document.addEventListener("DOMContentLoaded", () => {
             newAlgoCoefficient = 10;
             newAlgoCoefficientMinimum = 4;
           } else if(newAlgo == "pbkdf2-hmac-sha256") {
-            newAlgoCoefficient = 50000;
-            newAlgoCoefficientStepSize = 10000;
-            newAlgoCoefficientMinimum = 10000;
+            newAlgoCoefficient = 100000;
+            newAlgoCoefficientStepSize = 25000;
+            newAlgoCoefficientMinimum = 25000;
           }
           document.getElementById("psAlgorithmCoefficient").value = newAlgoCoefficient;
           document.getElementById("psAlgorithmCoefficient").step = newAlgoCoefficientStepSize;

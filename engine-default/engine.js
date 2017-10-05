@@ -304,7 +304,7 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
     var hashResult = null;
     // Here is where we actually dive into the respective algorithms. They all come from different libraries
     // and as such are handled differently.
-    if(settings.hashAlgorithm == "pbkdf2-hmac-sha256") {
+    if(settings.hashAlgorithm == "pbkdf2-sha256") {
       pbkdf2WebCrypto(str2arr(masterPassword), accumulator.salt, settings.hashAlgorithmCoefficient, 64).then((hashResult) => {
         handleHashResult(arr2hex(hashResult), masterPassword, url, settings, depth, accumulator, resolve, requestId);
       });
