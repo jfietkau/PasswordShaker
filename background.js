@@ -24,7 +24,6 @@ function checkOptionalPermissions() {
       checkOptionalPermissions();
     });
   } else {
-    console.log(currentSettings);
     if(currentSettings.showPageAction == "when-applicable") {
       browser.permissions.contains({
         origins: ["<all_urls>"]
