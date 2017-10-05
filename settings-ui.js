@@ -465,7 +465,7 @@ function updateSecurityAlerts() {
         result = 9;
       } else if(algo == "bcrypt") {
         result = 9;
-      } else if(algo == "pbkdf2-hmac-sha256") {
+      } else if(algo == "pbkdf2-sha256") {
         result = 50000;
       }
       return result;
@@ -503,7 +503,7 @@ function getCoefficientNameByAlgorithm(algo) {
     name = "Cost parameter";
   } else if(algo == "bcrypt") {
     name = "Cost parameter";
-  } else if(algo == "pbkdf2-hmac-sha256") {
+  } else if(algo == "pbkdf2-sha256") {
     name = "Iteration count";
   }
   return name;
@@ -576,7 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
           } else if(newAlgo == "bcrypt") {
             newAlgoCoefficient = 10;
             newAlgoCoefficientMinimum = 4;
-          } else if(newAlgo == "pbkdf2-hmac-sha256") {
+          } else if(newAlgo == "pbkdf2-sha256") {
             newAlgoCoefficient = 100000;
             newAlgoCoefficientStepSize = 25000;
             newAlgoCoefficientMinimum = 25000;
