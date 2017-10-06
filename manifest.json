@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "PasswordShaker",
-  "version": "0.1",
+  "version": "0.1.1",
 
   "description": "Generates site-specific passwords for you automatically, based on one master password.",
 

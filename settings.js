@@ -109,7 +109,7 @@ function getDefaultSettings() {
     verifyMasterPassword: true,
     showMasterPassword: false,
     showGeneratedPassword: false,
-    showVisualHash: true,
+    showVisualHash: false,
     visualHashMinInputLength: 8,
     visualHashDelay: 800,
     storeMasterPassword: "volatile",
