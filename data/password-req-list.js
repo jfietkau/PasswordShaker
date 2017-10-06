@@ -439,6 +439,15 @@ var passwordReqList = {
     "minLength": 6,
     "lastVerified": "2017-09-17",
   },
+  "PayPal": {
+    "hostnames": ["paypal.com", "paypal.me"],
+    "name": "PayPal",
+    "minLength": 8,
+    "maxLength": 20,
+    "minNumLetter": 1,
+    "minNumDigit": 1,
+    "lastVerified": "2017-10-06",
+  },
   "Photobucket": {
     "hostnames": ["photobucket.com"],
     "name": "Photobucket",
