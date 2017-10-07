@@ -499,6 +499,56 @@ DAMAGES.
 
 var base = typeof window === 'object' ? window : {};
 
+var domainSuffixList = [
+  // The last published version of PasswordMaker-JS still shipped with the
+  // assumption that the last two segments of a hostname would always be the
+  // domain. This approach did not cope well with compound TLDs, as used for
+  // example in the United Kingdom. For the main Firefox extension version of
+  // PasswordMaker, this was eventually fixed: it deployed a user-extendable
+  // list of ccSLDs so the extension would not generate the same password for
+  // foo.co.uk and bar.co.uk, although it seems this addition did not make its
+  // way back into the JavaScript port.
+  //
+  // Today this effort has been surpassed by Mozilla's public suffix list,
+  // found here: https://publicsuffix.org/ That is also what PasswordShaker's
+  // default engine uses for the same purpose.
+  //
+  // See also: https://en.wikipedia.org/wiki/Country_code_second-level_domain
+  //
+  // This list is a 1:1 copy of the domain suffix list that was deployed with
+  // and used by PasswordMaker 1.7.8.1-signed.1-signed, the last version of
+  // the old Firefox extension as of 2017. It is used here to ensure the best
+  // compatibility with the FF add-on that we can achieve.
+
+  "aland.fi",
+  "wa.edu.au",
+  "nsw.edu.au", "vic.edu.au", "csiro.au", "conf.au", "info.au", "oz.au", "telememo.au", "sa.edu.au", "nt.edu.au", "tas.edu.au", "act.edu.au", "wa.gov.au", "nsw.gov.au", "vic.gov.au", "qld.gov.au", "sa.gov.au", "tas.gov.au", "nt.gov.au", "act.gov.au", "archie.au", "edu.au", "gov.au", "id.au", "org.au", "asn.au", "net.au", "com.au", "qld.edu.au",
+  "com.bb", "net.bb", "org.bb", "gov.bb",
+  "agr.br", "am.br", "art.br", "edu.br", "com.br", "coop.br", "esp.br", "far.br", "fm.br", "g12.br", "gov.br", "imb.br", "ind.br", "inf.br", "mil.br", "net.br", "org.br", "psi.br", "rec.br", "srv.br", "tmp.br", "tur.br", "tv.br", "etc.br", "adm.br", "adv.br", "arq.br", "ato.br", "bio.br", "bmd.br", "cim.br", "cng.br", "cnt.br", "ecn.br", "eng.br", "eti.br", "fnd.br", "fot.br", "fst.br", "ggf.br", "jor.br", "lel.br", "mat.br", "med.br", "mus.br", "not.br", "ntr.br", "odo.br", "ppg.br", "pro.br", "psc.br", "qsl.br", "slg.br", "trd.br", "vet.br", "zlg.br", "nom.br",
+  "ab.ca", "bc.ca", "mb.ca", "nb.ca", "nf.ca", "nl.ca", "ns.ca", "nt.ca", "nu.ca", "on.ca", "pe.ca", "qc.ca", "sk.ca", "yk.ca",
+  "com.cd", "net.cd", "org.cd",
+  "ac.cn", "com.cn", "edu.cn", "gov.cn", "net.cn", "org.cn", "ah.cn", "bj.cn", "cq.cn", "fj.cn", "gd.cn", "gs.cn", "gz.cn", "gx.cn", "ha.cn", "hb.cn", "he.cn", "hi.cn", "hl.cn", "hn.cn", "jl.cn", "js.cn", "jx.cn", "ln.cn", "nm.cn", "nx.cn", "qh.cn", "sc.cn", "sd.cn", "sh.cn", "sn.cn", "sx.cn", "tj.cn", "xj.cn", "xz.cn", "yn.cn", "zj.cn",
+  "co.ck", "org.ck", "edu.ck", "gov.ck", "net.ck",
+  "ac.cr", "co.cr", "ed.cr", "fi.cr", "go.cr", "or.cr", "sa.cr",
+  "eu.int",
+  "ac.in", "co.in", "edu.in", "firm.in", "gen.in", "gov.in", "ind.in", "mil.in", "net.in", "org.in", "res.in",
+  "ac.id", "co.id", "or.id", "net.id", "web.id", "sch.id", "go.id", "mil.id", "war.net.id",
+  "ac.nz", "co.nz", "cri.nz", "gen.nz", "geek.nz", "govt.nz", "iwi.nz", "maori.nz", "mil.nz", "net.nz", "org.nz", "school.nz",
+  "aid.pl", "agro.pl", "atm.pl", "auto.pl", "biz.pl", "com.pl", "edu.pl", "gmina.pl", "gsm.pl", "info.pl", "mail.pl", "miasta.pl", "media.pl", "nil.pl", "net.pl", "nieruchomosci.pl", "nom.pl", "pc.pl", "powiat.pl", "priv.pl", "realestate.pl", "rel.pl", "sex.pl", "shop.pl", "sklep.pl", "sos.pl", "szkola.pl", "targi.pl", "tm.pl", "tourism.pl", "travel.pl", "turystyka.pl",
+  "com.pt", "edu.pt", "gov.pt", "int.pt", "net.pt", "nome.pt", "org.pt", "publ.pt",
+  "com.tw", "club.tw", "ebiz.tw", "game.tw", "gov.tw", "idv.tw", "net.tw", "org.tw",
+  "av.tr", "bbs.tr", "bel.tr", "biz.tr", "com.tr", "dr.tr", "edu.tr", "gen.tr", "gov.tr", "info.tr", "k12.tr", "mil.tr", "name.tr", "net.tr", "org.tr", "pol.tr", "tel.tr", "web.tr",
+  "ac.za", "city.za", "co.za", "edu.za", "gov.za", "law.za", "mil.za", "nom.za", "org.za", "school.za", "alt.za", "net.za", "ngo.za", "tm.za", "web.za", "bourse.za", "agric.za", "cybernet.za", "grondar.za", "iaccess.za", "inca.za", "nis.za", "olivetti.za", "pix.za", "db.za", "imt.za", "landesign.za",
+  "co.kr", "pe.kr", "or.kr", "go.kr", "ac.kr", "mil.kr", "ne.kr",
+  "chiyoda.tokyo.jp", "tcvb.or.jp", "ac.jp", "ad.jp", "co.jp", "ed.jp", "go.jp", "gr.jp", "lg.jp", "ne.jp", "or.jp",
+  "com.mx", "net.mx", "org.mx", "edu.mx", "gob.mx",
+  "ac.uk", "co.uk", "gov.uk", "ltd.uk", "me.uk", "mod.uk", "net.uk", "nic.uk", "nhs.uk", "org.uk", "plc.uk", "police.uk", "sch.uk",
+  "ak.us", "al.us", "ar.us", "az.us", "ca.us", "co.us", "ct.us", "dc.us", "de.us", "dni.us", "fed.us", "fl.us", "ga.us", "hi.us", "ia.us", "id.us", "il.us", "in.us", "isa.us", "kids.us", "ks.us", "ky.us", "la.us", "ma.us", "md.us", "me.us", "mi.us", "mn.us", "mo.us", "ms.us", "mt.us", "nc.us", "nd.us", "ne.us", "nh.us", "nj.us", "nm.us", "nsn.us", "nv.us", "ny.us", "oh.us", "ok.us", "or.us", "pa.us", "ri.us", "sc.us", "sd.us", "tn.us", "tx.us", "ut.us", "vt.us", "va.us", "wa.us", "wi.us", "wv.us", "wy.us",
+  "com.ua", "edu.ua", "gov.ua", "net.ua", "org.ua", "cherkassy.ua", "chernigov.ua", "chernovtsy.ua", "ck.ua", "cn.ua", "crimea.ua", "cv.ua", "dn.ua", "dnepropetrovsk.ua", "donetsk.ua", "dp.ua", "if.ua", "ivano-frankivsk.ua", "kh.ua", "kharkov.ua", "kherson.ua", "kiev.ua", "kirovograd.ua", "km.ua", "kr.ua", "ks.ua", "lg.ua", "lugansk.ua", "lutsk.ua", "lviv.ua", "mk.ua", "nikolaev.ua", "od.ua", "odessa.ua", "pl.ua", "poltava.ua", "rovno.ua", "rv.ua", "sebastopol.ua", "sumy.ua", "te.ua", "ternopil.ua", "vinnica.ua", "vn.ua", "zaporizhzhe.ua", "zp.ua", "uz.ua", "uzhgorod.ua", "zhitomir.ua", "zt.ua",
+  "ac.il", "co.il", "org.il", "net.il", "k12.il", "gov.il", "muni.il", "idf.il",
+  "co.im", "org.im"
+];
+
 // scripts/aes.js
 
 /* rijndael.js      Rijndael Reference Implementation
@@ -1103,33 +1153,46 @@ function generatepassword(hashAlgorithm, key, data, whereToUseL33t, l33tLevel, p
   return password;
 }
 
+function splitHostname(hostname) {
+  // 2017 remark: This code does not cope well if you pass in an IP, but
+  // neither did PasswordMaker, so we do the same thing for output
+  // compatibility. If you pass in "127.0.0.1" it considers "0.1" the
+  // domain and "127.0" the subdomain(s).
+
+  var segments = hostname.split(".");
+
+  var domain = segments.pop();
+  if(segments.length > 0) {
+    domain = segments.pop() + "." + domain;
+  }
+  while(segments.length > 0 && domainSuffixList.includes(domain)) {
+    domain = segments.pop() + "." + domain;
+  }
+
+  var subdomain = (segments.length > 0) ? segments.join(".") : "";
+
+  return [subdomain, domain];
+}
+
 function truncateUrl(fullUrl, settings) {
   var temp = fullUrl.match("([^://]*://)?([^:/]*)([^#]*)");
   if (!temp) {
 	temp = ['','','','']; // Helps prevent an undefine based error
   }
-  var domainSegments = temp[2].split(".");
-  while (domainSegments.length < 3) {
-	domainSegments.unshift(''); // Helps prevent the URL from displaying undefined in the URL to use box
-  }
+
+  var hostnameSegments = splitHostname(temp[2]);
+
   var displayMe = '';
   var displayMeTemp= settings.useProtocol ? temp[1] : ''; // set the protocol or empty string
 
   if (settings.useSubdomains) {
-	  // The subdomain is all domainSegments
-	  // except the final two.
-	  for (var i=0; i<domainSegments.length-2;i++) {
-	    displayMe += domainSegments[i];
-        // Add a dot if this isn't the final subdomain
-	    if (i+1 < domainSegments.length-2)
-		  displayMe += ".";
-	  }			
+	displayMe += hostnameSegments[0];
   }
 
   if (settings.useDomain) {
-	  if (displayMe != "" && displayMe[displayMe.length-1]  != ".")
-	    displayMe += ".";
-      displayMe += domainSegments[domainSegments.length-2] + "." + domainSegments[domainSegments.length-1];
+	if (displayMe != "" && displayMe[displayMe.length-1]  != ".")
+	  displayMe += ".";
+      displayMe += hostnameSegments[1];
   }
   displayMe = displayMeTemp + displayMe;
 
