@@ -195,7 +195,6 @@ function updatePopupForm(settings, toUpdate) {
 // function retrieves it from the background script.
 function updateGeneratedPasswordInput(input, profileId) {
   var generatedPasswordInput = document.getElementById("generatedPassword");
-  var currentSiteDisplay = document.getElementById("currentSite");
   if(input.length > 0) {
     generatedPasswordInput.style.fontStyle = "normal";
     generatedPasswordInput.value = ".....";
@@ -296,7 +295,7 @@ function reactToCurrentSiteClick(evt) {
   siteInput.addEventListener("blur", (e) => {
     updateCurrentSite(e.target.value);
     e.target.parentNode.removeChild(e.target);
-    currentSiteDisplay.style.display = "inline-block";
+    currentSiteDisplay.style.display = "inline";
     document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
     updatePopupForm(currentSettings, {generatedPassword: true});
   });
