@@ -588,7 +588,7 @@ function preGeneratePassword(masterPassword, url, settings) {
      password = settings.passwordPrefix + password;
    if (settings.passwordSuffix)
      password = password.substring(0, settings.passwordLength-settings.passwordSuffix.length) + settings.passwordSuffix;
-   return password.substring(0, settings.passwordLength);
+   return [password.substring(0, settings.passwordLength), truncatedUrl];
 }
   
 function generatepassword(hashAlgorithm, key, data, whereToUseL33t, l33tLevel, passwordLength, charset, prefix, suffix) {
@@ -1885,7 +1885,12 @@ if (typeof(PasswordMaker_HashUtils) != "object") {
 // Provide the main interface for this password generation engine
 base.pmGeneratePassword = function(masterPassword, url, settings, requestId) {
   return new Promise((resolve, reject) => {
-    resolve({password: preGeneratePassword(masterPassword, url, settings), requestId: requestId});
+    var result = preGeneratePassword(masterPassword, url, settings);
+    resolve({
+      password: result[0],
+      inputText: result[1],
+      requestId: requestId,
+    });
   });
 }
 

@@ -434,7 +434,8 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
     }
     resolve({
       password: accumulator.password,
-      requestId: requestId
+      inputText: domain,
+      requestId: requestId,
     });
   }
 }
@@ -442,16 +443,7 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
 // The outside interface for the main password generation function.
 function generatePassword(masterPassword, url, settings, requestId) {
   settings.passwordRequirements = settings.passwordRequirements || {};
-  var charSet = createCharSet(settings);
-  if(charSet.length < 2) {
-    // if the character set is too short, fail immediately
-    return new Promise((resolve, reject) => {
-      resolve({
-        password: null,
-        requestId: requestId
-      });
-    });
-  }
+
   var hostName = extractHostName(url);
   var domain = extractTopLevelHostname(hostName);
   if(settings.passwordRequirements.hasOwnProperty("hostnames")) {
@@ -460,6 +452,19 @@ function generatePassword(masterPassword, url, settings, requestId) {
   if(settings.hostnameOverride) {
     domain = settings.hostnameOverride;
   }
+
+  var charSet = createCharSet(settings);
+  if(charSet.length < 2) {
+    // if the character set is too short, fail immediately
+    return new Promise((resolve, reject) => {
+      resolve({
+        password: null,
+        inputText: domain,
+        requestId: requestId
+      });
+    });
+  }
+
   var thDomain = str2arr(domain);
   var thMainSalt = hex2arr(settings.mainSalt);
   var combinedSalt = new Uint8Array(thDomain.length + thMainSalt.length);
