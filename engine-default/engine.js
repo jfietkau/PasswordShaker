@@ -287,8 +287,8 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   if(settings.passwordRequirements && settings.passwordRequirements.hasOwnProperty("hostnames")) {
     domain = settings.passwordRequirements.hostnames[0];
   }
-  if(settings.hostnameOverride) {
-    domain = settings.hostnameOverride;
+  if(settings.inputTextOverride) {
+    domain = settings.inputTextOverride;
   }
   var thDomain = str2arr(domain);
   var thMainSalt = hex2arr(settings.mainSalt);
@@ -449,8 +449,8 @@ function generatePassword(masterPassword, url, settings, requestId) {
   if(settings.passwordRequirements.hasOwnProperty("hostnames")) {
     domain = settings.passwordRequirements.hostnames[0];
   }
-  if(settings.hostnameOverride) {
-    domain = settings.hostnameOverride;
+  if(settings.inputTextOverride) {
+    domain = settings.inputTextOverride;
   }
 
   var charSet = createCharSet(settings);

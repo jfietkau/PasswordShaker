@@ -84,11 +84,11 @@ function checkOptionalPermissions() {
 //       use just the hostname.
 //  masterPassword: self-explanatory
 //  profileSettings: a complete profile
-//  hostnameOverride: hostname that should be used instead of the hostname in the URL. This is for
-//                    when the user changes the input text by hand.
+//  inputTextOverride: input text that should be used instead of the one extracted from the URL.
+//                     This is for when the user changes the input text by hand.
 //  requestId: can be any value. This gets passed back out through the promise object to allow
 //             callers to differentiate between several asynchronous requests.
-function generatePasswordForProfile(url, masterPassword, profileSettings, hostnameOverride, requestId) {
+function generatePasswordForProfile(url, masterPassword, profileSettings, inputTextOverride, requestId) {
   var generatedPassword = null;
   if(profileSettings.profileEngine == "profileEngineDefault") {
     var engineSpecificSettings = {
@@ -105,7 +105,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
       mainSalt: profileSettings.psMainSalt,
       useSiteSpecificRequirements: profileSettings.psUseSiteSpecificRequirements,
       passwordRequirements: null,
-      hostnameOverride: hostnameOverride,
+      inputTextOverride: inputTextOverride,
     };
     if(profileSettings.psUseSiteSpecificRequirements) {
       engineSpecificSettings.passwordRequirements = passwordReqListParser.byUrl(url);
@@ -126,6 +126,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
       useSubdomains: profileSettings.pmUseSubdomains,
       useDomain: profileSettings.pmUseDomain,
       usePath: profileSettings.pmUseOther,
+      inputTextOverride: inputTextOverride,
     };
     generatedPassword = pmGeneratePassword(masterPassword, url, engineSpecificSettings, requestId);
   }
@@ -134,7 +135,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, hostna
 
 // This function takes the given parameters to calculate a site-specific password and
 // then inject it into the page. See injector.js for how the actual password field is populated.
-function activateOnPage(url, masterPassword, profileId, hostnameOverride) {
+function activateOnPage(url, masterPassword, profileId, inputTextOverride) {
   if(profileId === undefined) {
     profileId = session.currentProfile;
   }
@@ -142,7 +143,7 @@ function activateOnPage(url, masterPassword, profileId, hostnameOverride) {
     return;
   }
   var profileSettings = currentSettings.profiles[profileId];
-  generatePasswordForProfile(url, masterPassword, profileSettings, hostnameOverride, null).then((generatedPassword) => {
+  generatePasswordForProfile(url, masterPassword, profileSettings, inputTextOverride, null).then((generatedPassword) => {
     if(generatedPassword !== null && generatedPassword.password !== null) {
       browser.tabs.executeScript({file: "/injector.js"}).then(() => {
         browser.tabs.executeScript({code: "fillPassword('" + generatedPassword.password + "');"});
@@ -493,7 +494,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       browser.pageAction.hide(session.currentTabId);
     }
     var currentUrl = session.currentUrl;
-    activateOnPage(currentUrl, request.masterPassword, request.profileId, request.hostnameOverride);
+    activateOnPage(currentUrl, request.masterPassword, request.profileId, request.inputTextOverride);
   }
   // Client requests an example password for the given profile.
   if(request != null && request.wantExamplePasswordForProfile !== undefined) {
@@ -513,7 +514,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         var profileId = (request.profileId !== undefined) ? request.profileId : session.currentProfile;
         var profileSettings = currentSettings.profiles[profileId];
         var url = (request.url !== undefined) ? request.url : session.currentUrl;
-        generatePasswordForProfile(url, request.masterPassword, profileSettings, request.hostnameOverride, request.id).then((response) => {
+        generatePasswordForProfile(url, request.masterPassword, profileSettings, request.inputTextOverride, request.id).then((response) => {
           sendResponse({generatedPassword: response.password, inputText: response.inputText, requestId: response.requestId});
         });
       } else {

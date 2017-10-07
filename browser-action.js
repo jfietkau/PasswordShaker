@@ -203,17 +203,17 @@ function updateGeneratedPasswordInput(input, profileId) {
     var myEventId = lastGeneratedPasswordEvent;
     setTimeout(() => {
       if(myEventId == lastGeneratedPasswordEvent) {
-        var hostnameOverride = undefined;
+        var inputTextOverride = undefined;
         if(document.getElementById("currentSiteCustom").value.length > 0) {
-          hostnameOverride = document.getElementById("currentSiteCustom").value;
+          inputTextOverride = document.getElementById("currentSiteCustom").value;
         } else if(document.getElementById("currentSiteOriginal").value.length > 0) {
-          hostnameOverride = document.getElementById("currentSiteOriginal").value;
+          inputTextOverride = document.getElementById("currentSiteOriginal").value;
         }
         browser.runtime.sendMessage({
           generatePassword: true,
           masterPassword: input,
           profileId: profileId,
-          hostnameOverride: hostnameOverride,
+          inputTextOverride: inputTextOverride,
           id: myEventId,
         }).then((message) => {
           if(message.requestId == lastGeneratedPasswordEvent) {
@@ -340,7 +340,7 @@ function initializeCurrentSiteDisplay(settings) {
           generatePassword: true,
           masterPassword: "dummy request",
           profileId: getSelectedProfile(),
-          hostnameOverride: null,
+          inputTextOverride: null,
           id: null,
         }).then((response) => {
           document.getElementById("currentSiteOriginal").value = response.inputText;
@@ -424,17 +424,17 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     var enteredMasterPassword = document.getElementById("masterPassword").value;
     var enteredProfileId = getSelectedProfile();
-    var hostnameOverride = undefined;
+    var inputTextOverride = undefined;
     if(document.getElementById("currentSiteCustom").value.length > 0) {
-      hostnameOverride = document.getElementById("currentSiteCustom").value;
+      inputTextOverride = document.getElementById("currentSiteCustom").value;
     } else if(document.getElementById("currentSiteOriginal").value.length > 0) {
-      hostnameOverride = document.getElementById("currentSiteOriginal").value;
+      inputTextOverride = document.getElementById("currentSiteOriginal").value;
     }
     browser.runtime.sendMessage({
       activateOnPage: true,
       masterPassword: enteredMasterPassword,
       profileId: enteredProfileId,
-      hostnameOverride: hostnameOverride,
+      inputTextOverride: inputTextOverride,
     }).then(() => {
       if(currentSettings.storeMasterPasswordHash && storedHash === null) {
         // Initially we used to do this as a plain SHA3 hash, but since we have

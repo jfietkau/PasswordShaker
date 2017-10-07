@@ -554,7 +554,12 @@ var domainSuffixList = [
 function preGeneratePassword(masterPassword, url, settings) {
    var selectedChar = settings.charSet;
 
-   var truncatedUrl = truncateUrl(url, settings);
+   var inputText;
+   if(settings.inputTextOverride) {
+     inputText = settings.inputTextOverride;
+   } else {
+     inputText = truncateUrl(url, settings);
+   }
 
    // Never *ever, ever* allow the charset's length<2 else
    // the hash algorithms will run indefinitely
@@ -576,10 +581,10 @@ function preGeneratePassword(masterPassword, url, settings) {
      // doesn't generate the same hash value.
      password += (count == 0) ?
        generatepassword(hashAlgorithm, masterPassword,
-         truncatedUrl + settings.userName + settings.modifier, whereToUseL33t, l33tLevel,
+         inputText + settings.userName + settings.modifier, whereToUseL33t, l33tLevel,
          settings.passwordLength, selectedChar, settings.passwordPrefix, settings.passwordSuffix) :
        generatepassword(hashAlgorithm, masterPassword + '\n' + count, 
-         truncatedUrl + settings.userName + settings.modifier, whereToUseL33t, l33tLevel,
+         inputText + settings.userName + settings.modifier, whereToUseL33t, l33tLevel,
          settings.passwordLength, selectedChar, settings.passwordPrefix, settings.passwordSuffix);
      count++;
    }
@@ -588,7 +593,7 @@ function preGeneratePassword(masterPassword, url, settings) {
      password = settings.passwordPrefix + password;
    if (settings.passwordSuffix)
      password = password.substring(0, settings.passwordLength-settings.passwordSuffix.length) + settings.passwordSuffix;
-   return [password.substring(0, settings.passwordLength), truncatedUrl];
+   return [password.substring(0, settings.passwordLength), inputText];
 }
   
 function generatepassword(hashAlgorithm, key, data, whereToUseL33t, l33tLevel, passwordLength, charset, prefix, suffix) {
