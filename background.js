@@ -500,7 +500,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     loadSettings().then(() => {
       var profileSettings = currentSettings.profiles[request.wantExamplePasswordForProfile];
       generatePasswordForProfile("https://subdomain.example.com/test.html", "example master password", profileSettings, null, request.id).then((response) => {
-        sendResponse({examplePassword: response.password, requestId: response.requestId});
+        sendResponse({examplePassword: response.password, inputText: response.inputText, requestId: response.requestId});
       });
     });
     return true;
@@ -514,10 +514,10 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         var profileSettings = currentSettings.profiles[profileId];
         var url = (request.url !== undefined) ? request.url : session.currentUrl;
         generatePasswordForProfile(url, request.masterPassword, profileSettings, request.hostnameOverride, request.id).then((response) => {
-          sendResponse({generatedPassword: response.password, requestId: response.requestId});
+          sendResponse({generatedPassword: response.password, inputText: response.inputText, requestId: response.requestId});
         });
       } else {
-        sendResponse({generatedPassword: null, requestId: request.id});
+        sendResponse({generatedPassword: null, inputText: null, requestId: request.id});
       }
     });
     return true;

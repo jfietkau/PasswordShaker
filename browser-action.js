@@ -309,26 +309,42 @@ function initializeCurrentSiteDisplay(settings) {
   }).then((response) => {
     if(response != null) {
       var currentSiteDisplay = document.getElementById("currentSite");
-      if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault"
-         && settings.profiles[getSelectedProfile()].psUseSiteSpecificRequirements) {
-        // Only if we use the site-specific things at all can there be verified websites.
-        document.getElementById("currentSiteIntro").innerHTML = "Password for:";
-        currentSiteDisplay.style.display = "inline";
-        var canonicalHostname = response.publicSuffix;
-        if(response.passwordReq != null) {
-          canonicalHostname = response.passwordReq.hostnames[0];
-        }
-        currentPasswordReq = response.passwordReq;
-        document.getElementById("currentSiteOriginal").value = canonicalHostname;
-        updateCurrentSite(canonicalHostname);
+      if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
         document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
-      } else {
+        if(settings.profiles[getSelectedProfile()].psUseSiteSpecificRequirements) {
+          // Only if we use the site-specific things at all can there be verified websites.
+          var canonicalHostname = response.publicSuffix;
+          if(response.passwordReq != null) {
+            canonicalHostname = response.passwordReq.hostnames[0];
+          }
+          currentPasswordReq = response.passwordReq;
+          document.getElementById("currentSiteOriginal").value = canonicalHostname;
+          updateCurrentSite(canonicalHostname);
+        } else {
+          currentSiteArea.classList.remove("verified");
+          document.getElementById("currentSiteOriginal").value = "";
+          document.getElementById("currentSiteCustom").value = "";
+          currentSiteDisplay.innerHTML = "";
+          currentSiteDisplay.appendChild(document.createTextNode(response.publicSuffix));
+        }
+      } else { // using the PasswordMaker engine
+        document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
         currentSiteArea.classList.remove("verified");
         document.getElementById("currentSiteOriginal").value = "";
         document.getElementById("currentSiteCustom").value = "";
-        document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
         currentSiteDisplay.innerHTML = "";
-        currentSiteDisplay.appendChild(document.createTextNode(response.publicSuffix));
+        // It's a bit inelegant that we fire a generate password request just to find out
+        // what the engine will use as the input text, but the PasswordMaker algorithms
+        // are all so near-instant that the wasted calculation shouldn't matter.
+        browser.runtime.sendMessage({
+          generatePassword: true,
+          masterPassword: "dummy request",
+          profileId: getSelectedProfile(),
+          hostnameOverride: null,
+          id: null,
+        }).then((response) => {
+          currentSiteDisplay.appendChild(document.createTextNode(response.inputText));
+        });
       }
     }
   });
