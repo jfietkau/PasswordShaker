@@ -328,7 +328,7 @@ function initializeCurrentSiteDisplay(settings) {
           currentSiteDisplay.appendChild(document.createTextNode(response.publicSuffix));
         }
       } else { // using the PasswordMaker engine
-        document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
+        //document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
         currentSiteArea.classList.remove("verified");
         document.getElementById("currentSiteOriginal").value = "";
         document.getElementById("currentSiteCustom").value = "";
@@ -343,6 +343,7 @@ function initializeCurrentSiteDisplay(settings) {
           hostnameOverride: null,
           id: null,
         }).then((response) => {
+          document.getElementById("currentSiteOriginal").value = response.inputText;
           currentSiteDisplay.appendChild(document.createTextNode(response.inputText));
         });
       }
