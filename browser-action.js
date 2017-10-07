@@ -235,13 +235,29 @@ function updateGeneratedPasswordInput(input, profileId) {
 
 function fitTextInto(text, element, width) {
   element.innerHTML = "";
-  element.appendChild(document.createTextNode(text));
-  var currentWidth = element.getBoundingClientRect().width;
-  while(currentWidth >= width && text.length > 0) {
+  var shorteningCondition = false;
+  if(width == "auto") {
+    var boundRect = element.getBoundingClientRect();
+    var bestPosition = { x: boundRect.x, y: boundRect.y };
+    element.appendChild(document.createTextNode(text));
+    boundRect = element.getBoundingClientRect();
+    shorteningCondition = (boundRect.x != bestPosition.x || boundRect.y != bestPosition.y);
+  } else {
+    element.appendChild(document.createTextNode(text));
+    var currentWidth = element.getBoundingClientRect().width;
+    shorteningCondition = (currentWidth >= width);
+  }
+  while(shorteningCondition && text.length > 0) {
     element.innerHTML = "";
     text = text.slice(0, -1);
     element.appendChild(document.createTextNode(text + "…"));
     currentWidth = element.getBoundingClientRect().width;
+    if(width == "auto") {
+      boundRect = element.getBoundingClientRect();
+      shorteningCondition = (boundRect.x != bestPosition.x || boundRect.y != bestPosition.y);
+    } else {
+      shorteningCondition = (currentWidth >= width);
+    }
   }
 }
 
@@ -263,14 +279,14 @@ function updateCurrentSite(siteText) {
     if(currentPasswordReq != null) {
       siteTextFancy = currentPasswordReq.name;
     }
-    fitTextInto(siteTextFancy, currentSiteElem, 150);
+    fitTextInto(siteTextFancy, currentSiteElem, "auto");
     if(siteTextFancy != siteText) {
       document.getElementById("currentSiteArea").classList.add("verified");
     }
   } else {
     // given site text has been changed frm the original
     document.getElementById("currentSiteCustom").value = siteText;
-    fitTextInto(siteText, currentSiteElem, 150);
+    fitTextInto(siteText, currentSiteElem, "auto");
   }
 }
 
