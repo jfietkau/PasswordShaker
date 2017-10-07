@@ -233,6 +233,18 @@ function updateGeneratedPasswordInput(input, profileId) {
   }
 }
 
+function fitTextInto(text, element, width) {
+  element.innerHTML = "";
+  element.appendChild(document.createTextNode(text));
+  var currentWidth = element.getBoundingClientRect().width;
+  while(currentWidth >= width && text.length > 0) {
+    element.innerHTML = "";
+    text = text.slice(0, -1);
+    element.appendChild(document.createTextNode(text + "…"));
+    currentWidth = element.getBoundingClientRect().width;
+  }
+}
+
 // Given a specific input text, update the display of the current site.
 function updateCurrentSite(siteText) {
   // This is a tiny bit unwieldy, but we have the hostname for verified websites
@@ -251,14 +263,14 @@ function updateCurrentSite(siteText) {
     if(currentPasswordReq != null) {
       siteTextFancy = currentPasswordReq.name;
     }
-    currentSiteElem.appendChild(document.createTextNode(siteTextFancy));
+    fitTextInto(siteTextFancy, currentSiteElem, 150);
     if(siteTextFancy != siteText) {
       document.getElementById("currentSiteArea").classList.add("verified");
     }
   } else {
     // given site text has been changed frm the original
     document.getElementById("currentSiteCustom").value = siteText;
-    currentSiteElem.appendChild(document.createTextNode(siteText));
+    fitTextInto(siteText, currentSiteElem, 150);
   }
 }
 
@@ -283,7 +295,9 @@ function reactToCurrentSiteClick(evt) {
   var siteInput = document.createElement("input");
   siteInput.type = "text";
   siteInput.id = "currentSiteInput";
-  if(currentSiteArea.classList.contains("verified")) {
+  if(document.getElementById("currentSiteCustom").value.length > 0) {
+    siteInput.value = document.getElementById("currentSiteCustom").value;
+  } else if(document.getElementById("currentSiteOriginal").value.length > 0) {
     siteInput.value = document.getElementById("currentSiteOriginal").value;
   } else {
     siteInput.value = currentSiteDisplay.innerHTML;
@@ -293,9 +307,9 @@ function reactToCurrentSiteClick(evt) {
   currentSiteDisplay.style.display = "none";
   siteInput.focus();
   siteInput.addEventListener("blur", (e) => {
-    updateCurrentSite(e.target.value);
     e.target.parentNode.removeChild(e.target);
     currentSiteDisplay.style.display = "inline";
+    updateCurrentSite(e.target.value);
     document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
     updatePopupForm(currentSettings, {generatedPassword: true});
   });
@@ -303,6 +317,7 @@ function reactToCurrentSiteClick(evt) {
 
 // Set up the portion of the popup that displays the current site, depending on the settings.
 function initializeCurrentSiteDisplay(settings) {
+  currentPasswordReq = null;
   browser.runtime.sendMessage({
     getCurrentUrlDetails: true
   }).then((response) => {
@@ -327,7 +342,6 @@ function initializeCurrentSiteDisplay(settings) {
           currentSiteDisplay.appendChild(document.createTextNode(response.publicSuffix));
         }
       } else { // using the PasswordMaker engine
-        //document.getElementById("currentSiteArea").removeEventListener("click", reactToCurrentSiteClick);
         currentSiteArea.classList.remove("verified");
         document.getElementById("currentSiteOriginal").value = "";
         document.getElementById("currentSiteCustom").value = "";
@@ -343,7 +357,7 @@ function initializeCurrentSiteDisplay(settings) {
           id: null,
         }).then((response) => {
           document.getElementById("currentSiteOriginal").value = response.inputText;
-          currentSiteDisplay.appendChild(document.createTextNode(response.inputText));
+          updateCurrentSite(response.inputText);
         });
       }
     }
