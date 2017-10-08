@@ -594,7 +594,7 @@ browser.tabs.onActivated.addListener((activeInfo) => {
         if(result && !session.injectedTabs.includes(tabId)) {
           session.injectedTabs.push(tabId);
           browser.tabs.executeScript({file: "/content-watch.js"}).then(() => {
-            browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
+            browser.tabs.executeScript({code: "updateNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
           });
         }
       });
@@ -613,7 +613,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       }).then((result) => {
         // Find out the number of password fields and watch for changes.
         browser.tabs.executeScript({file: "/content-watch.js"}).then(() => {
-          browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
+          browser.tabs.executeScript({code: "updateNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
           if(!session.injectedTabs.includes(tabId)) {
             session.injectedTabs.push(tabId);
           }
