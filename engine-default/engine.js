@@ -108,6 +108,14 @@ function createCharSet(settings) {
   if(settings.charactersCustom) {
     charSet += settings.charactersCustomList;
   }
+  if(typeof settings.passwordRequirements.forbiddenCharacters == "string") {
+    var forbidden = settings.passwordRequirements.forbiddenCharacters;
+    for(var i = 0; i < forbidden.length; i++) {
+      while(charSet.indexOf(forbidden[i]) > -1) {
+        charSet = charSet.replace(forbidden[i], "");
+      }
+    }
+  }
   return charSet;
 }
 
