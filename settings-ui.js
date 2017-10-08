@@ -462,11 +462,11 @@ function updateSecurityAlerts() {
       if(algo == "argon2") {
         result = 2;
       } else if(algo == "scrypt") {
-        result = 9;
+        result = 13;
       } else if(algo == "bcrypt") {
         result = 9;
       } else if(algo == "pbkdf2-sha256") {
-        result = 50000;
+        result = 75000;
       }
       return result;
     }
@@ -572,7 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if(newAlgo == "argon2") {
             newAlgoCoefficient = 3;
           } else if(newAlgo == "scrypt") {
-            newAlgoCoefficient = 10;
+            newAlgoCoefficient = 15;
           } else if(newAlgo == "bcrypt") {
             newAlgoCoefficient = 10;
             newAlgoCoefficientMinimum = 4;
