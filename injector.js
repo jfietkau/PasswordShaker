@@ -30,16 +30,16 @@ function fillPasswordField(passwordField, password) {
   passwordField.dispatchEvent(event);
   event = new KeyboardEvent("keypress", {});
   passwordField.dispatchEvent(event);
-  event = new KeyboardEvent("keyup", {});
-  passwordField.dispatchEvent(event);
   passwordField.value = password;
-  var event = new Event("change", {
+  var event = new Event("input", {
     target: passwordField,
     bubbles: true,
     cancelable: true,
   });
+  event = new KeyboardEvent("keyup", {});
   passwordField.dispatchEvent(event);
-  event = new Event('input', {
+  passwordField.dispatchEvent(event);
+  event = new Event("change", {
     target: passwordField,
     bubbles: true,
     cancelable: true,
