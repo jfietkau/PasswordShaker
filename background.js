@@ -134,7 +134,7 @@ function generatePasswordForProfile(url, masterPassword, profileSettings, inputT
 }
 
 // This function takes the given parameters to calculate a site-specific password and
-// then inject it into the page. See injector.js for how the actual password field is populated.
+// then inject it into the page. See content-fill.js for how the actual password field is populated.
 function activateOnPage(url, masterPassword, profileId, inputTextOverride) {
   if(profileId === undefined) {
     profileId = session.currentProfile;
@@ -145,7 +145,7 @@ function activateOnPage(url, masterPassword, profileId, inputTextOverride) {
   var profileSettings = currentSettings.profiles[profileId];
   generatePasswordForProfile(url, masterPassword, profileSettings, inputTextOverride, null).then((generatedPassword) => {
     if(generatedPassword !== null && generatedPassword.password !== null) {
-      browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+      browser.tabs.executeScript({file: "/content-fill.js"}).then(() => {
         browser.tabs.executeScript({code: "fillPassword('" + generatedPassword.password + "');"});
       });
     }
@@ -593,7 +593,7 @@ browser.tabs.onActivated.addListener((activeInfo) => {
         // fields and watch for changes.
         if(result && !session.injectedTabs.includes(tabId)) {
           session.injectedTabs.push(tabId);
-          browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+          browser.tabs.executeScript({file: "/content-watch.js"}).then(() => {
             browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
           });
         }
@@ -611,9 +611,8 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       browser.permissions.contains({
         origins: ["<all_urls>"]
       }).then((result) => {
-        // Only if we haven't done it yet for this tab and its current page, find out the number of password
-        // fields and watch for changes.
-        browser.tabs.executeScript({file: "/injector.js"}).then(() => {
+        // Find out the number of password fields and watch for changes.
+        browser.tabs.executeScript({file: "/content-watch.js"}).then(() => {
           browser.tabs.executeScript({code: "sendNumberOfPasswordFields(" + tabId + "); installChangeListener(" + tabId + ");"});
           if(!session.injectedTabs.includes(tabId)) {
             session.injectedTabs.push(tabId);
