@@ -464,7 +464,7 @@ function updateSecurityAlerts() {
       } else if(algo == "scrypt") {
         result = 13;
       } else if(algo == "bcrypt") {
-        result = 9;
+        result = 10;
       } else if(algo == "pbkdf2-sha256") {
         result = 75000;
       }
@@ -574,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
           } else if(newAlgo == "scrypt") {
             newAlgoCoefficient = 15;
           } else if(newAlgo == "bcrypt") {
-            newAlgoCoefficient = 10;
+            newAlgoCoefficient = 11;
             newAlgoCoefficientMinimum = 4;
           } else if(newAlgo == "pbkdf2-sha256") {
             newAlgoCoefficient = 100000;
