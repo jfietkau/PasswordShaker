@@ -33,8 +33,17 @@ function fillPasswordField(passwordField, password) {
   event = new KeyboardEvent("keyup", {});
   passwordField.dispatchEvent(event);
   passwordField.value = password;
-  event = document.createEvent("HTMLEvents");
-  event.initEvent("change", false, true);
+  var event = new Event("change", {
+    target: passwordField,
+    bubbles: true,
+    cancelable: true,
+  });
+  passwordField.dispatchEvent(event);
+  event = new Event('input', {
+    target: passwordField,
+    bubbles: true,
+    cancelable: true,
+  });
   passwordField.dispatchEvent(event);
 }
 
