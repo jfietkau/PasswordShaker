@@ -134,7 +134,7 @@ function extractHostName(url) {
 // Extract the public suffix from a hostname
 function extractTopLevelHostname(hostName) {
   var parts = hostName.split(".");
-  if(!isNaN(parseInt(parts.slice(-1)[0]))) {
+  if(!isNaN(parseInt(parts.slice(-1)[0], 10))) {
     // this is an IP address
     return hostName;
   }

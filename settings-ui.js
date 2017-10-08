@@ -63,7 +63,7 @@ function populateSettingsForm(settings) {
           newRadio.value = i;
           newRadio.addEventListener("click", (e) => {
             ignoreFormEvents += 1;
-            populateProfileArea(currentSettings, parseInt(e.target.value));
+            populateProfileArea(currentSettings, parseInt(e.target.value, 10));
             updateForm();
             updateSecurityAlerts();
             updateExamplePassword();
@@ -219,7 +219,7 @@ function parseSettingsElement(elem, settings) {
       } else if(domElem.type == "text") {
         value = domElem.value;
       } else if(domElem.type == "number") {
-        value = (domElem.value.length == 0) ? null : parseInt(domElem.value);
+        value = (domElem.value.length == 0) ? null : parseInt(domElem.value, 10);
       }
     } else if(domElem.tagName.toLowerCase() == "select") {
       value = domElem.value;

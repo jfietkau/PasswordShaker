@@ -255,7 +255,7 @@ function showAlertIfNotSeen(alertName) {
 // which website the user is currently on.
 function extractTopLevelHostname(hostName) {
   var parts = hostName.split(".");
-  if(!isNaN(parseInt(parts.slice(-1)[0]))) {
+  if(!isNaN(parseInt(parts.slice(-1)[0], 10))) {
     // this is an IP address
     return hostName;
   }
@@ -399,7 +399,7 @@ browser.menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId.startsWith("password-shaker-menu-profile-") || info.menuItemId.startsWith("password-shaker-tools-profile-")) {
     // Clicked a profile item. Unless we're on a browser-internal page, activate here.
     if(!info["pageUrl"].startsWith("about:") && !info["pageUrl"].startsWith("moz-extension:")) {
-      var selectedProfile = parseInt(info.menuItemId.split("-")[4]);
+      var selectedProfile = parseInt(info.menuItemId.split("-")[4], 10);
       session.currentTabId = tab.id;
       activateProfile(selectedProfile, info["pageUrl"]);
     }
