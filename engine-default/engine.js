@@ -333,14 +333,11 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
         handleHashResult(hashResult, masterPassword, url, settings, depth, accumulator, resolve, requestId);
       });
     } else if(settings.hashAlgorithm == "scrypt") {
-      var N = 2 ** settings.hashAlgorithmCoefficient, r = 8, p = 1;
-      var dkLen = 64;
-      scrypt(str2arr(masterPassword), accumulator.salt, N, r, p, dkLen, function(error, progress, key) {
-        if(key) {
-          handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve, requestId);
-        } else if(error) {
-          console.log("scrypt error: " + error);
-        }
+      scrypt(str2arr(masterPassword), accumulator.salt, {
+        N: 2 ** settings.hashAlgorithmCoefficient,
+        r: 8, p: 1, dkLen: 32,
+      }, (key) => {
+        handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve, requestId);
       });
     } else if(settings.hashAlgorithm == "argon2") {
       var t_cost = 2 ** settings.hashAlgorithmCoefficient;
