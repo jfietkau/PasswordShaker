@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style type="text/css">
+      body {
+        padding: .5em;
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+      }
+
+      input {
+        display: block;
+      }
+      .passwordEntry {
+        width: 250px;
+        margin-bottom: .33em;
+        font-size: 1.5em;
+      }
+      #forms {
+        width: 250px;
+      }
+
+      #confirmationIcons {
+        float: left;
+        line-height: 0;
+        height: 1.5em;
+      }
+      #confirmationIcons img {
+        height: 100%;
+        padding-right: .33em;
+      }
+
+      #okButton {
+        width: 100px;
+        float: right;
+        font-size: 1.5em;
+      }
+
+      #visualHashContainer {
+        display: inline-block;
+        padding-left: 7px;
+        border-left: 1px solid #e0e0e0;
+        margin-left: 7px;
+      }
+      #visualHashContainer > img, #visualHashContainer > canvas {
+        border: 1px solid #000;
+        height: 100%;
+        width: 100%;
+        background: #ddd;
+      }
+
+      #profileSelectContainer {
+        clear: both;
+        padding-top: .6em;
+      }
+      #profileSelect {
+        width: 250px;
+        font-size: .8em;
+      }
+
+      #generatedPasswordForm {
+        font-size: .8em;
+        clear: both;
+        padding-top: .6em;
+        color: #888;
+      }
+      #currentSiteArea {
+        display: inline-block;
+        font-weight: bold;
+        min-width: 150px;
+      }
+      #currentSite {
+        color: #48f;
+        white-space: pre;
+      }
+      #currentSiteArea img.checkmark {
+        display: none;
+      }
+      #currentSiteArea.verified #currentSite {
+        color: #080;
+      }
+      #currentSiteArea.verified img.checkmark {
+        display: inline;
+        width: 1.2em;
+        height: 1.2em;
+        margin: -0.1em .4em;
+        vertical-align: middle;
+      }
+      #currentSiteInput {
+        display: inline;
+        margin: -1em 0;
+        font-size: 1em;
+        width: 150px;
+      }
+      #generatedPassword {
+        width: 250px;
+        margin-top: .3em;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <script src="engine-default/sha3.js"></script>
+    <script src="engine-default/bcrypt.js"></script>
+    <script src="settings.js"></script>
+    <script src="mosaicVisualHash.js"></script>
+    <script src="page-action.js"></script>
+
+    <div id="forms">
+      <form id="mainForm">
+
+        <input type="password" id="masterPassword" class="passwordEntry" value="" placeholder="Master password">
+        <input type="password" id="masterPasswordConfirmation" class="passwordEntry" value="" placeholder="Master password (confirm)">
+
+        <div id="confirmationIcons">
+          <img src="/icons/equals-gray.svg" id="equalsIcon">
+          <img src="/icons/stored-gray.svg" id="matchStoredIcon">
+        </div>
+
+        <input type="submit" id="okButton" value="OK">
+
+        <div id="profileSelectContainer">
+          <select id="profileSelect">
+            <option value="0">(default profile)</option>
+          </select>
+        </div>
+
+        <input type="hidden" id="currentSiteOriginal" value="">
+        <input type="hidden" id="currentSiteCustom" value="">
+      </form>
+
+      <form id="generatedPasswordForm">
+        <span id="currentSiteIntro">Password for:</span>
+        <span id="currentSiteArea"><span id="currentSite"></span><img src="/icons/verified.svg" alt="verified" class="checkmark"></span><br>
+        <input type="text" id="generatedPassword" readonly value="(click here to show)">
+        <input type="submit" style="display: none;">
+      </form>
+
+    </div>
+
+    <div id="visualHashContainer">
+      <canvas id="visualHash" width="32" height="32"></canvas>
+      <img src="/icons/loading-big.svg" id="visualHashLoading" alt="Loading..." title="Loading..." style="display: none;">
+    </div>
+
+  </body>
+
+</html>
