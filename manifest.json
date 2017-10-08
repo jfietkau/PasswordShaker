@@ -54,7 +54,7 @@
       "19": "icons/logo.svg"
     },
     "default_title": "PasswordShaker",
-    "default_popup": "browser-action.html"
+    "default_popup": "page-action.html"
   },
 
   "commands": {
