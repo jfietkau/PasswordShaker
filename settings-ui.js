@@ -162,6 +162,7 @@ function populateSettingsElement(elem, value) {
           }
           if(separatorIndex !== undefined) {
             if(!usingAdditionalAlgorithm || (options[i].id != "psHashAlgorithmAdditionalDivider" && options[i].value != value)) {
+              // Apparently hiding <option> elements doesn't work cross-browser, but it works in Firefox
               options[i].style.display = "none";
             }
           }
