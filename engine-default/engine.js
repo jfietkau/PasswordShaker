@@ -321,7 +321,6 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
   }
   var thDomain = str2arr(domain);
   var thMainSalt = parseData(settings.mainSalt);
-  console.log(thMainSalt);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var desiredPasswordLength = settings.passwordLength;
   if(settings.passwordRequirements.minLength) {
