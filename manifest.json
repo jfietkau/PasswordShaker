@@ -14,7 +14,7 @@
   },
 
   "icons": {
-    "48": "icons/logo.svg"
+    "256": "icons/logo.svg"
   },
 
   "permissions": [
