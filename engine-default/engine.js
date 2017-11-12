@@ -340,6 +340,29 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
         handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve, requestId);
       });
     } else if(settings.hashAlgorithm == "argon2") {
+      //
+      // The following text was added to and then immediately cut from the FAQ for version
+      // 0.1.3, when Argon2 was removed from general availability. It is preserved in the
+      // code for users of previous versions (so as to not break existing configurations)
+      // as well as people who insist on editing their config by hand. Hopefully this is
+      // deterrent enough though:
+      //
+      //   ## Why is the *Argon2* algorithm marked "experimental"?
+      //
+      //   Of the password generation algorithms currenty implemented by *PasswordShaker*,
+      //   Argon2 is the newest. Due to its relatively young age, it has received the least
+      //   scrutiny by researchers. In addition, the implementation that *PasswordShaker*
+      //   uses is also not very time-tested and, due to its fairly experimental status,
+      //   it is likely the most error-prone of the options available. If either the
+      //   implementation or the algorithm itself are ever proven to be fundamentally
+      //   flawed, they may be removed from future versions of *PasswordShaker* entirely.
+      //
+      //   While the choice is provided for expert users who really want it, picking Argon2
+      //   for your password generation profile should not be regarded as a matter of
+      //   "future-proofing" and is not recommended for general users. For a good balance
+      //   between tried and tested technology and the cryptographic state of the art, it
+      //   is recommended to stick with the default configuration.
+      //
       var t_cost = 2 ** settings.hashAlgorithmCoefficient;
       var m_cost = 1024;
       var parallelism = 1;

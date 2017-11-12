@@ -31,7 +31,7 @@
 // is 0, it must be caused by the user.
 var ignoreFormEvents = 0;
 
-// helper function
+// helper functions
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
   elem.parentNode.removeChild(elem);
@@ -150,6 +150,23 @@ function populateSettingsElement(elem, value) {
       }
     } else if(domElem.tagName.toLowerCase() == "select") {
       domElem.value = value;
+      if(domElem.id == "psHashAlgorithm") {
+        var separatorIndex = undefined;
+        var usingAdditionalAlgorithm = false;
+        var options = domElem.getElementsByTagName("option");
+        for(var i = 0; i < options.length; i++) {
+          options[i].style.display = "";
+          if(options[i].id == "psHashAlgorithmAdditionalDivider") {
+            separatorIndex = i;
+            usingAdditionalAlgorithm = (domElem.selectedIndex > separatorIndex);
+          }
+          if(separatorIndex !== undefined) {
+            if(!usingAdditionalAlgorithm || (options[i].id != "psHashAlgorithmAdditionalDivider" && options[i].value != value)) {
+              options[i].style.display = "none";
+            }
+          }
+        }
+      }
     }
   } else if(document.getElementsByName(elem).length > 0) {
     var radios = document.getElementsByName(elem);
