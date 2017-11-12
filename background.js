@@ -477,7 +477,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     createOrUpdateMenu();
   }
   // Client signals that the user has supplied a master password that should be cached if applicable.
-  if(request != null && (request.cacheMasterPassword !== undefined || request.activateOnPage !== undefined)) {
+  if(request != null && request.cacheMasterPassword !== undefined) {
     loadSettings().then(() => {
       if(currentSettings.storeMasterPassword != "never") {
         // cache master password in RAM if desired
