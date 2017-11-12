@@ -70,6 +70,27 @@ function getRandomBytes(numberOfBytes) {
   return uint8View;
 }
 
+// helper function
+function parseData(input) {
+  if(typeof input == "string") {
+    var reHex = /^(0[Xx])?[0-9A-Fa-f]+$/g;
+    if(reHex.test(input)) {
+      if(input.toLowerCase().startsWith("0x")) {
+        input = input.slice(2);
+      }
+      var interim = new Uint8Array(Math.floor(input.length / 2));
+      for(var i = 0; i < interim.length; i++) {
+        interim[i] = parseInt(input.slice(2 * i, 2 * i + 2), 16);
+      }
+      input = interim;
+    } else {
+      input = new TextEncoder("utf-8").encode(input);
+    }
+  }
+  // If it's not a string, simply assume it's an iterable of unsigned bytes
+  return input;
+}
+
 // possible parts of the character set - we enumerate them here so we can refer to them by name in the following
 var charSetSegment = {
   upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -299,7 +320,8 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
     domain = settings.inputTextOverride;
   }
   var thDomain = str2arr(domain);
-  var thMainSalt = hex2arr(settings.mainSalt);
+  var thMainSalt = parseData(settings.mainSalt);
+  console.log(thMainSalt);
   // Math.log( 2 ^ 32 ) = 22.1807097779 (rounded down)
   var desiredPasswordLength = settings.passwordLength;
   if(settings.passwordRequirements.minLength) {
@@ -494,7 +516,7 @@ function generatePassword(masterPassword, url, settings, requestId) {
   }
 
   var thDomain = str2arr(domain);
-  var thMainSalt = hex2arr(settings.mainSalt);
+  var thMainSalt = parseData(settings.mainSalt);
   var combinedSalt = new Uint8Array(thDomain.length + thMainSalt.length);
   combinedSalt.set(thDomain);
   combinedSalt.set(thMainSalt, thDomain.length);
