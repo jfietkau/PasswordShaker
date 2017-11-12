@@ -476,9 +476,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request != null && request.createOrUpdateMenu !== undefined) {
     createOrUpdateMenu();
   }
-  // Client signals that PasswordShaker should be activated right now and
-  // supplies a full request including the master password that should be used.
-  if(request != null && request.activateOnPage !== undefined) {
+  // Client signals that the user has supplied a master password that should be cached if applicable.
+  if(request != null && (request.cacheMasterPassword !== undefined || request.activateOnPage !== undefined)) {
     loadSettings().then(() => {
       if(currentSettings.storeMasterPassword != "never") {
         // cache master password in RAM if desired
@@ -489,12 +488,19 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       }
     });
-    if(currentSettings.showPageAction == "when-needed" && session.currentTabId !== null) {
-      // Since the master password has been provided along with this request, we donÄt need the icon anymore
-      browser.pageAction.hide(session.currentTabId);
-    }
-    var currentUrl = session.currentUrl;
-    activateOnPage(currentUrl, request.masterPassword, request.profileId, request.inputTextOverride);
+  }
+  // Client signals that PasswordShaker should be activated right now and
+  // supplies a full request including the master password that should be used.
+  if(request != null && request.activateOnPage !== undefined) {
+    loadSettings().then(() => {
+      // caching of master password is handled above
+      if(currentSettings.showPageAction == "when-needed" && session.currentTabId !== null) {
+        // Since the master password has been provided along with this request, we don't need the icon anymore
+        browser.pageAction.hide(session.currentTabId);
+      }
+      var currentUrl = session.currentUrl;
+      activateOnPage(currentUrl, request.masterPassword, request.profileId, request.inputTextOverride);
+    });
   }
   // Client requests an example password for the given profile.
   if(request != null && request.wantExamplePasswordForProfile !== undefined) {

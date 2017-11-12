@@ -440,6 +440,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // This is where the user is going to want to type (or press enter to submit)
     document.getElementById("masterPassword").focus();
   });
+  document.getElementById("masterPassword").addEventListener("blur", (e) => {
+    browser.runtime.sendMessage({
+      cacheMasterPassword: true,
+      masterPassword: e.target.value,
+    });
+  });
   document.getElementById("generatedPasswordForm").addEventListener("submit", (e) => {
     // The generated password form actually doesn't have a submit button, but if the
     // user presses enter while the current site input is focused, we want to trigger
