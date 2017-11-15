@@ -14,6 +14,17 @@
         margin-right: .5em;
       }
 
+      .iconpreview {
+        display: inline-block;
+        padding: 4px 7px 2px;
+        margin-right: .5em;
+        border: 1px solid #808080;
+      }
+      .iconpreview img {
+        width: 16px;
+        height: 16px;
+      }
+
       #infoboxes {
         float: right;
         padding-right: .5em;
@@ -275,6 +286,20 @@
       </select><br>
       <div class="smallspace"></div>
       <input type="checkbox" id="storeMasterPasswordHash"><label for="storeMasterPasswordHash">Store master password hash for automatic verification</label><br>
+      <div class="smallspace"></div>
+      Page action icon style:
+      <input type="radio" name="pageActionIconStyle" id="pageActionIconStyleDefault" value="default">
+      <label for="pageActionIconStyleDefault" class="iconpreview" style="background: #fff;">
+        <img src="/icons/pageaction-default-b.svg" alt="Default" title="Default">
+      </label>
+      <input type="radio" name="pageActionIconStyle" id="pageActionIconStylePhotonDefault" value="photon-default">
+      <label for="pageActionIconStylePhotonDefault" class="iconpreview" style="background: #fff;">
+        <img src="/icons/pageaction-photon-default-b.svg" alt="Photon" title="Photon">
+      </label>
+      <input type="radio" name="pageActionIconStyle" id="pageActionIconStylePhotonDark" value="photon-dark">
+      <label for="pageActionIconStylePhotonDark" class="iconpreview" style="background: #474749;">
+        <img src="/icons/pageaction-photon-dark-b.svg" alt="Photon (dark)" title="Photon (dark)">
+      </label>
       <div class="smallspace"></div>
       <label for="showPageAction">Show the page action (address bar button)</label>
       <select id="showPageAction">
