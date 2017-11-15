@@ -274,7 +274,7 @@ function extractTopLevelHostname(hostName) {
 // been supplied yet, jiggle the page action icon to call attention to the fact that we need it.
 function activateProfile(profileId, url) {
   session.currentProfile = profileId;
-  if(session.masterPassword === null) {
+  if(session.masterPassword === null || session.masterPassword.length == 0) {
     if(session.currentTabId !== null && !session.runningPageActionAnimation) {
       browser.pageAction.show(session.currentTabId);
       // We can't have an animated icon for the page action, but we _can_ change between several
