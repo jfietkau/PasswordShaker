@@ -309,7 +309,7 @@ function animatePageAction(script, tabId) {
   // Display the first frame of the given script
   var frame = script[0].split(":");
   browser.pageAction.setIcon({
-    path: "/icons/pageaction-default-" + frame[0] + ".svg",
+    path: "/icons/pageaction-" + currentSettings.pageActionIconStyle + "-" + frame[0] + ".svg",
     tabId: tabId
   });
   // Wait for the specified delay, then recurse to the rest of the script
@@ -565,7 +565,7 @@ function reactToTabChange(tabId, newUrl) {
   // Mainly what we do here is figure out if the page action icon should be displayed right now,
   // and act accordingly.
   browser.pageAction.setIcon({
-    path: "/icons/pageaction-default-b.svg",
+    path: "/icons/pageaction-" + currentSettings.pageActionIconStyle + "-b.svg",
     tabId: tabId
   });
   loadSettings().then(() => {

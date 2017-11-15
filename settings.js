@@ -117,6 +117,7 @@ function getDefaultSettings() {
     showPageAction: "always",
     showPasswordDelay: 500,
     showSecurityAlerts: true,
+    pageActionIconStyle: "default",
     profiles: []
   };
 }
