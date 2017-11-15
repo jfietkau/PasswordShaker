@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "PasswordShaker",
-  "version": "1.0",
+  "version": "1.0.1",
 
   "description": "Generates site-specific passwords for you automatically, based on one master password.",
 
@@ -51,7 +51,7 @@
   "page_action": {
     "browser_style": true,
     "default_icon": {
-      "19": "icons/logo.svg"
+      "16": "icons/pageaction-blank.svg"
     },
     "default_title": "PasswordShaker",
     "default_popup": "page-action.html"
