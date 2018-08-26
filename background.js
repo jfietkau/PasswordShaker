@@ -276,7 +276,7 @@ function activateProfile(profileId, url) {
   session.currentProfile = profileId;
   if(session.masterPassword === null || session.masterPassword.length == 0) {
     if(session.currentTabId !== null && !session.runningPageActionAnimation) {
-      browser.pageAction.show(session.currentTabId);
+      setPageActionVisible(session.currentTabId, true);
       // We can't have an animated icon for the page action, but we _can_ change between several
       // static ones really quickly. ;)
       // Yeah this is pretty cheeky, but it works well and I hope it's not forbidden.
@@ -496,7 +496,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // caching of master password is handled above
       if(currentSettings.showPageAction == "when-needed" && session.currentTabId !== null) {
         // Since the master password has been provided along with this request, we don't need the icon anymore
-        browser.pageAction.hide(session.currentTabId);
+        setPageActionVisible(session.currentTabId, false);
       }
       var currentUrl = session.currentUrl;
       activateOnPage(currentUrl, request.masterPassword, request.profileId, request.inputTextOverride);
@@ -533,9 +533,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // if the show page action setting requires it.
   if(request != null && request.numberOfPasswordFields !== undefined && currentSettings.showPageAction == "when-applicable") {
     if(request.numberOfPasswordFields > 0) {
-      browser.pageAction.show(request.tabId);
+      setPageActionVisible(request.tabId, true);
     } else {
-      browser.pageAction.hide(request.tabId);
+      setPageActionVisible(request.tabId, false);
     }
   }
 });
@@ -560,6 +560,14 @@ browser.commands.onCommand.addListener(function(command) {
   }
 });
 
+function setPageActionVisible(tabId, visible) {
+  if(visible) {
+    browser.pageAction.show(tabId);
+  } else {
+    browser.pageAction.hide(tabId, false);
+  }
+}
+
 // This function gets called when we have either switched tabs, or the current tab has updated.
 function reactToTabChange(tabId, newUrl) {
   // Mainly what we do here is figure out if the page action icon should be displayed right now,
@@ -576,17 +584,17 @@ function reactToTabChange(tabId, newUrl) {
        && !newUrl.startsWith("about:")
        && !newUrl.startsWith("moz-extension:")
        && newUrl.length > 0) {
-      browser.pageAction.show(tabId);
+      setPageActionVisible(tabId, true);
     } else if(currentSettings.showPageAction == "when-applicable") {
       browser.permissions.contains({
         origins: ["<all_urls>"]
       }).then((result) => {
         if(!result) {
-          browser.pageAction.hide(tabId);
+          setPageActionVisible(tabId, false);
         }
       });
     } else if(currentSettings.showPageAction == "when-needed") {
-      browser.pageAction.hide(tabId);
+      setPageActionVisible(tabId, false);
     }
   });
 }
