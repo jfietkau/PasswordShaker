@@ -35,7 +35,6 @@
       "data/publicsuffixlist.js",
       "data/publicsuffixlist-raw.js",
       "data/punycode.js",
-      "engine-default/argon2-asm.min.js",
       "engine-default/base64ArrayBuffer.js",
       "engine-default/bcrypt.js",
       "engine-default/scrypt-async.js",
