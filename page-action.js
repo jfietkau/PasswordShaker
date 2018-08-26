@@ -158,8 +158,14 @@ function updatePopupForm(settings, toUpdate) {
         var hash = sha3_512.update(input).update("PasswordShaker").hex();
         lastVisualHashEvent = Math.random();
         var myEventId = lastVisualHashEvent;
-        hashCanvas.style.display = "none";
-        hashLoading.style.display = "block";
+        setTimeout(() => {
+          // Would like to do this immediately, but there's a visual text
+          // rendering bug that manifests (on Windows only) that I *think*
+          // is triggered by the animated SVG being rendered while the
+          // popup is still opening. This seems to be a reliable workaround.
+          hashCanvas.style.display = "none";
+          hashLoading.style.display = "block";
+        }, 100);
         setTimeout(() => {
           if(myEventId == lastVisualHashEvent) {
             hashCanvas.style.display = "block";
