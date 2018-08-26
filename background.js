@@ -561,11 +561,16 @@ browser.commands.onCommand.addListener(function(command) {
 });
 
 function setPageActionVisible(tabId, visible) {
-  if(visible) {
-    browser.pageAction.show(tabId);
-  } else {
-    browser.pageAction.hide(tabId, false);
-  }
+  browser.pageAction.isShown({
+    tabId: tabId
+  }).then((isAlreadyVisible) => {
+    if(visible && !isAlreadyVisible) {
+      browser.pageAction.show(tabId);
+    }
+    if(!visible && isAlreadyVisible) {
+      browser.pageAction.hide(tabId);
+    }
+  });
 }
 
 // This function gets called when we have either switched tabs, or the current tab has updated.
