@@ -54,7 +54,8 @@
       "16": "icons/pageaction-blank.svg"
     },
     "default_title": "PasswordShaker",
-    "default_popup": "page-action.html"
+    "default_popup": "page-action.html",
+    "show_matches": ["<all_urls>"]
   },
 
   "commands": {
