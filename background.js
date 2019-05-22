@@ -467,7 +467,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
         publicSuffix = extractTopLevelHostname(url.hostname);
       }
       var response = {
-        url: url,
+        url: url.href,
         hostname: url.hostname,
         passwordReq: passwordReqListParser.byUrl(session.currentUrl),
         publicSuffix: publicSuffix,

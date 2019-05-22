@@ -45,7 +45,7 @@ var currentPasswordReq = null;
 
 // We keep track of the current URL so we can update the popup if the active tab's URL
 // changes while the popup is open (e.g. through a timed redirect).
-var currentUrl = null;
+var currentUrlDetails = null;
 
 // helper function
 function removeElementById(elemId) {
@@ -342,13 +342,16 @@ function reactToCurrentSiteClick(evt) {
 }
 
 // Set up the portion of the popup that displays the current site, depending on the settings.
-function initializeCurrentSiteDisplay(settings) {
+function initializeCurrentSiteDisplay(settings, forceRefresh = false) {
   currentPasswordReq = null;
   browser.runtime.sendMessage({
     getCurrentUrlDetails: true
   }).then((response) => {
-    if(response != null && currentUrl !== response.url) {
-      currentUrl = response.url;
+    if(response != null &&
+        (forceRefresh || currentUrlDetails === null || currentUrlDetails.url !== response.url || currentUrlDetails.hostname !== response.hostname ||
+        currentUrlDetails.passwordReq !== response.passwordReq || currentUrlDetails.publicSuffix !== response.publicSuffix)
+       ) {
+      currentUrlDetails = response;
       var currentSiteDisplay = document.getElementById("currentSite");
       if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
         document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
@@ -387,6 +390,8 @@ function initializeCurrentSiteDisplay(settings) {
           updateCurrentSite(response.inputText);
         });
       }
+      // update generated password because of the new URL
+      updatePopupForm(currentSettings, {generatedPassword: true});
     }
   });
 }
@@ -426,7 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updatePopupForm(currentSettings, {});
     });
 
-    initializeCurrentSiteDisplay(currentSettings);
+    initializeCurrentSiteDisplay(currentSettings, true);
     document.getElementById("confirmationIcons").style.height = document.getElementById("okButton").offsetHeight + "px";
     setupPopupForm(currentSettings);
     updatePopupForm(currentSettings);
@@ -511,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   document.getElementById("profileSelect").addEventListener("change", (e) => {
-    initializeCurrentSiteDisplay(currentSettings);
+    initializeCurrentSiteDisplay(currentSettings, true);
     updatePopupForm(currentSettings, {generatedPassword: true});
   });
   setInterval(() => {
