@@ -17,6 +17,11 @@
         padding: .5em .5em .5em 50px;
         color: #444;
         font-size: 20px;
+        display: flex;
+        justify-content: space-between;
+      }
+      header button {
+        flex-grow: 0;
       }
       form {
         max-width: 80em;
@@ -281,12 +286,46 @@
       #deleteProfileConfirm {
         font-weight: bold;
       }
+
+      #textEditorPane {
+        display: none;
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      #textEditorPane > div {
+        border-radius: .7em;
+        box-shadow: 0px 10px 40px 1px rgba(0, 0, 0, 0.2);
+        background: #fff;
+        padding: 1.5em;
+        margin: 2em auto;
+        max-width: 80em;
+      }
+      #textEditorPane p {
+        margin-top: 0px;
+      }
+      #textEditorPane textarea {
+        width: 100%;
+        height: 40em;
+        padding: .3em;
+        line-height: 1.5em;
+        margin-bottom: .8em;
+      }
+      #textEditorPane button {
+        margin-right: .5em;
+      }
     </style>
   </head>
 
   <body>
 
-    <header>PasswordShaker Settings </header>
+    <header>
+      <span>PasswordShaker Settings</span>
+      <button id="openTextEditor">JSON editor</button>
+    </header>
 
     <script src="settings.js"></script>
     <script src="mosaicVisualHash.js"></script>
@@ -529,6 +568,18 @@
       </div>
       
     </form>
+
+    <div id="textEditorPane">
+      <div>
+        <p>The following text field allows you to edit your <em>PasswordShaker</em> configuration directly.<br><strong>Warning:</strong>
+          Small mistakes here can easily lead to loss of data or functionality. Using this view is recommended for expert users only.</p>
+        <textarea id="textEditor"></textarea>
+        <div id="textEditorButtons">
+          <button id="saveSettings">Save changes</button>
+          <button id="cancelSettings">Cancel</button>
+        </div>
+      </div>
+    </div>
 
   </body>
 

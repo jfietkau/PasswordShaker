@@ -714,5 +714,41 @@ document.addEventListener("DOMContentLoaded", () => {
       createOrUpdateMenu();
     });
   });
+  var disableSaveButton = () => {
+    document.getElementById("saveSettings").removeAttribute("disabled");
+    document.getElementById("textEditor").style.color = "#111";
+  };
+  document.getElementById("textEditor").addEventListener("keyup", disableSaveButton);
+  document.getElementById("textEditor").addEventListener("change", disableSaveButton);
+  document.getElementById("openTextEditor").addEventListener("click", () => {
+    var json = JSON.stringify(currentSettings, null, 4);
+    document.getElementById("textEditor").value = json;
+    document.getElementById("saveSettings").setAttribute("disabled", "");
+    document.getElementById("textEditorPane").style.display = "block";
+  });
+  document.getElementById("saveSettings").addEventListener("click", () => {
+    var newSettings;
+    try {
+      newSettings = JSON.parse(document.getElementById("textEditor").value);
+    } catch(e) {
+      newSettings = undefined;
+      document.getElementById("textEditor").style.color = "#f00";
+    };
+    if(newSettings !== undefined) {
+      browser.runtime.sendMessage({
+        overwriteSettings: true,
+        newSettings: newSettings
+      });
+      document.getElementById("saveSettings").setAttribute("disabled", "");
+      document.getElementById("cancelSettings").setAttribute("disabled", "");
+      // Give the new settings a little bit of time to propagate before we reload the form
+      setTimeout(() => {
+        location.reload();
+      }, 400);
+    }
+  });
+  document.getElementById("cancelSettings").addEventListener("click", () => {
+    document.getElementById("textEditorPane").style.display = "none";
+  });
 
 });

@@ -562,6 +562,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
       setPageActionVisible(request.tabId, false);
     }
   }
+  // Client is providing a full settings object to completely replace the current one.
+  if(request != null && request.overwriteSettings !== undefined) {
+    currentSettings = request.newSettings;
+    saveSettings();
+  }
 });
 
 // React to the keyboard shortcut if it has been assigned to a profile.
