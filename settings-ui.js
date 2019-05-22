@@ -360,21 +360,21 @@ var alertMessages = {
   no_protection_against_master_password_typos:
     "You currently have no way of detecting typos in your master password as you enter it.",
   master_password_stored_permanently:
-   "<strong>You have set your master password to be saved permanently. This means that other software on your device can easily steal it.</strong>",
+    "You have set your master password to be saved permanently. This means that other software on your device can easily steal it.",
   show_master_password_in_plain_text:
-   "You have set your master password to be displayed in plain text. This makes you vulnerable to over-the-shoulder attacks as well as malicious screengrabbers.",
+    "You have set your master password to be displayed in plain text. This makes you vulnerable to over-the-shoulder attacks as well as malicious screengrabbers.",
   short_minimum_input_for_the_visual_hash:
-   "You have set the visual hash to appear for very short master password fragments. This makes it much easier for over-the-shoulder attackers and screen recorders to reconstruct your master password.",
+    "You have set the visual hash to appear for very short master password fragments. This makes it much easier for over-the-shoulder attackers and screen recorders to reconstruct your master password.",
   short_delay_for_the_visual_hash:
-   "You have set the visual hash to render very quickly. This may make it easier for over-the-shoulder attackers and screen recorders to reconstruct your master password if you type slowly.",
+    "You have set the visual hash to render very quickly. This may make it easier for over-the-shoulder attackers and screen recorders to reconstruct your master password if you type slowly.",
   requested_use_of_the_passwordmaker_engine:
-   "You have chosen the legacy PasswordMaker engine for this profile. The algorithms it can use are older and much more vulnerable to attacks.",
+    "You have chosen the legacy PasswordMaker engine for this profile. The algorithms it can use are older and much more vulnerable to attacks.",
   short_generated_password_length:
-   "The length of generated passwords for this profile is very short. They are likely to leave you vulnerable to attacks.",
+    "The length of generated passwords for this profile is very short. They are likely to leave you vulnerable to attacks.",
   short_password_character_set:
-   "You have selected a small number of characters for your generated passwords. This makes them more vulnerable to attacks.",
+    "You have selected a small number of characters for your generated passwords. This makes them more vulnerable to attacks.",
   low_algorithmic_cost_parameter:
-   "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks.",
+    "You have set the algorithm cost parameter to a low value. This makes your master password more susceptible to brute force attacks.",
 };
 // These are just the ones that apply per profile
 var profileSpecificAlertMessages = [
@@ -397,6 +397,10 @@ function populateSecurityAlerts() {
       newAlertLi.id = "alert_" + property;
       newAlertLi.innerHTML = "";
       newAlertLi.appendChild(document.createTextNode(" " + alertMessages[property] + " "));
+      // Special case for highest severity formatting
+      if(property == "master_password_stored_permanently") {
+        newAlertLi.style.fontWeight = "bold";
+      }
       var readMoreLink = document.createElement("a");
       readMoreLink.href = "/docs/internal/security-alerts/index.html#" + property.replace(/_/g, "-");
       readMoreLink.target = "_blank";
