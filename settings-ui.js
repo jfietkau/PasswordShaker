@@ -652,27 +652,6 @@ document.addEventListener("DOMContentLoaded", () => {
           algoCoefficientElem.appendChild(document.createTextNode(newAlgoCoefficientName + ":"));
           ignoreFormEvents -= 1;
         }
-        if(e.target.id == "showPageAction") {
-          if(e.target.value == "when-applicable") {
-            // Would actually love to request the optional permission right from the settings page,
-            // but that is currently blocked by https://bugzilla.mozilla.org/show_bug.cgi?id=1382953
-            /*
-            browser.permissions.contains({
-              origins: ["<all_urls>"],
-            }).then((result) => {
-              if(!result) {
-                // So instead we put it in a tab!
-                browser.tabs.create({
-                  url: "/permissions.html"
-                });
-              }
-            });
-            */
-            browser.permissions.request({ origins: ["<all_urls>"] }).then((result) => {
-        console.log(result);
-      });
-          }
-        }
         updateForm();
         parseForm(currentSettings);
         updateSecurityAlerts();
