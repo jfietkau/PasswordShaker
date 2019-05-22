@@ -43,6 +43,10 @@ var clickEventInProgress = false;
 // for slightly fancier display.
 var currentPasswordReq = null;
 
+// We keep track of the current URL so we can update the popup if the active tab's URL
+// changes while the popup is open (e.g. through a timed redirect).
+var currentUrl = null;
+
 // helper function
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
@@ -343,7 +347,8 @@ function initializeCurrentSiteDisplay(settings) {
   browser.runtime.sendMessage({
     getCurrentUrlDetails: true
   }).then((response) => {
-    if(response != null) {
+    if(response != null && currentUrl !== response.url) {
+      currentUrl = response.url;
       var currentSiteDisplay = document.getElementById("currentSite");
       if(settings.profiles[getSelectedProfile()].profileEngine == "profileEngineDefault") {
         document.getElementById("currentSiteArea").addEventListener("click", reactToCurrentSiteClick);
@@ -509,4 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeCurrentSiteDisplay(currentSettings);
     updatePopupForm(currentSettings, {generatedPassword: true});
   });
+  setInterval(() => {
+    initializeCurrentSiteDisplay(currentSettings);
+  }, 350);
 });
