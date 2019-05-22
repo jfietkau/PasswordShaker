@@ -286,6 +286,15 @@ function updateForm() {
     (document.getElementById("pmUseLeet").value == "off");
   document.getElementById("deleteProfile").disabled =
     (currentSettings.profiles.length < 2);
+  // The keyboard shortcut combo can be changed by the user via the Firefox settings at any
+  // point. Updating the displayed key combination on the settings page through a constantly
+  // running timer seems like overkill, but whenever we're updating the form anyway we might
+  // as well update the key combination just in case it's been changed.
+  browser.commands.getAll().then((commands) => {
+    if(commands.length > 0 && commands[0].name == "activate") {
+      document.getElementById("hotkeyCombo").textContent = commands[0].shortcut;
+    }
+  });
 }
 
 // Keep track of the last request for an example password that we send. If the form contents
