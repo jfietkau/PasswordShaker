@@ -52,7 +52,8 @@ showAlertIfNotSeen("first-run");
 
 // If this extension loads while a tab is already open (which can happen upon browser startup),
 // we may be showing the "failsafe" blank page action icon that's statically configured in the
-// manifest. One of the first things to do is replace it with the icon that the user
+// manifest. One of the first things to do is replace it with the icon that the user has
+// chosen, or the default.
 function setPageActionBaseIcon() {
   if(currentSettings === undefined || currentSettings.pageActionIconStyle === undefined) {
     // User settings may not be loaded yet. If so, load them and then try again.
@@ -60,9 +61,13 @@ function setPageActionBaseIcon() {
       setPageActionBaseIcon();
     });
   } else {
-    browser.pageAction.setIcon({
-      path: "/icons/pageaction-" + currentSettings.pageActionIconStyle + "-b.svg",
-      tabId: tabId
+    browser.tabs.query({ active: true }).then((tabs) => {
+      for(var i = 0; i < tabs.length; i++) {
+        browser.pageAction.setIcon({
+          path: "/icons/pageaction-" + currentSettings.pageActionIconStyle + "-b.svg",
+          tabId: tabs[i].id
+        });
+      }
     });
   }
 }
