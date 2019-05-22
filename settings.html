@@ -148,6 +148,33 @@
         opacity: 0.7;
       }
 
+      .additionalBox {
+        width: auto;
+        border: 1px solid #888;
+        background: #eee;
+        color: #111;
+        border-radius: .7em;
+        padding: .7em;
+        margin: .3em 18em 1em 0;
+      }
+      .additionalBox.notgranted {
+        border-color: #f2cb2f;
+        background: #ffe;
+      }
+      .additionalBox.granted {
+        border-color: #00b00c;
+        background: #efe;
+      }
+
+      #optionalPermissionPane {
+        display: flex;
+        align-items: center;
+      }
+      #optionalPermissionPane input {
+        flex-grow: 0;
+        margin-left: 1em;
+      }
+
       #profiles {
         margin-top: 1.2em;
       }
@@ -324,6 +351,14 @@
         <option value="when-applicable">only on pages with password fields</option>
         <option value="when-needed">only when the master password is required</option>
       </select><br>
+
+      <div id="optionalPermissionPane" class="additionalBox">
+        <div id="optionalPermissionNotGranted">In order to detect password fields everywhere,
+        <em>PasswordShaker</em> requires your permission to access all pages you view.</div>
+        <div id="optionalPermissionGranted">You have granted <em>PasswordShaker</em> the
+        permission to access any page you open in order to check for password fields.</div>
+        <input type="button" id="optionalPermissionRequest" value="Grant permission">
+      </div>
 
       <div id="profiles">
         <input id="profileTabX" type="radio" name="profileTabs">

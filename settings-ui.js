@@ -31,6 +31,9 @@
 // is 0, it must be caused by the user.
 var ignoreFormEvents = 0;
 
+// Because we refer to it in a few places, here's where our optional permission is encoded.
+var theOptionalPermission = { origins: ["<all_urls>"] };
+
 // helper functions
 function removeElementById(elemId) {
   var elem = document.getElementById(elemId);
@@ -286,6 +289,8 @@ function updateForm() {
     (document.getElementById("pmUseLeet").value == "off");
   document.getElementById("deleteProfile").disabled =
     (currentSettings.profiles.length < 2);
+  document.getElementById("optionalPermissionPane").style.display =
+    (document.getElementById("showPageAction").value == "when-applicable") ? "flex" : "none";
   // The keyboard shortcut combo can be changed by the user via the Firefox settings at any
   // point. Updating the displayed key combination on the settings page through a constantly
   // running timer seems like overkill, but whenever we're updating the form anyway we might
@@ -293,6 +298,24 @@ function updateForm() {
   browser.commands.getAll().then((commands) => {
     if(commands.length > 0 && commands[0].name == "activate") {
       document.getElementById("hotkeyCombo").textContent = commands[0].shortcut;
+    }
+  });
+  // Also make sure that the optional permission panel is up to date.
+  browser.permissions.contains(theOptionalPermission).then((result) => {
+    var button = document.getElementById("optionalPermissionRequest");
+    var pane = document.getElementById("optionalPermissionPane");
+    if(result) {
+      pane.classList.remove("notgranted");
+      pane.classList.add("granted");
+      document.getElementById("optionalPermissionNotGranted").style.display = "none";
+      document.getElementById("optionalPermissionGranted").style.display = "block";
+      button.value = "Revoke permission";
+    } else {
+      pane.classList.remove("granted");
+      pane.classList.add("notgranted");
+      document.getElementById("optionalPermissionNotGranted").style.display = "block";
+      document.getElementById("optionalPermissionGranted").style.display = "none";
+      button.value = "Grant permission";
     }
   });
 }
@@ -583,6 +606,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document.getElementById("optionalPermissionRequest").addEventListener("click", (e) => {
+    if(document.getElementById("optionalPermissionPane").classList.contains("granted")) {
+      browser.permissions.remove(theOptionalPermission).then((result) => {
+        updateForm();
+      });
+    } else {
+      browser.permissions.request(theOptionalPermission).then((result) => {
+        updateForm();
+      });
+    }
+  });
+
   var inputs = Array.from(document.getElementsByTagName("input"));
   var selects = Array.from(document.getElementsByTagName("select"));
   var elems = inputs.concat(selects);
@@ -621,6 +656,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if(e.target.value == "when-applicable") {
             // Would actually love to request the optional permission right from the settings page,
             // but that is currently blocked by https://bugzilla.mozilla.org/show_bug.cgi?id=1382953
+            /*
             browser.permissions.contains({
               origins: ["<all_urls>"],
             }).then((result) => {
@@ -631,6 +667,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
               }
             });
+            */
+            browser.permissions.request({ origins: ["<all_urls>"] }).then((result) => {
+        console.log(result);
+      });
           }
         }
         updateForm();

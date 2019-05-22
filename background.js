@@ -35,6 +35,8 @@ var session = {
 
 // Some things that we do upon loading
 
+// First thing, make sure we show the correct page action icon.
+setPageActionBaseIcon();
 // Parse the public suffix list for hostnames, this only has to happen once while the scripts are in RAM.
 publicSuffixList.parse(publicSuffixListRaw, punycode.toASCII);
 // Same for the password requirement list.
@@ -47,6 +49,23 @@ loadStoredMasterPassword();
 checkOptionalPermissions();
 // If the extension was just freshly installed, show the intro page in a tab
 showAlertIfNotSeen("first-run");
+
+// If this extension loads while a tab is already open (which can happen upon browser startup),
+// we may be showing the "failsafe" blank page action icon that's statically configured in the
+// manifest. One of the first things to do is replace it with the icon that the user
+function setPageActionBaseIcon() {
+  if(currentSettings === undefined || currentSettings.pageActionIconStyle === undefined) {
+    // User settings may not be loaded yet. If so, load them and then try again.
+    loadSettings().then(() => {
+      setPageActionBaseIcon();
+    });
+  } else {
+    browser.pageAction.setIcon({
+      path: "/icons/pageaction-" + currentSettings.pageActionIconStyle + "-b.svg",
+      tabId: tabId
+    });
+  }
+}
 
 // This extension can use some optional permissions. This function checks whether the user settings
 // are aligning with the optional permissions. If they are not, downgrade accordingly.
