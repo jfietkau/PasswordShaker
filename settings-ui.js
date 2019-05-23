@@ -513,9 +513,7 @@ function updateSecurityAlerts() {
     }
     function getCoefficientWarningMinimum(algo) {
       var result = null;
-      if(algo == "argon2") {
-        result = 2;
-      } else if(algo == "scrypt") {
+      if(algo == "scrypt") {
         result = 13;
       } else if(algo == "bcrypt") {
         result = 10;
@@ -551,9 +549,7 @@ function updateSecurityAlerts() {
 // These things are named differently depending on the algorithm
 function getCoefficientNameByAlgorithm(algo) {
   var name = "Algorithm coefficient";
-  if(algo == "argon2") {
-    name = "Execution time exponent";
-  } else if(algo == "scrypt") {
+  if(algo == "scrypt") {
     name = "Cost parameter";
   } else if(algo == "bcrypt") {
     name = "Cost parameter";
@@ -635,9 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
           var newAlgoCoefficient = 0;
           var newAlgoCoefficientStepSize = 1;
           var newAlgoCoefficientMinimum = 1;
-          if(newAlgo == "argon2") {
-            newAlgoCoefficient = 3;
-          } else if(newAlgo == "scrypt") {
+          if(newAlgo == "scrypt") {
             newAlgoCoefficient = 15;
           } else if(newAlgo == "bcrypt") {
             newAlgoCoefficient = 11;

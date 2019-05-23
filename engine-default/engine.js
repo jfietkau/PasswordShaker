@@ -371,76 +371,16 @@ function generatePasswordPart(masterPassword, url, settings, depth, accumulator,
         handleHashResult(arr2hex(key), masterPassword, url, settings, depth, accumulator, resolve, requestId);
       });
     } else if(settings.hashAlgorithm == "argon2") {
-      //
-      // The following text was added to and then immediately cut from the FAQ for version
-      // 0.1.3, when Argon2 was removed from general availability. It is preserved in the
-      // code for users of previous versions (so as to not break existing configurations)
-      // as well as people who insist on editing their config by hand. Hopefully this is
-      // deterrent enough though:
-      //
-      //   ## Why is the *Argon2* algorithm marked "experimental"?
-      //
-      //   Of the password generation algorithms currenty implemented by *PasswordShaker*,
-      //   Argon2 is the newest. Due to its relatively young age, it has received the least
-      //   scrutiny by researchers. In addition, the implementation that *PasswordShaker*
-      //   uses is also not very time-tested and, due to its fairly experimental status,
-      //   it is likely the most error-prone of the options available. If either the
-      //   implementation or the algorithm itself are ever proven to be fundamentally
-      //   flawed, they may be removed from future versions of *PasswordShaker* entirely.
-      //
-      //   While the choice is provided for expert users who really want it, picking Argon2
-      //   for your password generation profile should not be regarded as a matter of
-      //   "future-proofing" and is not recommended for general users. For a good balance
-      //   between tried and tested technology and the cryptographic state of the art, it
-      //   is recommended to stick with the default configuration.
-      //
-      var t_cost = 2 ** settings.hashAlgorithmCoefficient;
-      var m_cost = 1024;
-      var parallelism = 1;
-      var pwd = Module.allocate(Module.intArrayFromString(masterPassword), 'i8', Module.ALLOC_NORMAL);
-      var pwdlen = masterPassword.length;
-      var salt = Module.allocate(accumulator.salt, 'i8', Module.ALLOC_NORMAL);
-      var saltlen = accumulator.salt.length;
-      var hash = Module.allocate(new Array(64), 'i8', Module.ALLOC_NORMAL);
-      var hashlen = 64;
-      var encoded = Module.allocate(new Array(512), 'i8', Module.ALLOC_NORMAL);
-      var encodedlen = 512;
-      var argon2_type = 0;
-      var version = 0x13;
-      var err;
-      try {
-        var res = Module._argon2_hash(t_cost, m_cost, parallelism, pwd, pwdlen, salt, saltlen,
-                    hash, hashlen, encoded, encodedlen,
-                    argon2_type, version);
-      } catch (e) {
-        err = e;
-      }
-      if (res === 0 && !err) {
-        var hashArr = [];
-        for(var i = hash; i < hash + hashlen; i++) {
-          hashArr.push(Module.HEAP8[i]);
-        }
-      } else {
-        try {
-          if(!err) {
-            err = Module.Pointer_stringify(Module._argon2_error_message(res))
-          }
-        } catch(e) {}
-        console.log('Argon2 error: ' + res + (err ? ': ' + err : ''));
-      }
-      try {
-        Module._free(pwd);
-        Module._free(salt);
-        Module._free(hash);
-        Module._free(encoded);
-      } catch (e) {}
-      // hashArr comes back as signed bytes, so fix to unsigned
-      for(var i = 0; i < hashArr.length; i++) {
-        if(hashArr[i] < 0) {
-          hashArr[i] += 256;
-        }
-      }
-      handleHashResult(arr2hex(hashArr), masterPassword, url, settings, depth, accumulator, resolve, requestId);
+      // Argon2 was supported until version 0.1.3 of PasswordShaker, and remained accessible
+      // to existing users up to and including version 1.1 to not break existing configurations.
+      // Starting from version 1.2, Argon2 has been completely removed and is no longer
+      // available. The name remains here so any remaining configurations can fail fast
+      // rather than quietly reverting to another algorithm.
+      resolve({
+        password: null,
+        inputText: domain,
+        requestId: requestId,
+      });
     }
   } else {
     // At this point, the password generation from hashes is finished, but we may still need
