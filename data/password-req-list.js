@@ -30,9 +30,9 @@
 
 var passwordReqList = {
   "__meta": {
-    "version": "0.1",
+    "version": "0.1.1",
     "schema": "1.0",
-    "lastChanged": "2017-09-17",
+    "lastChanged": "2019-05-23",
   },
   "Adobe": {
     "hostnames": ["adobe.com"],
@@ -177,6 +177,17 @@ var passwordReqList = {
     "name": "Dropbox",
     "minLength": 6,
     "lastVerified": "2017-09-16",
+  },
+  "DHL Germany": {
+    "hostnames": ["dhl.de", "paket.de"],
+    "name": "DHL Germany",
+    "minLength": 8,
+    "minNumUpper": 1,
+    "minNumLower": 1,
+    "minNumDigit": 1,
+    "characterWhitelist": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!§&/()=?*+-_",
+    "unknownAdditionalRequirements": true,
+    "lastVerified": "2019-05-23",
   },
   "eBay": {
     "hostnames": [
@@ -351,6 +362,17 @@ var passwordReqList = {
     "minLength": 6,
     "lastVerified": "2017-09-17",
   },
+  "LandesbankBerlin": {
+    "hostnames": ["lbb.de"],
+    "name": "Landesbank Berlin",
+    "minLength": 7,
+    "maxLength": 20,
+    "minNumDigit": 1,
+    "characterWhitelist": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-$#[]{}!().,*:;_",
+    "characterBlacklist": "ÄÖÜäöüß ",
+    "unknownAdditionalRequirements": true,
+    "lastVerified": "2019-05-23",
+  },
   "LinkedIn": {
     "hostnames": ["linkedin.com"],
     "name": "LinkedIn",
@@ -398,6 +420,15 @@ var passwordReqList = {
     "name": "MySpace",
     "minLength": 6,
     "lastVerified": "2017-09-16",
+  },
+  "MyAnimeList": {
+    "hostnames": ["myanimelist.net"],
+    "name": "MyAnimeList",
+    "minLength": 6,
+    "maxLength": 50,
+    "characterWhitelist": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_{|}~.",
+    "unknownAdditionalRequirements": true,
+    "lastVerified": "2019-05-23",
   },
   "Netflix": {
     "hostnames": ["netflix.com"],
