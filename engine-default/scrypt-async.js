@@ -154,7 +154,11 @@ function scrypt(password, salt, logN, r, dkLen, interruptStep, callback, encodin
 
   function PBKDF2_HMAC_SHA256_OneIter(password, salt, dkLen) {
     // compress password if it's longer than hash block length
-    password = password.length <= 64 ? password : SHA256(password);
+    if(password.length > 64) {
+      // SHA256 expects password to be an Array. If it's not
+      // (i.e. it doesn't have .push method), convert it to one.
+      password = SHA256(password.push ? password : Array.prototype.slice.call(password, 0));
+    }
 
     var i, innerLen = 64 + salt.length + 4,
         inner = new Array(innerLen),
@@ -297,21 +301,34 @@ function scrypt(password, salt, logN, r, dkLen, interruptStep, callback, encodin
   }
 
   function stringToUTF8Bytes(s) {
-      var arr = [];
-      for (var i = 0; i < s.length; i++) {
-          var c = s.charCodeAt(i);
-          if (c < 128) {
-              arr.push(c);
-          } else if (c > 127 && c < 2048) {
-              arr.push((c>>6) | 192);
-              arr.push((c & 63) | 128);
-          } else {
-              arr.push((c>>12) | 224);
-              arr.push(((c>>6) & 63) | 128);
-              arr.push((c & 63) | 128);
-          }
+    var arr = [];
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 0x80) {
+        arr.push(c);
+      } else if (c < 0x800) {
+        arr.push(0xc0 | c >> 6);
+        arr.push(0x80 | c & 0x3f);
+      } else if (c < 0xd800) {
+        arr.push(0xe0 | c >> 12);
+        arr.push(0x80 | (c >> 6) & 0x3f);
+        arr.push(0x80 | c & 0x3f);
+      } else {
+        if (i >= s.length - 1) {
+          throw new Error('invalid string');
+        }
+        i++; // get one more character
+        c = (c & 0x3ff) << 10;
+        c |= s.charCodeAt(i) & 0x3ff;
+        c += 0x10000;
+
+        arr.push(0xf0 | c >> 18);
+        arr.push(0x80 | (c >> 12) & 0x3f);
+        arr.push(0x80 | (c >> 6) & 0x3f);
+        arr.push(0x80 | c & 0x3f);
       }
-      return arr;
+    }
+    return arr;
   }
 
   function bytesToHex(p) {
@@ -385,6 +402,10 @@ function scrypt(password, salt, logN, r, dkLen, interruptStep, callback, encodin
         throw new Error('scrypt: missing N parameter');
       }
     }
+
+    // XXX: If opts.p or opts.dkLen is 0, it will be set to the default value
+    // instead of throwing due to incorrect value. To avoid breaking
+    // compatibility, this will only be changed in the next major version.
     p = opts.p || 1;
     r = opts.r;
     dkLen = opts.dkLen || 32;
