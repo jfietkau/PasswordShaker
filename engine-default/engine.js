@@ -129,7 +129,17 @@ function createCharSet(settings) {
   if(settings.charactersCustom) {
     charSet += settings.charactersCustomList;
   }
-  if(typeof settings.passwordRequirements.forbiddenCharacters == "string") {
+  if(settings.passwordRequirements.hasOwnProperty("allowedCharacters")) {
+    var allowedCharacters = settings.passwordRequirements.allowedCharacters;
+    var filteredCharSet = "";
+    for(var i = 0; i < charSet.length; i++) {
+      if(allowedCharacters.indexOf(charSet[i]) > -1) {
+        filteredCharSet += charSet[i];
+      }
+    }
+    charSet = filteredCharSet;
+  }
+  if(settings.passwordRequirements.hasOwnProperty("forbiddenCharacters")) {
     var forbidden = settings.passwordRequirements.forbiddenCharacters;
     for(var i = 0; i < forbidden.length; i++) {
       while(charSet.indexOf(forbidden[i]) > -1) {
