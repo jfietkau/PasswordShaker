@@ -2,7 +2,7 @@
  * PasswordShaker
  * https://github.com/jfietkau/PasswordShaker/
  *
- * Copyright (c) 2017 Julian Fietkau
+ * Copyright (c) 2017-2019 Julian Fietkau
  *
  *************************************************************************
  *
