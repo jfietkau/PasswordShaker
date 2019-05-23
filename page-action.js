@@ -211,18 +211,13 @@ function updateGeneratedPasswordInput(input, profileId) {
     lastGeneratedPasswordEvent = Math.random();
     var myEventId = lastGeneratedPasswordEvent;
     setTimeout(() => {
-      console.log("foo");
-      console.log(myEventId);
-      console.log(lastGeneratedPasswordEvent);
       if(myEventId == lastGeneratedPasswordEvent) {
-        console.log("bar");
         var inputTextOverride = undefined;
         if(document.getElementById("currentSiteCustom").value.length > 0) {
           inputTextOverride = document.getElementById("currentSiteCustom").value;
         } else if(document.getElementById("currentSiteOriginal").value.length > 0) {
           inputTextOverride = document.getElementById("currentSiteOriginal").value;
         }
-        console.log("bar2");
         browser.runtime.sendMessage({
           generatePassword: true,
           masterPassword: input,
