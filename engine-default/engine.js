@@ -129,21 +129,21 @@ function createCharSet(settings) {
   if(settings.charactersCustom) {
     charSet += settings.charactersCustomList;
   }
-  if(settings.passwordRequirements.hasOwnProperty("allowedCharacters")) {
-    var allowedCharacters = settings.passwordRequirements.allowedCharacters;
+  if(settings.passwordRequirements.hasOwnProperty("characterWhitelist")) {
+    var characterWhitelist = settings.passwordRequirements.characterWhitelist;
     var filteredCharSet = "";
     for(var i = 0; i < charSet.length; i++) {
-      if(allowedCharacters.indexOf(charSet[i]) > -1) {
+      if(characterWhitelist.indexOf(charSet[i]) > -1) {
         filteredCharSet += charSet[i];
       }
     }
     charSet = filteredCharSet;
   }
-  if(settings.passwordRequirements.hasOwnProperty("forbiddenCharacters")) {
-    var forbidden = settings.passwordRequirements.forbiddenCharacters;
-    for(var i = 0; i < forbidden.length; i++) {
-      while(charSet.indexOf(forbidden[i]) > -1) {
-        charSet = charSet.replace(forbidden[i], "");
+  if(settings.passwordRequirements.hasOwnProperty("characterBlacklist")) {
+    var characterBlacklist = settings.passwordRequirements.characterBlacklist;
+    for(var i = 0; i < characterBlacklist.length; i++) {
+      while(charSet.indexOf(characterBlacklist[i]) > -1) {
+        charSet = charSet.replace(characterBlacklist[i], "");
       }
     }
   }
